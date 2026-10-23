@@ -49,6 +49,8 @@ class StateTests(unittest.TestCase):
             self.write(run, f"exports/{audience}.pdf", f"Fixture {audience} file")
             state.add_artifact(run["root"], f"{audience}-pdf", f"exports/{audience}.pdf",
                                audience, ["fact:offer"])
+        from creative_fixture import install_preservation
+        install_preservation(state.load_run(run['root']))
         for number in range(1, 82):
             state.record_evaluation(run["root"], f"R{number:02}", {
                 "status": "PASS", "applicable": True,
@@ -468,10 +470,11 @@ class StateTests(unittest.TestCase):
         self.assertEqual(receipt["status"], "PREPARED")
         packet = self.base / "packet"
         self.assertEqual({p.name for p in packet.iterdir()}, {"client.pdf", "manifest.json"})
-        self.assertEqual((packet / "client.pdf").read_text(), "Fixture client file")
+        expected=(Path(run["root"])/"exports/client.pdf").read_bytes()
+        self.assertEqual((packet / "client.pdf").read_bytes(), expected)
         manifest = json.loads((packet / "manifest.json").read_text())
         self.assertEqual(manifest["files"][0]["sha256"],
-                         hashlib.sha256(b"Fixture client file").hexdigest())
+                         hashlib.sha256(expected).hexdigest())
         self.assertNotIn(str(self.base), json.dumps(manifest))
         self.assertNotIn("sales", json.dumps(manifest))
 

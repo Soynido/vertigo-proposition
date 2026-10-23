@@ -512,6 +512,11 @@ def _stage_report(state, stage_id):
             issue("requirement_not_passed", requirement["id"], "Stage requirement has not passed")
         if not evaluation["evidence"] or evaluation["unknowns"]:
             issue("missing_evidence", requirement["id"], "Stage needs evidence without decisive unknowns")
+    if stage_id in {"creative.direction", "client.composition", "export.documents"}:
+        from .preservation import inspect_preservation
+        preservation = inspect_preservation(state, selection_only=stage_id == "creative.direction")
+        for message in preservation["issues"]:
+            issue("creative_preservation", stage_id, message)
     review = state["stage_reviews"].get(stage_id)
     score = None
     if review is None:

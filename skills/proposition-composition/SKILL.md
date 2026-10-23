@@ -8,6 +8,8 @@ license: MIT
 
 Recevoir brief public, histoire, direction et actifs utilisables. Lire [le contrat de composition](references/composition.md). Un seul propriétaire maintient la source HTML/CSS canonique et les médias locaux.
 
+Avant montage, appliquer [la préservation des créations retenues](references/preservation.md) : figer les scènes et leur décision de sélection, puis vérifier leur présence réelle dans le PDF et le PPTX finaux. Ce contrôle bloquant complète les revues et ne relance pas la DA.
+
 Conserver le format de remise du brief. Une demande de PDF immersif se matérialise dans les scènes du PDF ; le prototype local reste une source de travail. Pour des orientations, reprendre les scènes et la comparaison datées du [contrat créatif](../proposition-creative/references/creative-contract.md), puis exporter sans transformer une exploration en projet publié ou en proposition complète prétendument validée.
 
 Pour la proposition complète, relier les visuels produits aux changements recommandés du brief et à la carte des pages. Donner aux meilleures scènes assez de place pour comprendre leur apport. Conserver la progression compréhension → opportunité étayée → transformation montrée → mission d'agence → prochaine décision ; une collection d'orientations n'en tient pas lieu.

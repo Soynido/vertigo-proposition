@@ -18,6 +18,8 @@ Pour la revue créative, vérifier le brief d'analyse reçu avant création, le 
 
 Pour la remise finale, rendre et lire toutes les pages des trois PDF exacts et les diapositives du PPTX client ; vérifier le contexte compilé, les objets éditables et l'essai d'édition selon le contrat du principal, ainsi que séparation d'audience, médias et droits, géométrie, mots, sources et versions. Un fichier présent ou une auto-note n'est pas une validation.
 
+Avant tout verdict de conservation des créations, exécuter `check-creatives RUN_DIR` selon [le contrat de préservation](../proposition-composition/references/preservation.md). Les rapports de composition/export et le verdict global bloquent sans preuve courante. Compléter par la comparaison visuelle des scènes originales avec leur placement dans les fichiers exacts ; une note élevée ne contourne pas ce contrôle.
+
 ## Sortie
 
 Reçu avec entrées/empreintes, rôle et isolation, type de revue, cinq observations et notes, total, obligations et preuves, défauts localisés, corrections, état et limites. Après changement, marquer les dépendants `STALE`, corriger au bon niveau puis revoir les nouvelles empreintes. Une revue interne ou un scan ne vaut pas accord de diffusion ou publication relue.

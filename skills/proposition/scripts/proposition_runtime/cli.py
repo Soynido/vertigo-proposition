@@ -121,12 +121,17 @@ def parser():
     s = sub.add_parser('approve'); s.add_argument('run_dir', type=Path); s.add_argument('--plan-hash', required=True); s.add_argument('--actor', required=True); s.add_argument('--evidence', type=Path, required=True)
     s = sub.add_parser('publish'); s.add_argument('run_dir', type=Path); s.add_argument('--adapter', choices=['fixture'], required=True)
     s = sub.add_parser('upstream'); s.add_argument('operation', choices=['status','fetch']); s.add_argument('--family'); s.add_argument('--cache', type=Path)
+    s = sub.add_parser('freeze-creatives'); s.add_argument('run_dir', type=Path); s.add_argument('selection', type=Path)
+    s = sub.add_parser('check-creatives'); s.add_argument('run_dir', type=Path)
     s = sub.add_parser('layout'); s.add_argument('manifest', type=Path)
     return p
 
 
 def execute(a):
     c = a.command
+    if c in ('freeze-creatives', 'check-creatives'):
+        from .preservation import freeze_creatives, inspect_preservation
+        return freeze_creatives(a.run_dir, read_json(a.selection)) if c == 'freeze-creatives' else inspect_preservation(state.load_run(a.run_dir))
     if c == 'doctor': return doctor()
     if c == 'layout':
         from .layout import assess_placements

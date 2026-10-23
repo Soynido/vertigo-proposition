@@ -21,6 +21,7 @@ La commande peut aussi être installée par le paquet. Vérifier `--help` sur la
 | Revue / rapport d'étape | `stage-review RUN_DIR STAGE_ID JSON_FILE` ; `stage-report RUN_DIR STAGE_ID` |
 | Projection | `packet RUN_DIR --output DIR --files RELPATH...` |
 | Entrée créative | `context-packet RUN_DIR --output DIR --files RELPATH...` — brief public validé, distinct du paquet de livraison final |
+| Conservation créative | `freeze-creatives RUN_DIR SELECTION_JSON` ; `check-creatives RUN_DIR` — [contrat et formats](../../proposition-composition/references/preservation.md) |
 | Export / inspection | `export SOURCE_HTML OUTPUT_PDF --audience client|sales|technical` ; `inspect PDF --output DIR` |
 | Plan / accord | `plan RUN_DIR JSON_FILE` ; `approve RUN_DIR --plan-hash HASH --actor ID --evidence FILE` |
 | Publication de test | `publish RUN_DIR --adapter fixture` — explicite, aucun système métier réel |

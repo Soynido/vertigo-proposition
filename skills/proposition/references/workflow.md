@@ -23,6 +23,8 @@ Les phases peuvent se chevaucher si leurs entrées sont valides ; un travail con
 
 La passation reste sources → analyse → observations/recommandations → brief → création. Préparer les médias en parallèle n'autorise pas à présenter une création libre comme la réponse à une analyse encore absente. Le contrat créatif consomme le brief ; il ne remplace pas la recherche. Une exploration seule reste un candidat de portée créative, sans verdict de parcours complet.
 
+Après la création, figer les scènes retenues avant montage selon [le contrôle de préservation](../../proposition-composition/references/preservation.md). La sélection est requise au gate créatif ; la présence et la fidélité dans les PDF/PPTX exacts bloquent les gates de composition/export et le verdict global si elles ne sont pas démontrées. Ce contrôle ne remplace ni la revue visuelle ni les notes.
+
 Un seul propriétaire compose la source canonique. La correction suit le défaut : wording local → édition ; idée faible → brief ; incohérence de DA → direction ; source modifiée → invalidation des dépendants. Une boucle sans amélioration conserve un checkpoint et explique le blocage. Elle ne baisse pas le seuil.
 
 Références de méthode : [collecte et récit modulaires](https://github.com/ilexlyu/ad-proposal-skills), [contexte marketing](https://github.com/coreyhaines31/marketingskills/tree/main/skills/product-marketing). Les versions réellement chargées sont celles du reçu upstream, pas implicitement ces branches mobiles.

@@ -2,6 +2,8 @@
 
 La séquence de création, de rendu, de comparaison et de remise est définie uniquement dans le [contrat créatif](creative-contract.md). Cette référence précise les données transmises à la composition, sans seconde procédure de création.
 
+Avant transmission au montage, figer les scènes retenues et la décision selon [le contrôle de préservation](../../proposition-composition/references/preservation.md). Toutes les directions encore ouvertes restent dans la sélection ; les exports ne peuvent pas choisir à leur place. Ce verrou complète la passation sans changer la procédure créative.
+
 Transmettre l'idée et son origine, les signes préservés, les recommandations matérialisées, les scènes exactes et leur rôle dans le récit, la décision ou les choix laissés ouverts, les compromis et défauts. Une direction déjà choisie reçoit ses prolongements ; la présence d'une « alternative » n'est pas une condition de sa passation.
 
 Pour chaque actif ou placement : identifier source et fichier, sujet réellement montré, droits et usage autorisé, recadrage, retouche fidèle ou scène synthétique, surface visible et rôle dans l'argument. L'incertitude sur un droit indispensable bloque sa diffusion. Sans générateur, aucune scène synthétique n'est présentée comme produite ; un schéma fondé sur des faits reste distinct d'une photographie de produit.
