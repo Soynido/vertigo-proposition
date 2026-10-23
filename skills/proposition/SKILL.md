@@ -8,6 +8,8 @@ license: MIT
 
 Construire une proposition d'agence propre à l'entreprise, depuis son URL. L'URL suffit pour commencer : rechercher les éléments accessibles, distinguer faits et hypothèses, produire le brief. Demander uniquement une décision réellement nécessaire, jamais un questionnaire de démarrage systématique.
 
+Au collaborateur, parler simplement et brièvement : expliquer le travail utile et la décision suivante, comme à une personne non technique. Donner une nouvelle seulement lorsqu'elle apporte une information utile ; garder les IDs, outils et mécanismes internes dans les preuves. Pendant cette commande, ajouter le relevé bref temps/tokens/ressources décrit dans [les capacités](references/capabilities.md), avec « non disponibles » pour les compteurs réellement inaccessibles.
+
 ## Reprendre et travailler
 
 1. Résoudre le dossier installé de ce SKILL comme `MAIN_SKILL_DIR`. Lire [le routage](references/workflow.md) et la dernière preuve du run. Reprendre le premier passage incomplet ou périmé ; conserver les résultats encore valides.
