@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vertigo-proposition"
+version = "0.1.0a1"
+description = "Evidence-led agency proposals for Codex, from a client URL."
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+  "jsonschema==4.26.0",
+  "playwright==1.64.1",
+  "pypdf==6.21.2",
+  "pypdfium2==5.14.0",
+  "Pillow==13.0.0",
+]
+
+[project.scripts]
+proposition = "proposition_runtime.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["skills/proposition/scripts"]
+
+[tool.setuptools.package-data]
+proposition_runtime = ["contracts/*.json", "data/*.json"]

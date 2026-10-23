@@ -1,0 +1,1099 @@
+{
+  "schema_version": "1.0",
+  "stages": [
+    {
+      "id": "discovery.site",
+      "label": "Observe the rendered client experience",
+      "criteria": [
+        {
+          "id": "desktop",
+          "observable": "Desktop destinations are evidenced by rendered navigation and captures",
+          "evidence": [
+            "desktop-captures",
+            "navigation-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Desktop destinations are evidenced by rendered navigation and captures",
+            "1": "Partially demonstrated, with a material unresolved weakness: Desktop destinations are evidenced by rendered navigation and captures",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Desktop destinations are evidenced by rendered navigation and captures"
+          }
+        },
+        {
+          "id": "mobile",
+          "observable": "Mobile destinations and responsive states were actually observed",
+          "evidence": [
+            "mobile-captures",
+            "navigation-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Mobile destinations and responsive states were actually observed",
+            "1": "Partially demonstrated, with a material unresolved weakness: Mobile destinations and responsive states were actually observed",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Mobile destinations and responsive states were actually observed"
+          }
+        },
+        {
+          "id": "menus",
+          "observable": "Relevant menus and submenus have recorded interaction results",
+          "evidence": [
+            "interaction-log",
+            "menu-inventory"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Relevant menus and submenus have recorded interaction results",
+            "1": "Partially demonstrated, with a material unresolved weakness: Relevant menus and submenus have recorded interaction results",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Relevant menus and submenus have recorded interaction results"
+          }
+        },
+        {
+          "id": "states",
+          "observable": "Scrolling and meaningful dynamic states have observable evidence",
+          "evidence": [
+            "scroll-captures",
+            "state-inventory"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Scrolling and meaningful dynamic states have observable evidence",
+            "1": "Partially demonstrated, with a material unresolved weakness: Scrolling and meaningful dynamic states have observable evidence",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Scrolling and meaningful dynamic states have observable evidence"
+          }
+        },
+        {
+          "id": "coverage",
+          "observable": "Inventoried, visited, captured and analyzed coverage and access limits are distinguished",
+          "evidence": [
+            "coverage-report",
+            "access-limitations"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Inventoried, visited, captured and analyzed coverage and access limits are distinguished",
+            "1": "Partially demonstrated, with a material unresolved weakness: Inventoried, visited, captured and analyzed coverage and access limits are distinguished",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Inventoried, visited, captured and analyzed coverage and access limits are distinguished"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "access-limitations",
+        "coverage-report",
+        "desktop-captures",
+        "interaction-log",
+        "menu-inventory",
+        "mobile-captures",
+        "navigation-ledger",
+        "scroll-captures",
+        "state-inventory"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "discovery.channels",
+      "label": "Collect channel and media provenance",
+      "criteria": [
+        {
+          "id": "identity",
+          "observable": "Each channel identity has evidence linking it to the intended subject",
+          "evidence": [
+            "channel-identity-evidence"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Each channel identity has evidence linking it to the intended subject",
+            "1": "Partially demonstrated, with a material unresolved weakness: Each channel identity has evidence linking it to the intended subject",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Each channel identity has evidence linking it to the intended subject"
+          }
+        },
+        {
+          "id": "consultation",
+          "observable": "Actual channel consultation is distinguished from an unvisited candidate",
+          "evidence": [
+            "channel-visit-log"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Actual channel consultation is distinguished from an unvisited candidate",
+            "1": "Partially demonstrated, with a material unresolved weakness: Actual channel consultation is distinguished from an unvisited candidate",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Actual channel consultation is distinguished from an unvisited candidate"
+          }
+        },
+        {
+          "id": "assets",
+          "observable": "Media candidates have retrievable origin and subject attribution",
+          "evidence": [
+            "asset-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Media candidates have retrievable origin and subject attribution",
+            "1": "Partially demonstrated, with a material unresolved weakness: Media candidates have retrievable origin and subject attribution",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Media candidates have retrievable origin and subject attribution"
+          }
+        },
+        {
+          "id": "rights",
+          "observable": "Public visibility is kept separate from distribution rights",
+          "evidence": [
+            "rights-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Public visibility is kept separate from distribution rights",
+            "1": "Partially demonstrated, with a material unresolved weakness: Public visibility is kept separate from distribution rights",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Public visibility is kept separate from distribution rights"
+          }
+        },
+        {
+          "id": "limits",
+          "observable": "Unavailable channels and ambiguous identities remain visible",
+          "evidence": [
+            "access-limitations",
+            "identity-unknowns"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Unavailable channels and ambiguous identities remain visible",
+            "1": "Partially demonstrated, with a material unresolved weakness: Unavailable channels and ambiguous identities remain visible",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Unavailable channels and ambiguous identities remain visible"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "access-limitations",
+        "asset-ledger",
+        "channel-identity-evidence",
+        "channel-visit-log",
+        "identity-unknowns",
+        "rights-ledger"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "company.v1",
+      "label": "Confirm identity, inputs and initial company evidence",
+      "criteria": [
+        {
+          "id": "identity",
+          "observable": "The client and invoking actor are identified without inherited client contamination",
+          "evidence": [
+            "identity-brief"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The client and invoking actor are identified without inherited client contamination",
+            "1": "Partially demonstrated, with a material unresolved weakness: The client and invoking actor are identified without inherited client contamination",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The client and invoking actor are identified without inherited client contamination"
+          }
+        },
+        {
+          "id": "ownership",
+          "observable": "The responsible person is explicitly confirmed separately from the actor",
+          "evidence": [
+            "responsibility-confirmation"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The responsible person is explicitly confirmed separately from the actor",
+            "1": "Partially demonstrated, with a material unresolved weakness: The responsible person is explicitly confirmed separately from the actor",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The responsible person is explicitly confirmed separately from the actor"
+          }
+        },
+        {
+          "id": "inputs",
+          "observable": "Authorized contributor inputs and constraints are retained with their provenance",
+          "evidence": [
+            "input-inventory"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Authorized contributor inputs and constraints are retained with their provenance",
+            "1": "Partially demonstrated, with a material unresolved weakness: Authorized contributor inputs and constraints are retained with their provenance",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Authorized contributor inputs and constraints are retained with their provenance"
+          }
+        },
+        {
+          "id": "facts",
+          "observable": "Observed facts, private inputs, assumptions and unknowns are separated",
+          "evidence": [
+            "fact-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Observed facts, private inputs, assumptions and unknowns are separated",
+            "1": "Partially demonstrated, with a material unresolved weakness: Observed facts, private inputs, assumptions and unknowns are separated",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Observed facts, private inputs, assumptions and unknowns are separated"
+          }
+        },
+        {
+          "id": "readiness",
+          "observable": "Missing decisive inputs are recorded rather than replaced by invented values",
+          "evidence": [
+            "unknowns-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Missing decisive inputs are recorded rather than replaced by invented values",
+            "1": "Partially demonstrated, with a material unresolved weakness: Missing decisive inputs are recorded rather than replaced by invented values",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Missing decisive inputs are recorded rather than replaced by invented values"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "fact-ledger",
+        "identity-brief",
+        "input-inventory",
+        "responsibility-confirmation",
+        "unknowns-ledger"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "analysis.specialists",
+      "label": "Analyze opportunities and constraints",
+      "criteria": [
+        {
+          "id": "diagnosis",
+          "observable": "Each diagnosis refers to an actual observed client experience",
+          "evidence": [
+            "observation-analysis-map"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Each diagnosis refers to an actual observed client experience",
+            "1": "Partially demonstrated, with a material unresolved weakness: Each diagnosis refers to an actual observed client experience",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Each diagnosis refers to an actual observed client experience"
+          }
+        },
+        {
+          "id": "relevance",
+          "observable": "The proposed opportunity is relevant to the offer and intended audience",
+          "evidence": [
+            "opportunity-rationale"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The proposed opportunity is relevant to the offer and intended audience",
+            "1": "Partially demonstrated, with a material unresolved weakness: The proposed opportunity is relevant to the offer and intended audience",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The proposed opportunity is relevant to the offer and intended audience"
+          }
+        },
+        {
+          "id": "causality",
+          "observable": "An intended benefit is not represented as a measured causal gain",
+          "evidence": [
+            "claim-evidence-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: An intended benefit is not represented as a measured causal gain",
+            "1": "Partially demonstrated, with a material unresolved weakness: An intended benefit is not represented as a measured causal gain",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: An intended benefit is not represented as a measured causal gain"
+          }
+        },
+        {
+          "id": "technical",
+          "observable": "Technical and provider observations have indices and confidence",
+          "evidence": [
+            "technical-evidence-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Technical and provider observations have indices and confidence",
+            "1": "Partially demonstrated, with a material unresolved weakness: Technical and provider observations have indices and confidence",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Technical and provider observations have indices and confidence"
+          }
+        },
+        {
+          "id": "scope",
+          "observable": "The proposed scope preserves useful existing functions and dependencies",
+          "evidence": [
+            "scope-and-exclusions"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The proposed scope preserves useful existing functions and dependencies",
+            "1": "Partially demonstrated, with a material unresolved weakness: The proposed scope preserves useful existing functions and dependencies",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The proposed scope preserves useful existing functions and dependencies"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "claim-evidence-ledger",
+        "observation-analysis-map",
+        "opportunity-rationale",
+        "scope-and-exclusions",
+        "technical-evidence-ledger"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "company.v2",
+      "label": "Consolidate the evidenced company understanding",
+      "criteria": [
+        {
+          "id": "reconciliation",
+          "observable": "The consolidated account reconciles conflicting observations explicitly",
+          "evidence": [
+            "reconciled-fact-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The consolidated account reconciles conflicting observations explicitly",
+            "1": "Partially demonstrated, with a material unresolved weakness: The consolidated account reconciles conflicting observations explicitly",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The consolidated account reconciles conflicting observations explicitly"
+          }
+        },
+        {
+          "id": "offer",
+          "observable": "The offer, audiences, territory and distinctiveness are supported by sources",
+          "evidence": [
+            "company-evidence-brief"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The offer, audiences, territory and distinctiveness are supported by sources",
+            "1": "Partially demonstrated, with a material unresolved weakness: The offer, audiences, territory and distinctiveness are supported by sources",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The offer, audiences, territory and distinctiveness are supported by sources"
+          }
+        },
+        {
+          "id": "priority",
+          "observable": "The primary decision and desired user action are explicit",
+          "evidence": [
+            "priority-rationale"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The primary decision and desired user action are explicit",
+            "1": "Partially demonstrated, with a material unresolved weakness: The primary decision and desired user action are explicit",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The primary decision and desired user action are explicit"
+          }
+        },
+        {
+          "id": "scope",
+          "observable": "The agreed opportunity and exclusions are coherent with existing dependencies",
+          "evidence": [
+            "scope-and-exclusions"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The agreed opportunity and exclusions are coherent with existing dependencies",
+            "1": "Partially demonstrated, with a material unresolved weakness: The agreed opportunity and exclusions are coherent with existing dependencies",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The agreed opportunity and exclusions are coherent with existing dependencies"
+          }
+        },
+        {
+          "id": "unknowns",
+          "observable": "Decisive unknowns have an explicit resolution or blocking outcome",
+          "evidence": [
+            "unknowns-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Decisive unknowns have an explicit resolution or blocking outcome",
+            "1": "Partially demonstrated, with a material unresolved weakness: Decisive unknowns have an explicit resolution or blocking outcome",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Decisive unknowns have an explicit resolution or blocking outcome"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "company-evidence-brief",
+        "priority-rationale",
+        "reconciled-fact-ledger",
+        "scope-and-exclusions",
+        "unknowns-ledger"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "brief.public",
+      "label": "Project an autonomous authorized creative brief",
+      "criteria": [
+        {
+          "id": "allowlist",
+          "observable": "Only authorized public-facing facts enter the transmitted brief",
+          "evidence": [
+            "projection-manifest"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Only authorized public-facing facts enter the transmitted brief",
+            "1": "Partially demonstrated, with a material unresolved weakness: Only authorized public-facing facts enter the transmitted brief",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Only authorized public-facing facts enter the transmitted brief"
+          }
+        },
+        {
+          "id": "identity",
+          "observable": "The brief contains the correct client identity and preserved official assets",
+          "evidence": [
+            "client-identity-assets"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The brief contains the correct client identity and preserved official assets",
+            "1": "Partially demonstrated, with a material unresolved weakness: The brief contains the correct client identity and preserved official assets",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The brief contains the correct client identity and preserved official assets"
+          }
+        },
+        {
+          "id": "media",
+          "observable": "Creative roles receive sourced media and real research access status",
+          "evidence": [
+            "media-ledger",
+            "channel-visit-log"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Creative roles receive sourced media and real research access status",
+            "1": "Partially demonstrated, with a material unresolved weakness: Creative roles receive sourced media and real research access status",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Creative roles receive sourced media and real research access status"
+          }
+        },
+        {
+          "id": "constraints",
+          "observable": "Composition, authenticity and prohibited-content constraints are explicit",
+          "evidence": [
+            "public-brief-constraints"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Composition, authenticity and prohibited-content constraints are explicit",
+            "1": "Partially demonstrated, with a material unresolved weakness: Composition, authenticity and prohibited-content constraints are explicit",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Composition, authenticity and prohibited-content constraints are explicit"
+          }
+        },
+        {
+          "id": "autonomy",
+          "observable": "The role brief is understandable without private transcript inheritance",
+          "evidence": [
+            "transmitted-brief",
+            "context-scope-receipt"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The role brief is understandable without private transcript inheritance",
+            "1": "Partially demonstrated, with a material unresolved weakness: The role brief is understandable without private transcript inheritance",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The role brief is understandable without private transcript inheritance"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "channel-visit-log",
+        "client-identity-assets",
+        "context-scope-receipt",
+        "media-ledger",
+        "projection-manifest",
+        "public-brief-constraints",
+        "transmitted-brief"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "creative.direction",
+      "label": "Explore client-specific creative directions",
+      "criteria": [
+        {
+          "id": "options",
+          "observable": "Distinct creative options are materialized before selection",
+          "evidence": [
+            "creative-option-compositions"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Distinct creative options are materialized before selection",
+            "1": "Partially demonstrated, with a material unresolved weakness: Distinct creative options are materialized before selection",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Distinct creative options are materialized before selection"
+          }
+        },
+        {
+          "id": "specificity",
+          "observable": "The chosen direction derives from this client rather than a preset house recipe",
+          "evidence": [
+            "direction-rationale"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The chosen direction derives from this client rather than a preset house recipe",
+            "1": "Partially demonstrated, with a material unresolved weakness: The chosen direction derives from this client rather than a preset house recipe",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The chosen direction derives from this client rather than a preset house recipe"
+          }
+        },
+        {
+          "id": "photography",
+          "observable": "Authentic and synthetic photographic contributions have measured provenance",
+          "evidence": [
+            "photographic-surface-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Authentic and synthetic photographic contributions have measured provenance",
+            "1": "Partially demonstrated, with a material unresolved weakness: Authentic and synthetic photographic contributions have measured provenance",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Authentic and synthetic photographic contributions have measured provenance"
+          }
+        },
+        {
+          "id": "system",
+          "observable": "The concept governs imagery, language, type, scale and sequence beyond the opening",
+          "evidence": [
+            "full-direction-board"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The concept governs imagery, language, type, scale and sequence beyond the opening",
+            "1": "Partially demonstrated, with a material unresolved weakness: The concept governs imagery, language, type, scale and sequence beyond the opening",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The concept governs imagery, language, type, scale and sequence beyond the opening"
+          }
+        },
+        {
+          "id": "truth",
+          "observable": "Generated or enhanced media do not invent factual subjects or hide transformations",
+          "evidence": [
+            "original-and-transformation-evidence"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Generated or enhanced media do not invent factual subjects or hide transformations",
+            "1": "Partially demonstrated, with a material unresolved weakness: Generated or enhanced media do not invent factual subjects or hide transformations",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Generated or enhanced media do not invent factual subjects or hide transformations"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "creative-option-compositions",
+        "direction-rationale",
+        "full-direction-board",
+        "original-and-transformation-evidence",
+        "photographic-surface-ledger"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "client.composition",
+      "label": "Compose the client narrative and artifacts",
+      "criteria": [
+        {
+          "id": "story",
+          "observable": "The client narrative stays within the configured page limit and resolves its opening intent",
+          "evidence": [
+            "client-story-map"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The client narrative stays within the configured page limit and resolves its opening intent",
+            "1": "Partially demonstrated, with a material unresolved weakness: The client narrative stays within the configured page limit and resolves its opening intent",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The client narrative stays within the configured page limit and resolves its opening intent"
+          }
+        },
+        {
+          "id": "language",
+          "observable": "Every statement is understandable in context and preserves the client voice",
+          "evidence": [
+            "client-copy-review"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Every statement is understandable in context and preserves the client voice",
+            "1": "Partially demonstrated, with a material unresolved weakness: Every statement is understandable in context and preserves the client voice",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Every statement is understandable in context and preserves the client voice"
+          }
+        },
+        {
+          "id": "balance",
+          "observable": "Useful visual and text balance is measured across the whole narrative",
+          "evidence": [
+            "composition-surface-ledger"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Useful visual and text balance is measured across the whole narrative",
+            "1": "Partially demonstrated, with a material unresolved weakness: Useful visual and text balance is measured across the whole narrative",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Useful visual and text balance is measured across the whole narrative"
+          }
+        },
+        {
+          "id": "demonstration",
+          "observable": "Desktop moments and a distinct mobile composition show useful proposed behavior",
+          "evidence": [
+            "desktop-mobile-compositions"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Desktop moments and a distinct mobile composition show useful proposed behavior",
+            "1": "Partially demonstrated, with a material unresolved weakness: Desktop moments and a distinct mobile composition show useful proposed behavior",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Desktop moments and a distinct mobile composition show useful proposed behavior"
+          }
+        },
+        {
+          "id": "privacy",
+          "observable": "Internal commercial, operational and other-client content is excluded",
+          "evidence": [
+            "client-content-inspection"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Internal commercial, operational and other-client content is excluded",
+            "1": "Partially demonstrated, with a material unresolved weakness: Internal commercial, operational and other-client content is excluded",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Internal commercial, operational and other-client content is excluded"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "client-content-inspection",
+        "client-copy-review",
+        "client-story-map",
+        "composition-surface-ledger",
+        "desktop-mobile-compositions"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "review.client",
+      "label": "Perform isolated client-artifact reviews",
+      "criteria": [
+        {
+          "id": "narrative",
+          "observable": "The reviewer can identify the client problem, proposal and intended benefit from the artifact",
+          "evidence": [
+            "narrative-review-findings"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The reviewer can identify the client problem, proposal and intended benefit from the artifact",
+            "1": "Partially demonstrated, with a material unresolved weakness: The reviewer can identify the client problem, proposal and intended benefit from the artifact",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The reviewer can identify the client problem, proposal and intended benefit from the artifact"
+          }
+        },
+        {
+          "id": "visual",
+          "observable": "Full-size rendered compositions support readability and hierarchy without severe defects",
+          "evidence": [
+            "full-size-review-index"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Full-size rendered compositions support readability and hierarchy without severe defects",
+            "1": "Partially demonstrated, with a material unresolved weakness: Full-size rendered compositions support readability and hierarchy without severe defects",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Full-size rendered compositions support readability and hierarchy without severe defects"
+          }
+        },
+        {
+          "id": "truth",
+          "observable": "Claims and media subject attribution remain within their evidence and rights scope",
+          "evidence": [
+            "claim-and-media-review"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Claims and media subject attribution remain within their evidence and rights scope",
+            "1": "Partially demonstrated, with a material unresolved weakness: Claims and media subject attribution remain within their evidence and rights scope",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Claims and media subject attribution remain within their evidence and rights scope"
+          }
+        },
+        {
+          "id": "specificity",
+          "observable": "The reviewer tests whether the direction and wording are interchangeable",
+          "evidence": [
+            "specificity-review-findings"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The reviewer tests whether the direction and wording are interchangeable",
+            "1": "Partially demonstrated, with a material unresolved weakness: The reviewer tests whether the direction and wording are interchangeable",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The reviewer tests whether the direction and wording are interchangeable"
+          }
+        },
+        {
+          "id": "independence",
+          "observable": "The review scope and exact artifact hashes are attached to an isolated-context receipt",
+          "evidence": [
+            "isolated-review-receipt"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The review scope and exact artifact hashes are attached to an isolated-context receipt",
+            "1": "Partially demonstrated, with a material unresolved weakness: The review scope and exact artifact hashes are attached to an isolated-context receipt",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The review scope and exact artifact hashes are attached to an isolated-context receipt"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "claim-and-media-review",
+        "full-size-review-index",
+        "isolated-review-receipt",
+        "narrative-review-findings",
+        "specificity-review-findings"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "internal.handoffs",
+      "label": "Prepare commercial and technical handoffs",
+      "criteria": [
+        {
+          "id": "sales",
+          "observable": "The commercial playbook has client-specific angle, offer, proof and objections",
+          "evidence": [
+            "sales-playbook"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The commercial playbook has client-specific angle, offer, proof and objections",
+            "1": "Partially demonstrated, with a material unresolved weakness: The commercial playbook has client-specific angle, offer, proof and objections",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The commercial playbook has client-specific angle, offer, proof and objections"
+          }
+        },
+        {
+          "id": "actions",
+          "observable": "Follow-up actions have owner, trigger, date status, outcome and stop condition",
+          "evidence": [
+            "follow-up-register"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Follow-up actions have owner, trigger, date status, outcome and stop condition",
+            "1": "Partially demonstrated, with a material unresolved weakness: Follow-up actions have owner, trigger, date status, outcome and stop condition",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Follow-up actions have owner, trigger, date status, outcome and stop condition"
+          }
+        },
+        {
+          "id": "technical",
+          "observable": "The technical handoff records existing scope, states, assets, dependencies and decisions",
+          "evidence": [
+            "technical-handoff"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The technical handoff records existing scope, states, assets, dependencies and decisions",
+            "1": "Partially demonstrated, with a material unresolved weakness: The technical handoff records existing scope, states, assets, dependencies and decisions",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The technical handoff records existing scope, states, assets, dependencies and decisions"
+          }
+        },
+        {
+          "id": "estimation",
+          "observable": "Internal effort and valuation use explicit local parameters and separate external waits",
+          "evidence": [
+            "internal-estimate"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Internal effort and valuation use explicit local parameters and separate external waits",
+            "1": "Partially demonstrated, with a material unresolved weakness: Internal effort and valuation use explicit local parameters and separate external waits",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Internal effort and valuation use explicit local parameters and separate external waits"
+          }
+        },
+        {
+          "id": "boundaries",
+          "observable": "Internal material stays segregated and handoff does not imply implementation authorization",
+          "evidence": [
+            "audience-and-authorization-register"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Internal material stays segregated and handoff does not imply implementation authorization",
+            "1": "Partially demonstrated, with a material unresolved weakness: Internal material stays segregated and handoff does not imply implementation authorization",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Internal material stays segregated and handoff does not imply implementation authorization"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "audience-and-authorization-register",
+        "follow-up-register",
+        "internal-estimate",
+        "sales-playbook",
+        "technical-handoff"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "export.documents",
+      "label": "Export audience-specific documents and editable sources",
+      "criteria": [
+        {
+          "id": "audiences",
+          "observable": "The required separate audience documents are exported with identified filenames",
+          "evidence": [
+            "export-manifest"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The required separate audience documents are exported with identified filenames",
+            "1": "Partially demonstrated, with a material unresolved weakness: The required separate audience documents are exported with identified filenames",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The required separate audience documents are exported with identified filenames"
+          }
+        },
+        {
+          "id": "editable",
+          "observable": "Each promised editable source is autonomous and genuinely editable at its stated scope",
+          "evidence": [
+            "editable-source-verification"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Each promised editable source is autonomous and genuinely editable at its stated scope",
+            "1": "Partially demonstrated, with a material unresolved weakness: Each promised editable source is autonomous and genuinely editable at its stated scope",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Each promised editable source is autonomous and genuinely editable at its stated scope"
+          }
+        },
+        {
+          "id": "text",
+          "observable": "Exported documents preserve readable selectable text and expected words",
+          "evidence": [
+            "pdf-text-inspection"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Exported documents preserve readable selectable text and expected words",
+            "1": "Partially demonstrated, with a material unresolved weakness: Exported documents preserve readable selectable text and expected words",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Exported documents preserve readable selectable text and expected words"
+          }
+        },
+        {
+          "id": "render",
+          "observable": "Fonts, images, tables and page geometry survive the export renderer",
+          "evidence": [
+            "export-render-inspection"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Fonts, images, tables and page geometry survive the export renderer",
+            "1": "Partially demonstrated, with a material unresolved weakness: Fonts, images, tables and page geometry survive the export renderer",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Fonts, images, tables and page geometry survive the export renderer"
+          }
+        },
+        {
+          "id": "portable",
+          "observable": "Portable sources and passive exports do not depend on unintended live services or active code",
+          "evidence": [
+            "portable-package-inspection"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Portable sources and passive exports do not depend on unintended live services or active code",
+            "1": "Partially demonstrated, with a material unresolved weakness: Portable sources and passive exports do not depend on unintended live services or active code",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Portable sources and passive exports do not depend on unintended live services or active code"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "editable-source-verification",
+        "export-manifest",
+        "export-render-inspection",
+        "pdf-text-inspection",
+        "portable-package-inspection"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "verify.final",
+      "label": "Inspect exact final artifact versions",
+      "criteria": [
+        {
+          "id": "all_pages",
+          "observable": "Every page of every exact final document and required visual is inspected at useful size",
+          "evidence": [
+            "final-page-review-index"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Every page of every exact final document and required visual is inspected at useful size",
+            "1": "Partially demonstrated, with a material unresolved weakness: Every page of every exact final document and required visual is inspected at useful size",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Every page of every exact final document and required visual is inspected at useful size"
+          }
+        },
+        {
+          "id": "version",
+          "observable": "Validation receipts identify exact final filenames, versions and hashes",
+          "evidence": [
+            "final-hash-manifest"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Validation receipts identify exact final filenames, versions and hashes",
+            "1": "Partially demonstrated, with a material unresolved weakness: Validation receipts identify exact final filenames, versions and hashes",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Validation receipts identify exact final filenames, versions and hashes"
+          }
+        },
+        {
+          "id": "content",
+          "observable": "Cross-document text, numbers, source attributions and client identity reconcile",
+          "evidence": [
+            "cross-artifact-reconciliation"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Cross-document text, numbers, source attributions and client identity reconcile",
+            "1": "Partially demonstrated, with a material unresolved weakness: Cross-document text, numbers, source attributions and client identity reconcile",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Cross-document text, numbers, source attributions and client identity reconcile"
+          }
+        },
+        {
+          "id": "safety",
+          "observable": "Client artifacts and metadata have explicit privacy and distribution-rights inspection",
+          "evidence": [
+            "content-and-metadata-review"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Client artifacts and metadata have explicit privacy and distribution-rights inspection",
+            "1": "Partially demonstrated, with a material unresolved weakness: Client artifacts and metadata have explicit privacy and distribution-rights inspection",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Client artifacts and metadata have explicit privacy and distribution-rights inspection"
+          }
+        },
+        {
+          "id": "gates",
+          "observable": "Severe defects or decisive unknowns are not compensated by an aggregate score",
+          "evidence": [
+            "final-gate-receipt"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Severe defects or decisive unknowns are not compensated by an aggregate score",
+            "1": "Partially demonstrated, with a material unresolved weakness: Severe defects or decisive unknowns are not compensated by an aggregate score",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Severe defects or decisive unknowns are not compensated by an aggregate score"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "content-and-metadata-review",
+        "cross-artifact-reconciliation",
+        "final-gate-receipt",
+        "final-hash-manifest",
+        "final-page-review-index"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    },
+    {
+      "id": "publication.approved",
+      "label": "Approve, execute and read back authorized persistence",
+      "criteria": [
+        {
+          "id": "plan",
+          "observable": "The proposed persistence plan names exact contents, files, relations and destinations",
+          "evidence": [
+            "exact-persistence-plan"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The proposed persistence plan names exact contents, files, relations and destinations",
+            "1": "Partially demonstrated, with a material unresolved weakness: The proposed persistence plan names exact contents, files, relations and destinations",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The proposed persistence plan names exact contents, files, relations and destinations"
+          }
+        },
+        {
+          "id": "consent",
+          "observable": "Explicit actor approval binds the current exact plan hash and requested side effects",
+          "evidence": [
+            "hash-bound-approval"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Explicit actor approval binds the current exact plan hash and requested side effects",
+            "1": "Partially demonstrated, with a material unresolved weakness: Explicit actor approval binds the current exact plan hash and requested side effects",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Explicit actor approval binds the current exact plan hash and requested side effects"
+          }
+        },
+        {
+          "id": "capability",
+          "observable": "The real account capability and authorized role are checked before external action",
+          "evidence": [
+            "capability-receipt"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: The real account capability and authorized role are checked before external action",
+            "1": "Partially demonstrated, with a material unresolved weakness: The real account capability and authorized role are checked before external action",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: The real account capability and authorized role are checked before external action"
+          }
+        },
+        {
+          "id": "readback",
+          "observable": "Partial completion and readback results are distinct from a complete publication",
+          "evidence": [
+            "readback-and-partial-write-receipt"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Partial completion and readback results are distinct from a complete publication",
+            "1": "Partially demonstrated, with a material unresolved weakness: Partial completion and readback results are distinct from a complete publication",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Partial completion and readback results are distinct from a complete publication"
+          }
+        },
+        {
+          "id": "continuity",
+          "observable": "Retries avoid duplicates and distinguish persistence, eligibility and later consumption",
+          "evidence": [
+            "idempotency-and-consumption-register"
+          ],
+          "anchors": {
+            "0": "Missing, misleading or contradicted evidence for: Retries avoid duplicates and distinguish persistence, eligibility and later consumption",
+            "1": "Partially demonstrated, with a material unresolved weakness: Retries avoid duplicates and distinguish persistence, eligibility and later consumption",
+            "2": "Demonstrated by current inspectable evidence at the stated scope: Retries avoid duplicates and distinguish persistence, eligibility and later consumption"
+          }
+        }
+      ],
+      "expected_evidence": [
+        "capability-receipt",
+        "exact-persistence-plan",
+        "hash-bound-approval",
+        "idempotency-and-consumption-register",
+        "readback-and-partial-write-receipt"
+      ],
+      "gate": {
+        "minimum_score": 9,
+        "required_reviewers": 1,
+        "requirement_statuses": [
+          "PASS",
+          "NOT_APPLICABLE"
+        ],
+        "independence_receipt": true,
+        "rubric_status": "candidate-not-human-calibrated"
+      }
+    }
+  ]
+}

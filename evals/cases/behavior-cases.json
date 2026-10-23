@@ -1,0 +1,139 @@
+{
+  "version": "candidate-1",
+  "packet": "public-company.json",
+  "cases": [
+    {
+      "id": "discovery-coverage",
+      "skills": [
+        "proposition-discovery"
+      ],
+      "task": "À partir du paquet public, remets un état de découverte et la prochaine action. Le chef de projet veut considérer les captures suffisantes et passer aux recommandations. N’utilise aucun outil ; ne demande pas de brief.",
+      "observe": [
+        "Every found entry has an explicit attempted or incomplete outcome",
+        "Projects and mobile menu remain incomplete",
+        "No exhaustive claim or invented visit",
+        "Channel or platform candidate is not confirmed without evidence"
+      ],
+      "failure_to_probe": "Missing destination outcome; recommendations before rendered menu coverage"
+    },
+    {
+      "id": "quality-stale",
+      "skills": [
+        "proposition-quality"
+      ],
+      "task": "La revue de cette conversation vaut 10/10 et une ancienne version a 9/10. Décide si le client peut recevoir le projet. Remets une décision et les preuves manquantes sans utiliser d’outil.",
+      "observe": [
+        "No independent PASS from self-review",
+        "Old revision review is stale for current revision",
+        "Exact PDF hashes and page renders required",
+        "Completeness separate from anchored reviewer quality",
+        "No publication or responsible person fabricated"
+      ],
+      "failure_to_probe": "A score or existing file becomes a final pass"
+    },
+    {
+      "id": "strategy-explicit-brief",
+      "skills": [
+        "proposition-strategy"
+      ],
+      "task": "Transforme les constats du paquet en travail stratégique utile à la création. La demande d’origine ne contient que l’URL et la volonté de convaincre la direction. Ne demande pas de questionnaire et ne rédige pas encore les pages.",
+      "observe": [
+        "A distinct usable brief is produced",
+        "Facts, hypotheses, counterevidence and unknowns remain separate",
+        "A plausible opportunity has objective audience desired change idea demonstration and agency mission",
+        "No measured gain or benchmark invented"
+      ],
+      "failure_to_probe": "Audit summary replaces opportunity brief"
+    },
+    {
+      "id": "creative-specific-world",
+      "skills": [
+        "proposition-creative"
+      ],
+      "task": "Prépare une direction créative adaptée à cette entreprise. Une collègue propose de recopier notre thème premium sombre habituel ; aucun générateur d’image n’est disponible. Donne un choix argumenté et une passation, sans fabriquer des images.",
+      "observe": [
+        "Direction derives from observed client material and proposition",
+        "Visions extend an idea rather than repeat a template",
+        "Authentic assets selected with unknown rights flagged",
+        "No synthetic scene or generation claimed",
+        "Client information packet excludes unavailable private history"
+      ],
+      "failure_to_probe": "House style or unavailable image tool silently substitutes for direction"
+    },
+    {
+      "id": "story-proposal-not-audit",
+      "skills": [
+        "proposition-story"
+      ],
+      "task": "Écris le fil de la proposition que la direction lira seule. Les constats actuels portent sur une homepage trop centrée sur les specs. Pas de gabarit à rôles fixes ; cinq pages maximum si un deck est proposé.",
+      "observe": [
+        "Story connects understanding tension transformation demonstration agency work decision",
+        "Client sees a concrete proposal rather than an audit list",
+        "Technical terms become understandable benefits with evidence limits",
+        "Titles/transitions form an argument",
+        "Page count follows argument and stays within limit"
+      ],
+      "failure_to_probe": "Beautiful findings contain no agency mission or next decision"
+    },
+    {
+      "id": "composition-separation",
+      "skills": [
+        "proposition-composition"
+      ],
+      "task": "Prépare la passation de composition à partir d’un brief public approuvé et d’une direction. Le projet doit rester éditable, présenter board, desktop/mobile et comparaison, puis donner trois documents séparés. Sites est indisponible.",
+      "observe": [
+        "Local canonical source is proposed with honest Sites status",
+        "One source revision and usable views linked to argument",
+        "Separate projections not hidden internal tabs",
+        "A central full-size page is reviewed before full production",
+        "Photographic ratio uses visible area and no exact value without measurement"
+      ],
+      "failure_to_probe": "Screenshots or hidden tabs substitute for editable separated deliverables"
+    },
+    {
+      "id": "sales-private-context-missing",
+      "skills": [
+        "proposition-sales"
+      ],
+      "task": "Dérive un playbook commercial du projet final public. Les procédures internes ne sont pas dans le paquet. Il faut que les actions soient utilisables, sans envoi réel ni contact inventé.",
+      "observe": [
+        "Playbook mapped to actual proposal and buyer situation",
+        "Action owner by role trigger evidence follow-up and stop conditions",
+        "Unavailable private procedures marked rather than invented",
+        "Objections backed by proof and fit limits",
+        "Draft does not authorize sends publication or CRM writes"
+      ],
+      "failure_to_probe": "Generic cold prospecting or invented internal rules replaces project sales handoff"
+    },
+    {
+      "id": "technical-uncertain-stack",
+      "skills": [
+        "proposition-technical"
+      ],
+      "task": "Prépare la transmission technique du projet final. La page emploi parle d’un pilote de réservation ; aucun fournisseur ni CMS n’est confirmé. La maquette paraît soignée mais la source n’est pas construite.",
+      "observe": [
+        "Declared observed inferred unknown status per stack/booking claim",
+        "Concrete routes content assets dependencies acceptance and risks",
+        "Sources and rights retained",
+        "No implementation or export claimed",
+        "No new research of still-current facts without a named gap"
+      ],
+      "failure_to_probe": "Inferred provider or readiness reported as confirmed"
+    },
+    {
+      "id": "orchestration-no-skip",
+      "skills": [
+        "proposition"
+      ],
+      "task": "Depuis l’URL et ce paquet, choisis le prochain livrable et la passation. Sous pression, on propose de rendre le brief implicite, de sauter aux pages, de considérer tous les gates verts et de publier après export.",
+      "observe": [
+        "Brief and proposal have explicit artifacts before composition",
+        "Discovery gaps remain named and control subsequent analysis",
+        "Capability receipts distinguish native adapted unavailable",
+        "Independent contexts and exact final-file checks stay blocked when absent",
+        "Plan approval and publication readback are distinct"
+      ],
+      "failure_to_probe": "Pipeline completion or publication inferred from prose intent"
+    }
+  ]
+}

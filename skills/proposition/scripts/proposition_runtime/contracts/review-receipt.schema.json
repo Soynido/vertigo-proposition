@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Declared isolated review context bound to exact artifact hashes",
+  "type": "object",
+  "required": [
+    "run_id",
+    "reviewer_id",
+    "author_id",
+    "context_isolated",
+    "author_context_inherited",
+    "verdict_shared",
+    "method",
+    "artifact_hashes"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "author_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_isolated": {
+      "type": "boolean"
+    },
+    "author_context_inherited": {
+      "type": "boolean"
+    },
+    "verdict_shared": {
+      "type": "boolean"
+    },
+    "method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_hashes": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^artifact:.+$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "host_receipt": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "stage_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

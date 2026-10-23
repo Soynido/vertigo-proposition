@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Requirement completeness assessment",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "applicable",
+    "reason",
+    "evidence",
+    "unknowns",
+    "recorded_at",
+    "dependencies",
+    "dependency_hashes",
+    "profile_hash"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^R[0-9]{2}$"
+    },
+    "status": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN",
+        "NOT_APPLICABLE",
+        "STALE"
+      ]
+    },
+    "applicable": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^(source|fact|artifact|checkpoint):.+$"
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^(source|fact|artifact|evaluation|review|stage_review|checkpoint):.+$"
+      }
+    },
+    "dependency_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "profile_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

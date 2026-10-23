@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "One independent reviewer; five anchored candidate criteria",
+  "type": "object",
+  "required": [
+    "id",
+    "reviewer_id",
+    "status",
+    "scores",
+    "independence",
+    "evidence",
+    "unknowns",
+    "recorded_at",
+    "dependencies",
+    "dependency_hashes",
+    "profile_hash"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN",
+        "STALE"
+      ]
+    },
+    "scores": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2
+      }
+    },
+    "independence": {
+      "type": "object",
+      "properties": {
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^(source|fact|artifact|checkpoint):.+$"
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^(source|fact|artifact|evaluation|review|stage_review|checkpoint):.+$"
+      }
+    },
+    "dependency_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "profile_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stage_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "criterion_evidence": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^artifact:.+$"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

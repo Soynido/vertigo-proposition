@@ -1,0 +1,275 @@
+{
+  "status": "observed_baseline_not_a_runtime_gate",
+  "evaluation_kind": "one fresh native context with nine tasks; no skill guidance",
+  "samples": 1,
+  "tasks": 9,
+  "source_sha256": "baebf588a64cfc0ce5374c5ce0eab641eca1703b50a5f1736f2bc254d2f6b99e",
+  "scoring": "manual semantic reading; not keyword matching",
+  "limits": [
+    "Not nine independent samples",
+    "No browser, PDF, image or external mutation executed by this textual evaluation",
+    "No claim that already-successful behaviors needed corrective guidance"
+  ],
+  "results": [
+    {
+      "case_id": "discovery-coverage",
+      "criteria": [
+        {
+          "criterion": "Every found entry has an explicit attempted or incomplete outcome",
+          "status": "PASS",
+          "observation": "Les destinations visitées, projets non tenté et menu mobile non ouvert sont tous nommés."
+        },
+        {
+          "criterion": "Projects and mobile menu remain incomplete",
+          "status": "PASS",
+          "observation": "Le prochain travail cible projets et navigation mobile."
+        },
+        {
+          "criterion": "No exhaustive claim or invented visit",
+          "status": "PASS",
+          "observation": "La réponse dit couverture partielle et ne prétend pas voir des captures absentes."
+        },
+        {
+          "criterion": "Channel or platform candidate is not confirmed without evidence",
+          "status": "PASS",
+          "observation": "Le pilote de réservation et sa plateforme restent non confirmés."
+        }
+      ]
+    },
+    {
+      "case_id": "quality-stale",
+      "criteria": [
+        {
+          "criterion": "No independent PASS from self-review",
+          "status": "PASS",
+          "observation": "La note dans la même conversation est refusée comme revue indépendante."
+        },
+        {
+          "criterion": "Old revision review is stale for current revision",
+          "status": "PASS",
+          "observation": "La revue source-a ne valide pas source-b."
+        },
+        {
+          "criterion": "Exact PDF hashes and page renders required",
+          "status": "PASS",
+          "observation": "La réponse demande les fichiers précis et une empreinte de PDF final."
+        },
+        {
+          "criterion": "Completeness separate from anchored reviewer quality",
+          "status": "PARTIAL",
+          "observation": "Les obligations sont listées, mais aucun reçu ne sépare complétude et cinq notes ancrées."
+        },
+        {
+          "criterion": "No publication or responsible person fabricated",
+          "status": "PASS",
+          "observation": "Le responsable inconnu et le plan absent ne sont pas inventés."
+        }
+      ]
+    },
+    {
+      "case_id": "strategy-explicit-brief",
+      "criteria": [
+        {
+          "criterion": "A distinct usable brief is produced",
+          "status": "PASS",
+          "observation": "Une section brief de travail distincte est réellement produite."
+        },
+        {
+          "criterion": "Facts, hypotheses, counterevidence and unknowns remain separate",
+          "status": "PARTIAL",
+          "observation": "Faits et hypothèses sont distingués ; aucun contre-argument explicite ne teste le choix."
+        },
+        {
+          "criterion": "A plausible opportunity has objective audience desired change idea demonstration and agency mission",
+          "status": "PARTIAL",
+          "observation": "Public, objectif et démonstration sont présents ; la mission vendue par l’agence reste implicite."
+        },
+        {
+          "criterion": "No measured gain or benchmark invented",
+          "status": "PASS",
+          "observation": "Aucun gain mesuré ni benchmark non collecté n’est promis."
+        }
+      ]
+    },
+    {
+      "case_id": "creative-specific-world",
+      "criteria": [
+        {
+          "criterion": "Direction derives from observed client material and proposition",
+          "status": "PASS",
+          "observation": "La direction part de la matière, de l’atelier et de la réparabilité."
+        },
+        {
+          "criterion": "Visions extend an idea rather than repeat a template",
+          "status": "PARTIAL",
+          "observation": "Un choix cohérent est donné, mais les visions distinctes qui prolongent le concept ne sont pas développées."
+        },
+        {
+          "criterion": "Authentic assets selected with unknown rights flagged",
+          "status": "PARTIAL",
+          "observation": "Contenu, origine et recadrage sont évoqués ; un statut des droits non vérifiés manque."
+        },
+        {
+          "criterion": "No synthetic scene or generation claimed",
+          "status": "PASS",
+          "observation": "La réponse ne prétend pas générer une scène indisponible."
+        },
+        {
+          "criterion": "Client information packet excludes unavailable private history",
+          "status": "PASS",
+          "observation": "Aucun historique commercial privé n’est ajouté au créatif."
+        }
+      ]
+    },
+    {
+      "case_id": "story-proposal-not-audit",
+      "criteria": [
+        {
+          "criterion": "Story connects understanding tension transformation demonstration agency work decision",
+          "status": "PARTIAL",
+          "observation": "Le fil mène à une décision, mais ne nomme pas assez explicitement le travail et les limites de la mission d’agence."
+        },
+        {
+          "criterion": "Client sees a concrete proposal rather than an audit list",
+          "status": "PASS",
+          "observation": "Les pages présentent une transformation et des démonstrations, pas une simple liste d’audit."
+        },
+        {
+          "criterion": "Technical terms become understandable benefits with evidence limits",
+          "status": "PASS",
+          "observation": "La réparation devient une explication compréhensible sans promesse chiffrée."
+        },
+        {
+          "criterion": "Titles/transitions form an argument",
+          "status": "PASS",
+          "observation": "La séquence de titres suit une progression du constat à la décision."
+        },
+        {
+          "criterion": "Page count follows argument and stays within limit",
+          "status": "PASS",
+          "observation": "Cinq pages sont choisies pour le cas, sans prétendre en faire un plan universel."
+        }
+      ]
+    },
+    {
+      "case_id": "composition-separation",
+      "criteria": [
+        {
+          "criterion": "Local canonical source is proposed with honest Sites status",
+          "status": "PASS",
+          "observation": "La composition locale est proposée et l’absence de Sites est reconnue."
+        },
+        {
+          "criterion": "One source revision and usable views linked to argument",
+          "status": "PARTIAL",
+          "observation": "Les vues et révisions sont mentionnées, sans manifeste précis reliant une source canonique à ses trois exports."
+        },
+        {
+          "criterion": "Separate projections not hidden internal tabs",
+          "status": "PASS",
+          "observation": "Trois ensembles distincts avec sources sont prévus, pas une annexe client interne."
+        },
+        {
+          "criterion": "A central full-size page is reviewed before full production",
+          "status": "FAIL",
+          "observation": "Aucun contrôle de page centrale à taille finale avant fabrication complète n’est demandé."
+        },
+        {
+          "criterion": "Photographic ratio uses visible area and no exact value without measurement",
+          "status": "PASS",
+          "observation": "La photographie synthétique est mesurée en surface visible, pas en nombre d’images."
+        }
+      ]
+    },
+    {
+      "case_id": "sales-private-context-missing",
+      "criteria": [
+        {
+          "criterion": "Playbook mapped to actual proposal and buyer situation",
+          "status": "FAIL",
+          "observation": "Le playbook prépare la vente des luminaires et leur compatibilité au lieu de vendre la mission de l’agence au prospect."
+        },
+        {
+          "criterion": "Action owner by role trigger evidence follow-up and stop conditions",
+          "status": "PARTIAL",
+          "observation": "Suivi et responsable sont évoqués ; déclencheur, rôle et condition d’arrêt ne structurent pas chaque action."
+        },
+        {
+          "criterion": "Unavailable private procedures marked rather than invented",
+          "status": "PASS",
+          "observation": "Les procédures, outils et contacts privés absents sont explicitement inconnus."
+        },
+        {
+          "criterion": "Objections backed by proof and fit limits",
+          "status": "PARTIAL",
+          "observation": "Les preuves de produit restent honnêtes ; objections de la mission d’agence et critères de non-fit ne sont pas traités."
+        },
+        {
+          "criterion": "Draft does not authorize sends publication or CRM writes",
+          "status": "PASS",
+          "observation": "Aucun message ou contact n’est envoyé ni inventé."
+        }
+      ]
+    },
+    {
+      "case_id": "technical-uncertain-stack",
+      "criteria": [
+        {
+          "criterion": "Declared observed inferred unknown status per stack/booking claim",
+          "status": "PASS",
+          "observation": "CMS, fournisseur et réservation ne sont pas confirmés à partir du pilote."
+        },
+        {
+          "criterion": "Concrete routes content assets dependencies acceptance and risks",
+          "status": "PARTIAL",
+          "observation": "Composants et contrôles sont utiles mais ne lient pas chaque comportement à une acceptation et dépendance précises."
+        },
+        {
+          "criterion": "Sources and rights retained",
+          "status": "PARTIAL",
+          "observation": "Fichiers et caractéristiques sont demandés ; traçabilité des sources et droits des actifs reste incomplète."
+        },
+        {
+          "criterion": "No implementation or export claimed",
+          "status": "PASS",
+          "observation": "La maquette n’est pas annoncée comme construite ou testée."
+        },
+        {
+          "criterion": "No new research of still-current facts without a named gap",
+          "status": "PASS",
+          "observation": "La nouvelle vérification vise des accès et parcours inconnus, pas toute la recherche déjà valide."
+        }
+      ]
+    },
+    {
+      "case_id": "orchestration-no-skip",
+      "criteria": [
+        {
+          "criterion": "Brief and proposal have explicit artifacts before composition",
+          "status": "PASS",
+          "observation": "Le prochain livrable inclut un brief explicite avant la composition."
+        },
+        {
+          "criterion": "Discovery gaps remain named and control subsequent analysis",
+          "status": "PASS",
+          "observation": "Les lacunes de découverte restent nommées et conditionnent la suite."
+        },
+        {
+          "criterion": "Capability receipts distinguish native adapted unavailable",
+          "status": "FAIL",
+          "observation": "Aucun reçu ne distingue usage natif, méthode adaptée et famille indisponible."
+        },
+        {
+          "criterion": "Independent contexts and exact final-file checks stay blocked when absent",
+          "status": "PASS",
+          "observation": "Revue indisponible, ancienne source et PDF non identifié empêchent les validations vertes."
+        },
+        {
+          "criterion": "Plan approval and publication readback are distinct",
+          "status": "PARTIAL",
+          "observation": "Accès et autorisation sont distingués, mais empreinte du plan et readback de l’effet ne sont pas formalisés."
+        }
+      ]
+    }
+  ]
+}

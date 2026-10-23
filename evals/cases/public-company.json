@@ -1,0 +1,107 @@
+{
+  "fixture": "fictional-public-v1",
+  "company": {
+    "name": "Riverstone Works",
+    "url": "https://riverstone.example",
+    "declared_offer": "Modular repairable workspace lighting",
+    "audiences": [
+      "workspace teams",
+      "interior specifiers"
+    ],
+    "voice_observed": "Plain material language; product specifications dominate the current site"
+  },
+  "sources": [
+    {
+      "id": "s-home",
+      "kind": "first_party",
+      "observed": "Homepage declares repairable modular lighting",
+      "date": "2026-10-01"
+    },
+    {
+      "id": "s-quotes",
+      "kind": "first_party_quotes",
+      "observed": "Three attributed quotes describe easy replacement; no measured commercial outcomes",
+      "date": "2026-10-01"
+    },
+    {
+      "id": "s-careers",
+      "kind": "first_party",
+      "observed": "A booking pilot is mentioned; platform is unconfirmed",
+      "date": "2026-10-01"
+    }
+  ],
+  "coverage": [
+    {
+      "entry": "desktop/products",
+      "destination": "https://riverstone.example/products",
+      "status": "visited"
+    },
+    {
+      "entry": "desktop/products/desk",
+      "destination": "https://riverstone.example/products/desk",
+      "status": "visited"
+    },
+    {
+      "entry": "desktop/products/wall",
+      "destination": "https://riverstone.example/products/wall",
+      "status": "visited"
+    },
+    {
+      "entry": "desktop/studio",
+      "destination": "https://riverstone.example/studio",
+      "status": "visited"
+    },
+    {
+      "entry": "desktop/projects",
+      "destination": "https://riverstone.example/projects",
+      "status": "not_attempted"
+    },
+    {
+      "entry": "mobile/menu",
+      "destination": null,
+      "status": "not_opened"
+    }
+  ],
+  "media": {
+    "authentic_photos": 6,
+    "synthetic_photos": 1,
+    "generation_available": false,
+    "identity": "Warm materials and workshop photographs; no default agency visual system"
+  },
+  "constraints": {
+    "client_max_pages": 5,
+    "client_visual_target": "70/30 useful visual/text area",
+    "synthetic_limit": "20 percent of visible photographic area per deliverable",
+    "client_excludes": [
+      "commercial amounts",
+      "internal notes"
+    ],
+    "required_outputs": [
+      "client PDF and editable source",
+      "sales PDF and editable source",
+      "technical PDF and editable source"
+    ],
+    "private_sales_context": false
+  },
+  "capabilities": {
+    "rendered_browser": "unavailable in this evaluation",
+    "separate_reviewer": "unavailable",
+    "sites": "unavailable",
+    "upstream_doctor": "not_run",
+    "publication_connector": "unavailable"
+  },
+  "review_input": {
+    "current_source_revision": "source-b",
+    "self_review": {
+      "score": 10,
+      "independent": false
+    },
+    "old_review": {
+      "score": 9,
+      "source_revision": "source-a"
+    },
+    "final_pdf_hash": null,
+    "responsible_confirmed": false,
+    "current_plan_approval": null
+  }
+}

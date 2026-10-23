@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Safe public packet manifest without internal state or local paths",
+  "type": "object",
+  "required": [
+    "status",
+    "files"
+  ],
+  "properties": {
+    "status": {
+      "const": "PREPARED"
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "sha256",
+          "size_bytes"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\\\]+$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "scope": {
+      "enum": [
+        "creative_input",
+        "final_delivery"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

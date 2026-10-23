@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Local named-stage checkpoint; exact-plan approval is separate",
+  "type": "object",
+  "required": [
+    "id",
+    "stage_id",
+    "status",
+    "required",
+    "approval",
+    "recorded_at",
+    "dependencies",
+    "dependency_hashes",
+    "profile_hash"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stage_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "WAITING",
+        "COMPLETE",
+        "APPROVED",
+        "BLOCKED",
+        "UNKNOWN",
+        "STALE"
+      ]
+    },
+    "required": {
+      "type": "boolean"
+    },
+    "approval": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "actor",
+            "plan_ref",
+            "plan_sha256"
+          ],
+          "properties": {
+            "actor": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_ref": {
+              "type": "string",
+              "pattern": "^artifact:.+$"
+            },
+            "plan_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "approved_at": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "recorded_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^(source|fact|artifact|evaluation|review|stage_review|checkpoint):.+$"
+      }
+    },
+    "dependency_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "profile_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

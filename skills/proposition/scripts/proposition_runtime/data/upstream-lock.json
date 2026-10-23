@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-10-23",
+  "execution_policy": "Fetch source and notices only. Never run upstream installers or scripts. Cached does not mean installed, natively executed, or adapted.",
+  "families": [
+    {
+      "id": "claude-seo",
+      "repository": "AgriciDaniel/claude-seo",
+      "commit": "6be93f45064ffbadced572b5d5c95f55fd263af0",
+      "license": "MIT",
+      "license_files": ["LICENSE", "skills/seo/LICENSE.txt"],
+      "entrypoints": ["skills/seo/SKILL.md", "skills/seo-audit/SKILL.md", "skills/seo-geo/SKILL.md", "skills/seo-technical/SKILL.md"],
+      "default": true,
+      "notes": "Entrypoints verified in the pinned tree. Optional provider integrations can require keys or services and are not enabled by fetching. Preserve per-skill and third-party notices."
+    },
+    {
+      "id": "impeccable",
+      "repository": "pbakaus/impeccable",
+      "commit": "5cb95eea9c96479f57afe0732a45470d30183326",
+      "license": "Apache-2.0",
+      "license_files": ["LICENSE", "NOTICE.md"],
+      "entrypoints": ["plugin/skills/impeccable/SKILL.md"],
+      "default": true,
+      "notes": "The full source tree, references, notices, and tools remain together. Fetching does not build or run the engine."
+    },
+    {
+      "id": "scroll-craft",
+      "repository": "nateherkai/scroll-craft",
+      "commit": "75d81f74e83692add18cd7a8a8e078b8a887a579",
+      "license": "MIT",
+      "license_files": ["LICENSE"],
+      "entrypoints": ["plugins/nateherk-design/skills/scroll-craft/SKILL.md"],
+      "default": true,
+      "notes": "Scripts and references are fetched, not installed or executed. Browser, video, and local-server dependencies are not activated."
+    },
+    {
+      "id": "apple-design",
+      "repository": "emilkowalski/skills",
+      "commit": "2d228630ba1446365f614a108cb8252f1feda202",
+      "license": "MIT",
+      "license_files": ["LICENSE"],
+      "entrypoints": ["skills/apple-design/SKILL.md"],
+      "default": true,
+      "notes": "Full pinned source pack preserved. The skill supplies interaction guidance; caching it is not evidence of its native use in a proposal."
+    }
+  ],
+  "excluded_optional": [
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "e85f3cbc2e4a79bf33b2a12e9bdd9087d414735b",
+      "reason": "The pinned tree contains the CLAUDE.md symlink. This strict fetcher rejects symlinks instead of transforming or following them. Optional qualification requires a separate explicit decision."
+    }
+  ]
+}

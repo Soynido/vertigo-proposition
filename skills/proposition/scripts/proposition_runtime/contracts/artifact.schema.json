@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hash-bound local artifact, independent from public release permission",
+  "type": "object",
+  "required": [
+    "id",
+    "path",
+    "sha256",
+    "size_bytes",
+    "audience",
+    "status",
+    "public_allowed",
+    "approval",
+    "recorded_at",
+    "dependencies",
+    "dependency_hashes",
+    "profile_hash"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "size_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "audience": {
+      "enum": [
+        "client",
+        "sales",
+        "technical",
+        "internal",
+        "public"
+      ]
+    },
+    "status": {
+      "enum": [
+        "CURRENT",
+        "UNKNOWN",
+        "STALE"
+      ]
+    },
+    "public_allowed": {
+      "type": "boolean"
+    },
+    "approval": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "actor",
+            "sha256"
+          ],
+          "properties": {
+            "actor": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "approved_at": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "recorded_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^(source|fact|artifact|evaluation|review|stage_review|checkpoint):.+$"
+      }
+    },
+    "dependency_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "profile_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source provenance and a locally captured evidence file",
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "locator",
+    "path",
+    "sha256",
+    "status",
+    "audience",
+    "required",
+    "observed_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "enum": [
+        "public",
+        "private",
+        "observation",
+        "client",
+        "generated"
+      ]
+    },
+    "locator": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "status": {
+      "enum": [
+        "COLLECTED",
+        "INACCESSIBLE",
+        "UNKNOWN",
+        "STALE"
+      ]
+    },
+    "audience": {
+      "enum": [
+        "client",
+        "sales",
+        "technical",
+        "internal",
+        "public"
+      ]
+    },
+    "required": {
+      "type": "boolean"
+    },
+    "observed_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "COLLECTED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

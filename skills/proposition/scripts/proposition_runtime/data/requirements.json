@@ -1,0 +1,600 @@
+{
+  "schema_version": "1.0",
+  "description": "Generic public acceptance registry. Private identities, commercial values, model preferences and destination identifiers are supplied in local profile parameters, never in this registry.",
+  "quality_rubric": {
+    "status": "candidate-not-human-calibrated",
+    "criteria": [
+      "specificity",
+      "evidence",
+      "narrative",
+      "visual_execution",
+      "handoff"
+    ],
+    "anchors": {
+      "0": "Missing, misleading or unusable",
+      "1": "Present with a material weakness",
+      "2": "Specific, supported and usable at the stated review scope"
+    },
+    "required_per_reviewer": 9,
+    "average_between_reviewers": false
+  },
+  "requirements": [
+    {
+      "id": "R01",
+      "label": "Declare the entry point and integration scope",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R02",
+      "label": "Provide separate audience deliverables and editable sources",
+      "mandatory": true,
+      "stage_id": "export.documents",
+      "applicability": "always"
+    },
+    {
+      "id": "R03",
+      "label": "Respect the configured client document page limit",
+      "mandatory": true,
+      "parameter": "client_max_pages",
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R04",
+      "label": "Confirm the responsible person separately from the invoking actor",
+      "mandatory": true,
+      "parameter": "responsible_candidates",
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R05",
+      "label": "Inventory upstream packages, versions, licenses and executed scope",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R06",
+      "label": "Preserve official identity assets while designing for the client",
+      "mandatory": true,
+      "stage_id": "creative.direction",
+      "applicability": "always"
+    },
+    {
+      "id": "R07",
+      "label": "Establish offer, audiences, context and desired action",
+      "mandatory": true,
+      "stage_id": "company.v2",
+      "applicability": "always"
+    },
+    {
+      "id": "R08",
+      "label": "Observe rendered desktop and mobile navigation with real interactions",
+      "mandatory": true,
+      "stage_id": "discovery.site",
+      "applicability": "always"
+    },
+    {
+      "id": "R09",
+      "label": "Distinguish inventoried, visited, captured and analyzed coverage",
+      "mandatory": true,
+      "stage_id": "discovery.site",
+      "applicability": "always"
+    },
+    {
+      "id": "R10",
+      "label": "Record meaningful interface and content states",
+      "mandatory": true,
+      "stage_id": "discovery.site",
+      "applicability": "always"
+    },
+    {
+      "id": "R11",
+      "label": "Use market references without copying another identity",
+      "mandatory": true,
+      "stage_id": "discovery.channels",
+      "applicability": "always"
+    },
+    {
+      "id": "R12",
+      "label": "Separate observations, proposals and unknowns without invented claims",
+      "mandatory": true,
+      "stage_id": "discovery.channels",
+      "applicability": "always"
+    },
+    {
+      "id": "R13",
+      "label": "Connect the observation, proposed idea and intended benefit",
+      "mandatory": true,
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R14",
+      "label": "Use language understandable to the intended reader",
+      "mandatory": true,
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R15",
+      "label": "Exclude internal commercial and operational data from client artifacts",
+      "mandatory": true,
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R16",
+      "label": "Assess the visual and text balance across the whole narrative",
+      "mandatory": true,
+      "parameter": "composition_balance",
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R17",
+      "label": "Measure authentic and synthetic photographic surface separately",
+      "mandatory": true,
+      "parameter": "photographic_authenticity_threshold",
+      "stage_id": "creative.direction",
+      "applicability": "always"
+    },
+    {
+      "id": "R18",
+      "label": "Do not present fabricated factual subjects as authentic",
+      "mandatory": true,
+      "stage_id": "creative.direction",
+      "applicability": "always"
+    },
+    {
+      "id": "R19",
+      "label": "Track media subject, origin, rights, changes and placements",
+      "mandatory": true,
+      "stage_id": "discovery.channels",
+      "applicability": "always"
+    },
+    {
+      "id": "R20",
+      "label": "Materialize distinct creative options before choosing a direction",
+      "mandatory": true,
+      "stage_id": "creative.direction",
+      "applicability": "always"
+    },
+    {
+      "id": "R21",
+      "label": "Demonstrate useful desktop moments and a distinct mobile composition",
+      "mandatory": true,
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R22",
+      "label": "Prepare a client-specific commercial conversation and follow-up playbook",
+      "mandatory": true,
+      "stage_id": "internal.handoffs",
+      "applicability": "always"
+    },
+    {
+      "id": "R23",
+      "label": "Make next actions traceable to owners, triggers and expected outcomes",
+      "mandatory": true,
+      "stage_id": "internal.handoffs",
+      "applicability": "always"
+    },
+    {
+      "id": "R24",
+      "label": "Use only authorized private context without assuming public permission",
+      "mandatory": true,
+      "stage_id": "discovery.channels",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R25",
+      "label": "Preserve contributor observations and supplied material as explicit inputs",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R26",
+      "label": "Describe the existing system, scope, dependencies and handoff decisions",
+      "mandatory": true,
+      "stage_id": "internal.handoffs",
+      "applicability": "always"
+    },
+    {
+      "id": "R27",
+      "label": "Preserve useful content, functions and addresses during redesign planning",
+      "mandatory": true,
+      "stage_id": "analysis.specialists",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R28",
+      "label": "Adapt the offer to existing providers and integrated external services",
+      "mandatory": true,
+      "stage_id": "analysis.specialists",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R29",
+      "label": "Use an explicitly configured internal valuation basis",
+      "mandatory": true,
+      "parameter": "internal_daily_rate",
+      "stage_id": "internal.handoffs",
+      "applicability": "always"
+    },
+    {
+      "id": "R30",
+      "label": "Parameterize recurring service pricing and its explicit scope",
+      "mandatory": true,
+      "parameter": "recurring_service_rate",
+      "stage_id": "internal.handoffs",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R31",
+      "label": "Parameterize effort calibration without duplicate acceleration",
+      "mandatory": true,
+      "parameter": "effort_calibration",
+      "stage_id": "internal.handoffs",
+      "applicability": "always"
+    },
+    {
+      "id": "R32",
+      "label": "Separate active effort, external waits and validation delays",
+      "mandatory": true,
+      "stage_id": "internal.handoffs",
+      "applicability": "always"
+    },
+    {
+      "id": "R33",
+      "label": "Specify exact proposed persistence contents and destinations",
+      "mandatory": true,
+      "stage_id": "publication.approved",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R34",
+      "label": "Bind explicit authorization to the exact persistence plan hash",
+      "mandatory": true,
+      "stage_id": "publication.approved",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R35",
+      "label": "Use only persistence capabilities authorized for the real account",
+      "mandatory": true,
+      "stage_id": "publication.approved",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R36",
+      "label": "Read back separate persistence, eligibility and consumption states",
+      "mandatory": true,
+      "stage_id": "publication.approved",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R37",
+      "label": "Distinguish partial writes and prevent duplicate or destructive retries",
+      "mandatory": true,
+      "stage_id": "publication.approved",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R38",
+      "label": "Inspect every final document page and required visual artifact",
+      "mandatory": true,
+      "stage_id": "verify.final",
+      "applicability": "always"
+    },
+    {
+      "id": "R39",
+      "label": "Evidence two isolated reviews without inherited author context or shared verdict",
+      "mandatory": true,
+      "stage_id": "review.client",
+      "applicability": "always"
+    },
+    {
+      "id": "R40",
+      "label": "Bind validation to exact artifact identities, versions and hashes",
+      "mandatory": true,
+      "stage_id": "verify.final",
+      "applicability": "always"
+    },
+    {
+      "id": "R41",
+      "label": "Require distinct authorization for each external side effect",
+      "mandatory": true,
+      "stage_id": "publication.approved",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R42",
+      "label": "Respect actor permissions and exclude secrets from deliverables",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R43",
+      "label": "Parameterize the model preference and report only observed execution",
+      "mandatory": true,
+      "parameter": "preferred_model",
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R44",
+      "label": "Measure elapsed time without an invented automatic time cutoff",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R45",
+      "label": "Measure resource economy only when attributable and observable",
+      "mandatory": true,
+      "parameter": "usage_economy_target",
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R46",
+      "label": "Checkpoint before a costly operation at an applicable resource threshold",
+      "mandatory": true,
+      "parameter": "pause_threshold",
+      "stage_id": "company.v1",
+      "applicability": "conditional"
+    },
+    {
+      "id": "R47",
+      "label": "Instrument command messages with available measured telemetry",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R48",
+      "label": "Keep unavailable measures unknown and avoid invalid unit conversions",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R49",
+      "label": "Resume valid work and applicable authorizations without blind replay",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R50",
+      "label": "Reuse sourced research and caches without imposing a creative template",
+      "mandatory": true,
+      "stage_id": "discovery.channels",
+      "applicability": "always"
+    },
+    {
+      "id": "R51",
+      "label": "Respect explicitly available subscription and paid-provider boundaries",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R52",
+      "label": "Distinguish documentation, exposed capability, tested behavior and deployment",
+      "mandatory": true,
+      "stage_id": "internal.handoffs",
+      "applicability": "always"
+    },
+    {
+      "id": "R53",
+      "label": "Preserve provenance type and observation date",
+      "mandatory": true,
+      "stage_id": "discovery.channels",
+      "applicability": "always"
+    },
+    {
+      "id": "R54",
+      "label": "Prepare a reusable handoff without implicitly starting implementation",
+      "mandatory": true,
+      "stage_id": "internal.handoffs",
+      "applicability": "always"
+    },
+    {
+      "id": "R55",
+      "label": "Distinguish a local checkpoint from approved business persistence",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R56",
+      "label": "Make the proposed experience and commercial intent understandable",
+      "mandatory": true,
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R57",
+      "label": "Verify readable exports and autonomous genuinely editable sources",
+      "mandatory": true,
+      "stage_id": "verify.final",
+      "applicability": "always"
+    },
+    {
+      "id": "R58",
+      "label": "Keep operational counters outside client-facing artifacts",
+      "mandatory": true,
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R59",
+      "label": "Do not average away severe defects, decisive unknowns or leaks",
+      "mandatory": true,
+      "stage_id": "review.client",
+      "applicability": "always"
+    },
+    {
+      "id": "R60",
+      "label": "Correct observed causes and revalidate affected evidence",
+      "mandatory": true,
+      "stage_id": "review.client",
+      "applicability": "always"
+    },
+    {
+      "id": "R61",
+      "label": "Adapt techniques to sector and complexity instead of universal effects",
+      "mandatory": true,
+      "stage_id": "analysis.specialists",
+      "applicability": "always"
+    },
+    {
+      "id": "R62",
+      "label": "Prevent identity and metadata contamination from another client",
+      "mandatory": true,
+      "stage_id": "verify.final",
+      "applicability": "always"
+    },
+    {
+      "id": "R63",
+      "label": "Keep command communication concise and useful",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R64",
+      "label": "Record deduplicated authenticated usage without private content",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R65",
+      "label": "Version and label the handoff without authorizing production",
+      "mandatory": true,
+      "stage_id": "internal.handoffs",
+      "applicability": "always"
+    },
+    {
+      "id": "R66",
+      "label": "Keep the integration additive and within declared permissions",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R67",
+      "label": "Load role context progressively and reuse bounded common evidence",
+      "mandatory": true,
+      "stage_id": "company.v1",
+      "applicability": "always"
+    },
+    {
+      "id": "R68",
+      "label": "Extend the creative idea throughout the full experience",
+      "mandatory": true,
+      "stage_id": "creative.direction",
+      "applicability": "always"
+    },
+    {
+      "id": "R69",
+      "label": "Record relevant channel research, identity confidence and access limits",
+      "mandatory": true,
+      "stage_id": "discovery.channels",
+      "applicability": "always"
+    },
+    {
+      "id": "R70",
+      "label": "Check credited media against the correct factual subject",
+      "mandatory": true,
+      "stage_id": "discovery.channels",
+      "applicability": "always"
+    },
+    {
+      "id": "R71",
+      "label": "Preserve originals and transformation instructions for enhanced real media",
+      "mandatory": true,
+      "stage_id": "creative.direction",
+      "applicability": "always"
+    },
+    {
+      "id": "R72",
+      "label": "Classify factual invention as synthetic independently of composition balance",
+      "mandatory": true,
+      "stage_id": "creative.direction",
+      "applicability": "always"
+    },
+    {
+      "id": "R73",
+      "label": "Reject interchangeable direction despite superficial polish",
+      "mandatory": true,
+      "stage_id": "review.client",
+      "applicability": "always"
+    },
+    {
+      "id": "R74",
+      "label": "Make each sentence meaningful without oral repair",
+      "mandatory": true,
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R75",
+      "label": "Preserve the client's voice while removing interchangeable abstractions",
+      "mandatory": true,
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R76",
+      "label": "Distinguish intended outcomes from actual interface behavior",
+      "mandatory": true,
+      "stage_id": "client.composition",
+      "applicability": "always"
+    },
+    {
+      "id": "R77",
+      "label": "Qualify technical and provider observations by evidence and confidence",
+      "mandatory": true,
+      "stage_id": "internal.handoffs",
+      "applicability": "always"
+    },
+    {
+      "id": "R78",
+      "label": "Provide an autonomous role brief with transmitted evidence and limitations",
+      "mandatory": true,
+      "stage_id": "brief.public",
+      "applicability": "always"
+    },
+    {
+      "id": "R79",
+      "label": "Keep quality, distribution rights and persistence statuses independent",
+      "mandatory": true,
+      "stage_id": "publication.approved",
+      "applicability": "always"
+    },
+    {
+      "id": "R80",
+      "label": "Scope reproducible trials and avoid unsupported causal attribution",
+      "mandatory": true,
+      "stage_id": "review.client",
+      "applicability": "always"
+    },
+    {
+      "id": "R81",
+      "label": "Design a new client-specific direction without preset house styling",
+      "mandatory": true,
+      "stage_id": "creative.direction",
+      "applicability": "always"
+    }
+  ]
+}

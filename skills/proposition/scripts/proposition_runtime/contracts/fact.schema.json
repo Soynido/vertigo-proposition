@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fact with explicit source provenance and public projection permission",
+  "type": "object",
+  "required": [
+    "id",
+    "value",
+    "source_ids",
+    "status",
+    "audience",
+    "public_allowed",
+    "required",
+    "recorded_at",
+    "dependencies",
+    "dependency_hashes",
+    "profile_hash"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "value": {},
+    "source_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "status": {
+      "enum": [
+        "CONFIRMED",
+        "ASSUMPTION",
+        "UNKNOWN",
+        "STALE"
+      ]
+    },
+    "audience": {
+      "enum": [
+        "client",
+        "sales",
+        "technical",
+        "internal",
+        "public"
+      ]
+    },
+    "public_allowed": {
+      "type": "boolean"
+    },
+    "required": {
+      "type": "boolean"
+    },
+    "recorded_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^(source|fact|artifact|evaluation|review|stage_review|checkpoint):.+$"
+      }
+    },
+    "dependency_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "profile_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

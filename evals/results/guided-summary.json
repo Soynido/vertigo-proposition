@@ -1,0 +1,281 @@
+{
+  "status": "candidate_observed_not_calibrated",
+  "evaluation_kind": "one fresh native context with nine tasks and skill guidance",
+  "samples": 1,
+  "tasks": 9,
+  "source_sha256": "0f6d99727a338ef31204f9d9d1bb3aadc09170db1dc9eac1a91c00be0d94de96",
+  "scoring": "manual semantic reading by the pilot; not keyword matching; not an independent creative review",
+  "counts": {
+    "PASS": 39,
+    "PARTIAL": 4,
+    "FAIL": 0
+  },
+  "limits": [
+    "Not nine independent samples",
+    "No browser, PDF, image or external mutation executed by this textual evaluation",
+    "One baseline and one guided context do not establish causality or repeatability",
+    "No claim of universal creative quality or fully qualified live integration"
+  ],
+  "results": [
+    {
+      "case_id": "discovery-coverage",
+      "criteria": [
+        {
+          "criterion": "Every found entry has an explicit attempted or incomplete outcome",
+          "status": "PASS",
+          "observation": "Quatre destinations visitées, /projects non tenté et menu mobile non ouvert sont explicitement distingués."
+        },
+        {
+          "criterion": "Projects and mobile menu remain incomplete",
+          "status": "PASS",
+          "observation": "Les deux issues restent ouvertes et bloquent la clôture."
+        },
+        {
+          "criterion": "No exhaustive claim or invented visit",
+          "status": "PASS",
+          "observation": "Aucune capture ni exploration complète n’est revendiquée."
+        },
+        {
+          "criterion": "Channel or platform candidate is not confirmed without evidence",
+          "status": "PASS",
+          "observation": "Pilote et plateforme restent non confirmés ; comptes sociaux absents du paquet ne sont pas déclarés inexistants."
+        }
+      ]
+    },
+    {
+      "case_id": "quality-stale",
+      "criteria": [
+        {
+          "criterion": "No independent PASS from self-review",
+          "status": "PASS",
+          "observation": "Auto-note du même contexte rejetée."
+        },
+        {
+          "criterion": "Old revision review is stale for current revision",
+          "status": "PASS",
+          "observation": "source-a est explicitement STALE pour source-b."
+        },
+        {
+          "criterion": "Exact PDF hashes and page renders required",
+          "status": "PASS",
+          "observation": "Manifestes, empreintes exactes et toutes pages demandés."
+        },
+        {
+          "criterion": "Completeness separate from anchored reviewer quality",
+          "status": "PARTIAL",
+          "observation": "Complétude séparée ; la réponse renvoie aux reçus requis mais ne décrit pas les cinq ancrages dans ce livrable."
+        },
+        {
+          "criterion": "No publication or responsible person fabricated",
+          "status": "PASS",
+          "observation": "Responsable non confirmé et publication non autorisée conservés."
+        }
+      ]
+    },
+    {
+      "case_id": "strategy-explicit-brief",
+      "criteria": [
+        {
+          "criterion": "A distinct usable brief is produced",
+          "status": "PASS",
+          "observation": "Brief distinct avec tension et décision."
+        },
+        {
+          "criterion": "Facts, hypotheses, counterevidence and unknowns remain separate",
+          "status": "PASS",
+          "observation": "Contre-hypothèse explicite : les prescripteurs peuvent préférer les spécifications."
+        },
+        {
+          "criterion": "A plausible opportunity has objective audience desired change idea demonstration and agency mission",
+          "status": "PASS",
+          "observation": "Public, compréhension recherchée, démonstration et mission d’agence sont nommés."
+        },
+        {
+          "criterion": "No measured gain or benchmark invented",
+          "status": "PASS",
+          "observation": "Aucun benchmark ni gain mesuré ajouté."
+        }
+      ]
+    },
+    {
+      "case_id": "creative-specific-world",
+      "criteria": [
+        {
+          "criterion": "Direction derives from observed client material and proposition",
+          "status": "PASS",
+          "observation": "Matières chaudes, atelier et modularité fondent la direction."
+        },
+        {
+          "criterion": "Visions extend an idea rather than repeat a template",
+          "status": "PASS",
+          "observation": "Trois visions ont des fonctions différentes ; pas seulement une variation de couleur."
+        },
+        {
+          "criterion": "Authentic assets selected with unknown rights flagged",
+          "status": "PASS",
+          "observation": "Les six médias restent candidats ; sujets, sources et droits doivent être vérifiés."
+        },
+        {
+          "criterion": "No synthetic scene or generation claimed",
+          "status": "PASS",
+          "observation": "Aucune scène produite ou génération inventée."
+        },
+        {
+          "criterion": "Client information packet excludes unavailable private history",
+          "status": "PASS",
+          "observation": "Passation limitée au brief et sources publiques."
+        }
+      ]
+    },
+    {
+      "case_id": "story-proposal-not-audit",
+      "criteria": [
+        {
+          "criterion": "Story connects understanding tension transformation demonstration agency work decision",
+          "status": "PASS",
+          "observation": "Les quatre pages relient compréhension, difficulté, démonstration, mission et décision."
+        },
+        {
+          "criterion": "Client sees a concrete proposal rather than an audit list",
+          "status": "PASS",
+          "observation": "La dernière page propose le périmètre de conception, pas seulement des constats."
+        },
+        {
+          "criterion": "Technical terms become understandable benefits with evidence limits",
+          "status": "PASS",
+          "observation": "Le principe de remplacement devient une explication conditionnelle au mécanisme réel."
+        },
+        {
+          "criterion": "Titles/transitions form an argument",
+          "status": "PASS",
+          "observation": "Titres et transitions font progresser l’argument."
+        },
+        {
+          "criterion": "Page count follows argument and stays within limit",
+          "status": "PASS",
+          "observation": "Quatre pages choisies pour le cas ; plafond respecté."
+        }
+      ]
+    },
+    {
+      "case_id": "composition-separation",
+      "criteria": [
+        {
+          "criterion": "Local canonical source is proposed with honest Sites status",
+          "status": "PASS",
+          "observation": "Source locale canonique ; Sites explicitement indisponible."
+        },
+        {
+          "criterion": "One source revision and usable views linked to argument",
+          "status": "PASS",
+          "observation": "Révision, manifeste et trois exports reliés à la source ; vues au service de l’argument."
+        },
+        {
+          "criterion": "Separate projections not hidden internal tabs",
+          "status": "PASS",
+          "observation": "Trois ensembles autonomes ; données cachées internes exclues."
+        },
+        {
+          "criterion": "A central full-size page is reviewed before full production",
+          "status": "PASS",
+          "observation": "Page centrale à taille finale avant déclinaison, avec intention et défauts."
+        },
+        {
+          "criterion": "Photographic ratio uses visible area and no exact value without measurement",
+          "status": "PASS",
+          "observation": "Surface photographique visible par livrable, pas nombre de fichiers."
+        }
+      ]
+    },
+    {
+      "case_id": "sales-private-context-missing",
+      "criteria": [
+        {
+          "criterion": "Playbook mapped to actual proposal and buyer situation",
+          "status": "PASS",
+          "observation": "Vendeur agence, acheteur prospect, mission et décision sont explicitement fixés."
+        },
+        {
+          "criterion": "Action owner by role trigger evidence follow-up and stop conditions",
+          "status": "PASS",
+          "observation": "Ouverture et qualification possèdent déclencheur, rôle, preuve, décision, suivi et arrêt."
+        },
+        {
+          "criterion": "Unavailable private procedures marked rather than invented",
+          "status": "PASS",
+          "observation": "Aucune cadence, personne ni règle privée inventée."
+        },
+        {
+          "criterion": "Objections backed by proof and fit limits",
+          "status": "PASS",
+          "observation": "Objections de la mission, preuves manquantes et conditions de non-fit données."
+        },
+        {
+          "criterion": "Draft does not authorize sends publication or CRM writes",
+          "status": "PASS",
+          "observation": "Aucun envoi ni mutation métier autorisés par le brouillon."
+        }
+      ]
+    },
+    {
+      "case_id": "technical-uncertain-stack",
+      "criteria": [
+        {
+          "criterion": "Declared observed inferred unknown status per stack/booking claim",
+          "status": "PASS",
+          "observation": "Pilote déclaré mais CMS/fournisseur/hébergeur et état actuel inconnus."
+        },
+        {
+          "criterion": "Concrete routes content assets dependencies acceptance and risks",
+          "status": "PARTIAL",
+          "observation": "Routes et acceptations concrètes sont présentes ; le mapping composant par composant reste incomplet."
+        },
+        {
+          "criterion": "Sources and rights retained",
+          "status": "PARTIAL",
+          "observation": "Sources et droits sont à préserver, mais aucun registre d’actifs précis n’est encore livré."
+        },
+        {
+          "criterion": "No implementation or export claimed",
+          "status": "PASS",
+          "observation": "Conception non construite et absence de parcours validé annoncées."
+        },
+        {
+          "criterion": "No new research of still-current facts without a named gap",
+          "status": "PASS",
+          "observation": "Recherche suivante cible explicitement réservation, droits et fonctions inconnues."
+        }
+      ]
+    },
+    {
+      "case_id": "orchestration-no-skip",
+      "criteria": [
+        {
+          "criterion": "Brief and proposal have explicit artifacts before composition",
+          "status": "PASS",
+          "observation": "Brief explicite et haché avant transmission créative ; mission séparée."
+        },
+        {
+          "criterion": "Discovery gaps remain named and control subsequent analysis",
+          "status": "PASS",
+          "observation": "/projects puis menu mobile identifiés comme premier blocage."
+        },
+        {
+          "criterion": "Capability receipts distinguish native adapted unavailable",
+          "status": "PARTIAL",
+          "observation": "Doctor non exécuté et familles non revendiquées ; la réponse ne livre pas de reçus structurés native/adapted/unavailable."
+        },
+        {
+          "criterion": "Independent contexts and exact final-file checks stay blocked when absent",
+          "status": "PASS",
+          "observation": "Gate indépendant bloqué et exports/inspection NOT_RUN."
+        },
+        {
+          "criterion": "Plan approval and publication readback are distinct",
+          "status": "PASS",
+          "observation": "Accord lié à empreinte et readback séparés de l’export."
+        }
+      ]
+    }
+  ]
+}

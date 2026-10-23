@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Local run state",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "root",
+    "url",
+    "created_at",
+    "updated_at",
+    "profile",
+    "requirement_ids",
+    "sources",
+    "facts",
+    "artifacts",
+    "evaluations",
+    "reviews",
+    "checkpoints",
+    "stage_reviews"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^run-[0-9a-f]{32}$"
+    },
+    "root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "url": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "updated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profile": {
+      "type": "object"
+    },
+    "requirement_ids": {
+      "type": "array",
+      "minItems": 81,
+      "maxItems": 81,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^R[0-9]{2}$"
+      }
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "facts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "evaluations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "reviews": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "checkpoints": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "stage_reviews": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    }
+  },
+  "additionalProperties": false
+}
