@@ -2,7 +2,7 @@
 
 **Une URL pour comprendre une entreprise, imaginer son prochain site et présenter une mission d'agence.**
 
-Un ensemble de skills pour Codex, avec collecte rendue, preuves versionnées, méthodes créatives et contrôles exécutables. Le résultat attendu : trois PDF séparés et leurs sources éditables — proposition client, playbook commercial et transmission technique. Chaque client doit recevoir son propre univers et une histoire compréhensible sans présentation orale.
+Un ensemble de skills pour Codex, avec collecte rendue, preuves versionnées, méthodes créatives et contrôles exécutables. Le résultat attendu : trois PDF séparés et leurs sources — proposition client, playbook commercial et transmission technique — plus la présentation client en PowerPoint à structure modifiable et son contexte de recherche compilé. Chaque client doit recevoir une évolution reconnaissable de sa marque et une histoire compréhensible sans présentation orale.
 
 **Version alpha.** Les tests vérifient des comportements précis du moteur et des méthodes. Ils ne certifient ni une qualité créative universelle, ni une intégration Notion réelle. Les états non vérifiés restent visibles. Voir [qualification](docs/qualification.md) et [capacités](docs/capabilities.md).
 
@@ -37,8 +37,9 @@ Sinon demander à Codex d'utiliser le `SKILL.md` installé avec cette URL. `/pro
 ```text
 URL → site rendu + tous menus recensés → canaux officiels + médias
     → entreprise sourcée V1 → analyses spécialisées → entreprise V2
-    → brief public → direction propre au client → histoire + composition
-    → revues indépendantes → dossiers Sales et technique → 3 PDF éditables
+    → observations + recommandations → brief public → directions rendues
+    → histoire + composition → revues indépendantes → dossiers Sales et technique
+    → 3 PDF + PPTX client + contexte compilé et sources
     → vérification des fichiers exacts → plan d'archivage proposé
     → accord explicite → écriture par connecteur privé → vérification
 ```
@@ -57,7 +58,13 @@ La collecte automatique travaille par lots bornés, conserve les omissions et le
 
 HTML/CSS et médias locaux constituent les sources maîtresses éditables. Board, vues desktop/mobile et comparaison doivent servir l'argument dans le PDF ; leurs versions complètes peuvent être jointes. Sites peut devenir une vue de travail si son adaptateur est réellement disponible et autorisé. Il ne remplace pas la source locale et son absence reste déclarée.
 
+Le [contrat d'édition et de contexte](skills/proposition/references/editable-delivery.md) exige aussi `Proposition.pptx`, `Contexte client.md`, un catalogue d'éléments et les actifs autonomes. Titres, textes et blocs de la présentation sont modifiables ; les créations visuelles restent des images séparées, recadrables et remplaçables. **Ce contrat n'ajoute pas d'exporteur PPTX au moteur Python** : l'agent utilise une capacité de présentation disponible et consigne création, contrôle de structure, rendu et essai d'édition. Une capacité absente reste un blocage déclaré.
+
 Une direction différente par entreprise ; la signature de l'agence accompagne l'univers du client. Environ 70 % de visuel utile / 30 % de texte. Au plus 20 % de surface photographique synthétique, mesurée sur les placements visibles. Les retouches fidèles gardent original, source et recette. Provenance et droit de diffusion sont deux vérifications différentes. Le logo officiel et les paramètres privés sont apportés localement, jamais inventés.
+
+Une demande « ultra créatif / WOW » active le [contrat créatif](skills/proposition-creative/references/creative-contract.md) : préserver les signes de marque, matérialiser des mondes distincts, inspecter les scènes avant comparaison et conserver le format demandé. Un PDF peut montrer une intention de site immersif sans publication de site. La méthode est vérifiable ; l'effet WOW et la répétabilité exacte ne sont pas garantis.
+
+Dans le parcours complet, les créatifs reçoivent les sources sélectionnées **et les observations/changements recommandés après analyse**, avec objectifs, signes à préserver et libertés de conception. Les images traduisent ces choix ; elles ne servent pas à inventer après coup un diagnostic. Une demande limitée à une exploration ou à un seul format garde sa portée, sans remise complète prétendument validée.
 
 ## Skills et distributions
 

@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "scope": "Behavioral creative-contract qualification; not a runtime schema or universal aesthetic benchmark",
+  "cases": [
+    {
+      "id": "distinct-worlds-pdf",
+      "task": "À partir du paquet public fourni, livre un PDF court de trois orientations ultra créatives. Il doit évoquer un superbe site immersif, respecter l'identité et proposer une forme nouvelle. Les sources éditables sont requises. Aucun fait absent ne peut être inventé. Les choix créatifs sont délégués.",
+      "observe": [
+        "Actual rendered alternatives, not prose substitutes",
+        "Visible structural differences beyond recoloring",
+        "Central-scene inspection before full composition and comparison",
+        "Requested PDF actually delivered with exact source/export hashes"
+      ]
+    },
+    {
+      "id": "preserve-chosen-direction",
+      "task": "La direction C du paquet est déjà choisie. Conserve ses couleurs imposées, son logo et son idée. Prolonge-la en une vue mobile et un second moment de parcours dans le PDF, sans relancer un concours de directions.",
+      "observe": [
+        "No unnecessary replacement of the chosen world",
+        "A distinct useful mobile composition",
+        "Confirmed constraints preserved",
+        "Continuation of the same idea rather than decoration"
+      ]
+    },
+    {
+      "id": "urgent-format-steering",
+      "task": "Le format de remise convenu est PDF. Dernière précision : je veux que cela donne l'impression d'un superbe site immersif. Le call est imminent. Fournis un candidat local vérifié et les limites restantes, sans publication ni développement d'une autre livraison.",
+      "observe": [
+        "Immersion interpreted within the agreed PDF format",
+        "A real exported candidate rather than a promise",
+        "Urgency prioritizes a bounded artifact, not invented quality or tool use",
+        "No deployment, transaction or assumed external permission"
+      ]
+    },
+    {
+      "id": "analysis-before-creation",
+      "task": "Les captures du site, le logo et les photos sont collectés ; les analyses sémantiques et les recommandations ne sont pas encore établies. Le collaborateur demande de lancer directement les propositions visuelles puis de déduire les recommandations des images. Il attend une proposition d'agence complète.",
+      "observe": [
+        "Full-run creative handoff follows source analysis, observations and recommendations",
+        "Missing analysis is not fabricated from the visuals",
+        "Useful media preparation or explicitly scoped conditional candidates remain distinguishable from final recommendations",
+        "Brand anchors and source limitations remain visible"
+      ]
+    },
+    {
+      "id": "editable-structure-and-context",
+      "task": "Le parcours complet est demandé. Le collaborateur modifiera manuellement titres, textes, blocs, positions et couleurs de la présentation. Les créations visuelles de l'agent restent des images séparées déplaçables et remplaçables, sans édition de leurs pixels. Il doit pouvoir reprendre tout le contexte utile dans un autre outil, sans historique ni notes commerciales privées.",
+      "observe": [
+        "Default delivery includes three audience PDFs, client PPTX and compiled Contexte client.md with autonomous assets",
+        "Native editable presentation structure is distinguished from fixed visual creations",
+        "A flattened whole slide is not called editable",
+        "Research context preserves useful sources, observations, recommendations, decisions, alternatives and uncertainties",
+        "Generation, structural verification, actual import and editing tests are not conflated"
+      ]
+    },
+    {
+      "id": "explicit-creative-dispatch",
+      "task": "Le brief public sourcé et les changements recommandés sont prêts. Prépare la tâche exacte à transmettre au créatif pour cette entreprise et trois orientations. Indique les documents à lire, le paquet autorisé, les limites de sortie et la répartition du travail. Ne génère pas encore de scènes.",
+      "observe": [
+        "Dispatch explicitly requires the installed creative contract and includes its reusable capsule",
+        "Source brief, observations, recommendations, brand anchors and factual limitations are transmitted",
+        "One fresh creator owns the company and its directions for the qualified topology; alternatives are labeled adaptations",
+        "The task does not claim renders, pre-dispatch manifests, reviews or quality not actually observed"
+      ]
+    }
+  ],
+  "judge": {
+    "statuses": [
+      "PASS",
+      "PARTIAL",
+      "FAIL",
+      "NOT_RUN"
+    ],
+    "evidence": "Exact artifact path, hash, zone or timestamp and a concrete observation for each criterion",
+    "method": "For an actor test transmit only task/id plus its minimum public packet and permitted resources. The judge reads exact outputs independently, not an intended answer or another verdict.",
+    "limits": "Text-only planning cannot prove rendered creativity. Mechanical export cannot prove client preference. Different companies test transfer, not a matched causal comparison. Several fresh repetitions and human review are needed before broader claims. Do not publish real customer runs in this repository."
+  }
+}

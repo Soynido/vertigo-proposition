@@ -28,6 +28,8 @@ Les barèmes suivants sont **candidats**, sans calibration humaine. Ils structur
 
 ## Deux décisions distinctes
 
+Pour appliquer les critères de direction et de client, lire aussi le brief stratégique transmis. Localiser le lien observation sourcée → changement recommandé → transformation montrée, ainsi que les signes de marque préservés et les libertés utilisées. La créativité s'évalue dans cette continuité, pas seulement dans la finition d'une image. Une exploration créative seule ne prouve pas qu'une analyse complète ou une recommandation commerciale a été faite.
+
 Ces décisions existent à chaque étape, selon [ses cinq critères spécifiques](stage-quality.md) et les [81 contrôles par obligation](acceptance.md), puis sur les fichiers finaux. Une revue globale ne remplace pas les rapports des étapes.
 
 1. **Complétude** : énumérer chaque obligation applicable avec preuve et empreinte, issue, défaut et correction. Une obligation non prouvée ne disparaît pas dans une moyenne. Une exclusion exige une justification d'applicabilité.
@@ -38,5 +40,7 @@ Le gate client exige deux revues de contextes distincts sans historique auteur n
 ## Fichiers finaux
 
 Rendre puis lire toutes les pages de chacun des trois PDF exacts : récit, mission, mots, preuves, légendes, sources, liens, images, marges, coupures, débordements, nombre de pages, polices et séparation d'audience. Comparer aux sources éditables de la même révision ; inspecter le paquet distribuable, pas seulement l'écran de composition. Attacher les résultats aux empreintes. Après réexport, invalider et recontrôler les dépendants.
+
+Appliquer aussi [le contrat d'édition et de contexte](editable-delivery.md) : structure native du PPTX client, images indépendantes, toutes les diapositives rendues, essai d'édition/réexport à portée déclarée et reprise depuis `Contexte client.md` avec ses actifs. Vérifier commentaires, notes et métadonnées du paquet réel. Une source HTML éditable n'est pas un PPTX vérifié ; une belle capture n'est pas une structure modifiable. Aucun contrôle manquant ne disparaît dans le score.
 
 Le scan de confidentialité est un signal complémentaire, pas une preuve universelle d'absence de fuite. Droit de diffusion, responsable confirmé et accord de publication restent des champs séparés. Aucun « enregistré » sans effet relu ; aucun « consommé » déduit d'une simple écriture.

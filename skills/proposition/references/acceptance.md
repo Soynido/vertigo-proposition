@@ -7,7 +7,7 @@ Pour chaque obligation : identifiant, applicabilité motivée, état, observatio
 | ID | Obligation générique | Preuve minimale contrôlable |
 |---|---|---|
 | R01 | Entrée et périmètre | Run lié à l’URL, capacités/bindings utilisés et limite additive explicite ; aucun élargissement de mandat. |
-| R02 | Trois audiences et sources | Manifeste des trois PDF distincts, sources HTML/CSS et médias nécessaires, empreintes et audience de chaque fichier. |
+| R02 | Trois audiences et sources | Manifeste des trois PDF distincts, du PPTX client à structure modifiable, du contexte compilé et des sources/médias nécessaires ; empreintes et audience de chaque fichier. Une portée explicitement limitée n'est pas présentée comme une livraison complète. |
 | R03 | Limite client | Comptage des pages du PDF client exact comparé au paramètre actif ; l’édition ne compte pas les trois dossiers comme trois pages. |
 | R04 | Responsable confirmé | Identité/rôle de remise confirmé par source autorisée, distinct de l’acteur invocateur ; absence conservée comme blocage. |
 | R05 | Upstream réellement employés | Inventaire commits/licences/dépendances et reçus native/adapted/unavailable avec références lues, opérations et sorties. |
@@ -25,7 +25,7 @@ Pour chaque obligation : identifiant, applicabilité motivée, état, observatio
 | R17 | Ratio photographique | Placements et surfaces visibles par livrable, classifications et calcul du ratio actif ; incertitudes de mesure explicites. |
 | R18 | Sujet factuel fidèle | Comparaison des médias à leurs sujets/sources ; scène synthétique étiquetée, aucune représentation fabriquée annoncée authentique. |
 | R19 | Traçabilité des actifs | Registre de chaque actif : sujet, source, droit/usage, fichier, transformations et placements ; provenance et permission séparées. |
-| R20 | Options matérialisées | Visions réellement produites et comparables, choix argumenté, compromis et preuve visuelle ; une option décrite seulement reste non produite. |
+| R20 | Options matérialisées | Brief d'analyse transmis ; visions réellement rendues et inspectées avant comparaison, lien aux recommandations, signes préservés, choix ou alternatives et compromis datés ; une option décrite seulement reste non produite. |
 | R21 | Desktop et mobile utiles | Vues complètes et lisibles montrant des moments pertinents, composition mobile distincte et rôle de chaque vue dans la démonstration. |
 | R22 | Playbook de la mission | Dossier Sales où vendeur, acheteur, mission d’agence et décision sont explicites ; questions, preuves et objections propres au projet. |
 | R23 | Actions suivables | Chaque prochaine action a rôle, déclencheur, entrée/preuve, résultat attendu, trace de suivi et condition d’arrêt. |
@@ -62,7 +62,7 @@ Pour chaque obligation : identifiant, applicabilité motivée, état, observatio
 | R54 | Passation réutilisable | Paquet autonome de projet, dépendances et prochaine action ; aucun lancement d’implémentation ou déploiement déduit de sa remise. |
 | R55 | Local et métier séparés | Checkpoint local avec emplacement/empreintes et état de publication distinct ; aucune sauvegarde locale appelée enregistrement métier. |
 | R56 | Intention de la proposition | Lecture client seul : compréhension de l’expérience, transformation, mission de l’agence et décision, soutenue par les pages. |
-| R57 | PDF et sources autonomes | PDF lisibles et sources HTML/CSS/médias ouvrables ; essai d’édition/réexport ou limite explicitement non vérifiée. |
+| R57 | Exports et contexte autonomes | PDF lisibles, structure PPTX vérifiée élément par élément, créations visuelles comme images indépendantes, contexte compilé et actifs ouvrables ; essai d'édition/réexport avec outil et portée déclarés. Un contrôle requis absent reste non validé. |
 | R58 | Compteurs hors client | Inspection des pages, métadonnées, commentaires et paquet client : aucune télémétrie opérationnelle ou note d’exécution interne. |
 | R59 | Défauts non compensés | Chaque obligation et chaque réviseur conserve son verdict ; aucun oubli, fuite ou inconnu décisif masqué par une moyenne. |
 | R60 | Correction et recontrôle | Défaut→cause→modification localisée→dépendants invalidés→preuve nouvelle ; pas de PASS hérité d’un export précédent. |

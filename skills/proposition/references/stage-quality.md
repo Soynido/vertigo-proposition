@@ -11,13 +11,13 @@ Pour chacun des cinq critères : note, observation localisée, preuve et emprein
 | company.v1 | Offre/publics extraits des sources ; faits typés et traçables ; apports fournis conservés ; contraintes/capacités/responsable non inventés ; modèle exploitable avec inconnues visibles. |
 | analysis.specialists | Questions utiles à la décision ; preuves et portée des constats ; comparables choisis par rôle ; méthodes/capacités réellement reçues ; implications propres au cas et limites. |
 | company.v2 | Contradictions explicites ; arbitrages sourcés ou conditionnels ; manque actif et effet sur la décision ; dépendants mis à jour ; modèle cohérent utilisable pour le brief. |
-| brief.public | Enjeu/public/changement intelligibles ; idée et démonstration ; mission d’agence et décision ; preuve/contre-hypothèse/inconnu ; projection autorisée autonome et hachée. |
-| creative.direction | Spécificité factuelle client ; cohérence du monde ; fidélité/droits des médias ; visions distinctes prolongeant l’idée ; lecture/faisabilité desktop-mobile. |
+| brief.public | Enjeu/public/changement intelligibles depuis observations et recommandations ; idée et démonstration ; mission d’agence et décision ; preuve/contre-hypothèse/inconnu ; projection autorisée autonome et hachée. |
+| creative.direction | Spécificité factuelle et signes client préservés ; cohérence avec le brief d'analyse ; fidélité/droits des médias ; visions rendues et comparées prolongeant l’idée ; lecture/faisabilité desktop-mobile. |
 | client.composition | Offre/enjeu compris seul ; mission/décision explicites ; visuels qui démontrent ; hiérarchie et mots lisibles ; source éditable et séparation client. |
 | review.client | Contextes réellement isolés ; entrées identiques et empreintes ; obligations et qualité séparées ; observations/défauts localisés ; correction et décision sans moyenne entre réviseurs. |
 | internal.handoffs | Fidélité au projet final ; vente de la mission d’agence et actions suivables ; technique avec critères de reprise ; preuves/dépendances/certitudes ; séparation et limites privées. |
-| export.documents | Révision source commune ; trois projections réelles ; impression/ressources fidèles ; sources et actifs autonomes ; manifeste et empreintes exacts. |
-| verify.final | Toutes les pages exactes lues ; mots/affirmations/liens contrôlés ; géométrie et médias contrôlés ; confidentialité et identité vérifiées ; reçus/empreintes frais et limites. |
+| export.documents | Révision source commune ; trois projections réelles plus PPTX client et contexte compilé ; impression/ressources fidèles ; sources et actifs autonomes ; manifeste et empreintes exacts. |
+| verify.final | Toutes les pages et diapositives exactes lues ; mots/affirmations/liens contrôlés ; géométrie, médias et édition structurelle contrôlés ; confidentialité, identité et contexte vérifiés ; reçus/empreintes frais et limites. |
 | publication.approved | Plan exact et destinations ; accord acteur/hash courant ; connecteur et portée autorisés ; déduplication/incertitude maîtrisées ; effet relu avec états séparés. |
 
 Le seuil de chaque étape est 9/10 sans défaut bloquant, avec toutes ses obligations obligatoires applicables prouvées. Pas de moyenne entre étapes ou réviseurs. Une case Rxx non prouvée bloque même si le rapport d’étape obtient une bonne note. Les [81 preuves minimales](acceptance.md) rendent le contrôle par case explicite.
