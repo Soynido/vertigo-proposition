@@ -105,8 +105,10 @@ def parser():
     sub.add_parser('doctor')
     s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path)
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
-    for command in ('validate', 'receipt', 'workbench'):
+    for command in ('validate', 'receipt', 'workbench', 'next-stage', 'check-experience'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path)
+        if command == 'check-experience':
+            s.add_argument('--stage', choices=['creative.direction','client.composition','export.documents','verify.final'], default='creative.direction')
     s = sub.add_parser('measure'); s.add_argument('run_dir', type=Path); s.add_argument('--quota-remaining-percent', type=float); s.add_argument('--quota-source')
     for command in ('source', 'fact', 'plan'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path); s.add_argument('json_file', type=Path)
@@ -117,7 +119,7 @@ def parser():
     s = sub.add_parser('packet'); s.add_argument('run_dir', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--files', required=True, nargs='+')
     s = sub.add_parser('context-packet'); s.add_argument('run_dir', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--files', required=True, nargs='+')
     s = sub.add_parser('export'); s.add_argument('source', type=Path); s.add_argument('output', type=Path); s.add_argument('--audience', choices=['client','sales','technical'], default='client')
-    s = sub.add_parser('inspect'); s.add_argument('pdf', type=Path); s.add_argument('--output', type=Path, required=True); s.add_argument('--audience', choices=['client','sales','technical'], default='client')
+    s = sub.add_parser('inspect'); s.add_argument('pdf', type=Path); s.add_argument('--output', type=Path, required=True); s.add_argument('--audience', choices=['client','sales','technical'], default='client'); s.add_argument('--max-pages', type=int)
     s = sub.add_parser('approve'); s.add_argument('run_dir', type=Path); s.add_argument('--plan-hash', required=True); s.add_argument('--actor', required=True); s.add_argument('--evidence', type=Path, required=True)
     s = sub.add_parser('publish'); s.add_argument('run_dir', type=Path); s.add_argument('--adapter', choices=['fixture'], required=True)
     s = sub.add_parser('upstream'); s.add_argument('operation', choices=['status','fetch']); s.add_argument('--family'); s.add_argument('--cache', type=Path)
@@ -139,6 +141,11 @@ def execute(a):
         return assess_placements(data['placements'], data['pages'])
     if c == 'init': return state.init_run(a.url, a.runs_root, read_json(a.profile) if a.profile else None)
     if c == 'validate': return state.validate_run(a.run_dir)
+    if c == 'next-stage': return state.next_stage(a.run_dir)
+    if c == 'check-experience':
+        from .experience import inspect_experience
+        state.invalidate_changed(a.run_dir)
+        return inspect_experience(state.load_run(a.run_dir), a.stage)
     if c == 'measure': return measure(a.run_dir, quota=a.quota_remaining_percent, source=a.quota_source)
     if c == 'workbench': return workbench(a.run_dir)
     if c == 'source':
@@ -160,7 +167,7 @@ def execute(a):
         return collect(a.url, a.output, allow_local=a.allow_local_fixture, max_pages=a.max_pages)
     if c in ('export','inspect'):
         from .artifacts import export_pdf, inspect_pdf
-        return export_pdf(a.source,a.output,audience=a.audience) if c == 'export' else inspect_pdf(a.pdf,a.output,audience=a.audience)
+        return export_pdf(a.source,a.output,audience=a.audience) if c == 'export' else inspect_pdf(a.pdf,a.output,audience=a.audience,max_pages=a.max_pages)
     if c in ('plan','approve','publish'):
         from .publication import prepare_plan, approve_plan, publish_plan, FixtureAdapter
         if c == 'plan': return prepare_plan(a.run_dir, read_json(a.json_file))

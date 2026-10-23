@@ -36,3 +36,7 @@ L'export imprime une source passive et ses ressources locales ; il n'autorise pa
 `layout MANIFEST_JSON` calcule les surfaces à partir de rectangles de placement déclarés (`pages`, `placements` avec `page`, `kind`, `rect`, `source_id`). Sa portée est géométrique : les masques complexes et chevauchements restent bloqués tant que leur surface visible n'est pas établie ; la qualité, les droits et la fidélité ne sont pas déduits du ratio.
 
 La revue d'étape fournit cinq notes explicites, un rôle de réviseur, ses preuves et un reçu d'indépendance lié au même run et au même passage. Les critères/ancres sont dans `data/stages.json` embarqué. `stage-report` calcule l'état à partir des obligations et de cette revue ; il ne génère pas une note à la place du réviseur. Les deux revues globales finales restent requises en plus des treize rapports d'étape.
+
+## Progression et portée
+
+`next-stage RUN_DIR` indique le premier passage applicable non validé. `check-experience RUN_DIR` vérifie la chaîne de preuves créative ; `--stage client.composition` inclut la carte de récit et les pages du PDF. Lire [les champs attendus](experience-evidence.md) avant de créer les artefacts. `inspect --help` expose `--max-pages` pour une limite explicitement demandée ; aucune limite par défaut. Ces contrôles ne produisent pas une note esthétique.

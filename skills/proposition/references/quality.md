@@ -39,8 +39,14 @@ Le gate client exige deux revues de contextes distincts sans historique auteur n
 
 ## Fichiers finaux
 
-Rendre puis lire toutes les pages de chacun des trois PDF exacts : récit, mission, mots, preuves, légendes, sources, liens, images, marges, coupures, débordements, nombre de pages, polices et séparation d'audience. Comparer aux sources éditables de la même révision ; inspecter le paquet distribuable, pas seulement l'écran de composition. Attacher les résultats aux empreintes. Après réexport, invalider et recontrôler les dépendants.
+Rendre puis lire toutes les pages de chacun des PDF exacts inclus dans la portée : récit, mission, mots, preuves, légendes, sources, liens, images, marges, coupures, débordements, nombre de pages, polices et séparation d'audience. Comparer aux sources éditables de la même révision ; inspecter le paquet distribuable, pas seulement l'écran de composition. Attacher les résultats aux empreintes. Après réexport, invalider et recontrôler les dépendants.
 
 Appliquer aussi [le contrat d'édition et de contexte](editable-delivery.md) : structure native du PPTX client, images indépendantes, toutes les diapositives rendues, essai d'édition/réexport à portée déclarée et reprise depuis `Contexte client.md` avec ses actifs. Vérifier commentaires, notes et métadonnées du paquet réel. Une source HTML éditable n'est pas un PPTX vérifié ; une belle capture n'est pas une structure modifiable. Aucun contrôle manquant ne disparaît dans le score.
 
 Le scan de confidentialité est un signal complémentaire, pas une preuve universelle d'absence de fuite. Droit de diffusion, responsable confirmé et accord de publication restent des champs séparés. Aucun « enregistré » sans effet relu ; aucun « consommé » déduit d'une simple écriture.
+
+## Progression créative et critères non compensables
+
+Appliquer [les preuves de progression](experience-evidence.md) et les critères `required_full_scores` du registre : ils exigent chacun 2/2. Un total de 9 ne compense pas un système créatif partiel ou une faiblesse majeure de démonstration, langage ou spécificité. Le contrôle des fichiers ne mesure pas l’émotion : inspecter les scènes, leur rythme et le moment singulier. Une belle couverture seule ne qualifie pas une direction. Les mesures déclarées de lisibilité doivent être confrontées aux styles et aux images réelles.
+
+Le mode `parameters.delivery_scope: client` exclut les dossiers internes de la validation applicable ; il ne dispense d’aucune analyse ni revue client. `next-stage` utilise les enregistrements du run, pas les notes annexes. Aucun plafond implicite de pages ; seule une limite explicite s’applique.

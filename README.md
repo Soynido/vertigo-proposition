@@ -52,7 +52,7 @@ La collecte automatique travaille par lots bornés, conserve les omissions et le
 
 | Audience | Contenu |
 |---|---|
-| Client | Une histoire visuelle, une opportunité prouvée, une transformation montrée, la mission proposée et une prochaine décision. Cinq pages au plus, sans montant ni notes internes. |
+| Client | Une histoire visuelle, une opportunité prouvée, une transformation montrée, la mission proposée et une prochaine décision. Nombre de pages adapté au récit, sans montant ni notes internes. |
 | Commercial interne | Comment vendre **la mission d'agence au prospect** : preuves, qualification, objections, actions, relances conditionnelles et arrêts. |
 | Technique interne | Sources, routes, contenus, actifs, contraintes, intégrations observées ou inconnues, risques et acceptation. Transmission réutilisable, sans lancement de développement. |
 
@@ -102,3 +102,9 @@ Le moteur n'expose pas les tokens restants du compte Codex : il affiche « non d
 Le dépôt fonctionne sans clé API IA propre : il utilise l'agent et les outils de l'hôte. Les informations Sales/META, calendrier, mails, règles commerciales et destinations Notion passent par un adaptateur privé autorisé. Il n'est pas distribué ici.
 
 La publication fournie par le moteur est **un test dans un fichier local**, jamais un appel Notion. Une intégration réelle doit respecter le contrat décrit dans [les capacités](docs/capabilities.md), puis être qualifiée dans son environnement. Le plan exact doit être approuvé avant écriture ; après un résultat incertain, rechercher et relire avant de répéter. Aucun email ni déploiement n'est implicitement autorisé.
+
+### Une progression créative, pas seulement une couverture
+
+Le [contrat créatif](skills/proposition-creative/references/creative-contract.md) demande une entrée, une révélation propre au client et une action, réellement rendues, ainsi qu’une composition mobile autonome. Le [contrôle de leurs preuves](skills/proposition/references/experience-evidence.md) complète la conservation des créations ; il ne prétend pas mesurer automatiquement leur beauté. Les quatre méthodes publiques doivent parvenir au créateur. Les critères critiques ne sont pas compensables par la moyenne. Aucun plafond implicite de pages.
+
+Une demande client seule utilise `parameters.delivery_scope: client` : PDF/PPTX client, sans dossiers internes, avec les mêmes contrôles client. Le parcours URL seul reste complet.

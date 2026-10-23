@@ -25,3 +25,9 @@ Le seuil de chaque étape est 9/10 sans défaut bloquant, avec toutes ses obliga
 Une étape non exécutée est `NOT_RUN`, une capacité indispensable absente `BLOCKED`, une observation qui échoue `FAIL`, une validation invalidée par modification `STALE`. `NOT_APPLICABLE` demande une condition et une justification de portée, pas un moyen de contourner une case difficile.
 
 Le barème reste **candidat sans calibration humaine**. Un jugement par agent peut être utile et reproductible dans son protocole ; il n’est pas le retour d’une personne réelle ni une qualité garantie.
+
+## Progression créative et critères non compensables
+
+Appliquer [les preuves de progression](experience-evidence.md) et les critères `required_full_scores` du registre : ils exigent chacun 2/2. Un total de 9 ne compense pas un système créatif partiel ou une faiblesse majeure de démonstration, langage ou spécificité. Le contrôle des fichiers ne mesure pas l’émotion : inspecter les scènes, leur rythme et le moment singulier. Une belle couverture seule ne qualifie pas une direction. Les mesures déclarées de lisibilité doivent être confrontées aux styles et aux images réelles.
+
+Le mode `parameters.delivery_scope: client` exclut les dossiers internes de la validation applicable ; il ne dispense d’aucune analyse ni revue client. `next-stage` utilise les enregistrements du run, pas les notes annexes. Aucun plafond implicite de pages ; seule une limite explicite s’applique.

@@ -556,14 +556,14 @@
         },
         {
           "id": "system",
-          "observable": "The concept governs imagery, language, type, scale and sequence beyond the opening",
+          "observable": "A rendered opening, client-specific reveal and usable action form a coherent progression, with a separate readable mobile composition",
           "evidence": [
             "full-direction-board"
           ],
           "anchors": {
-            "0": "Missing, misleading or contradicted evidence for: The concept governs imagery, language, type, scale and sequence beyond the opening",
-            "1": "Partially demonstrated, with a material unresolved weakness: The concept governs imagery, language, type, scale and sequence beyond the opening",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: The concept governs imagery, language, type, scale and sequence beyond the opening"
+            "0": "Hero only, absent mobile or no client-specific reveal",
+            "1": "Progression exists but a reveal, action, method application or mobile readability is materially weak",
+            "2": "All narrative moments and mobile are inspected at useful size; signature is client-specific, actions preserved and four methods applied with references"
           }
         },
         {
@@ -594,7 +594,11 @@
           "NOT_APPLICABLE"
         ],
         "independence_receipt": true,
-        "rubric_status": "candidate-not-human-calibrated"
+        "rubric_status": "candidate-not-human-calibrated",
+        "required_full_scores": [
+          "specificity",
+          "system"
+        ]
       }
     },
     {
@@ -677,7 +681,11 @@
           "NOT_APPLICABLE"
         ],
         "independence_receipt": true,
-        "rubric_status": "candidate-not-human-calibrated"
+        "rubric_status": "candidate-not-human-calibrated",
+        "required_full_scores": [
+          "demonstration",
+          "language"
+        ]
       }
     },
     {
@@ -760,7 +768,12 @@
           "NOT_APPLICABLE"
         ],
         "independence_receipt": true,
-        "rubric_status": "candidate-not-human-calibrated"
+        "rubric_status": "candidate-not-human-calibrated",
+        "required_full_scores": [
+          "narrative",
+          "visual",
+          "specificity"
+        ]
       }
     },
     {

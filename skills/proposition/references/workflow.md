@@ -28,3 +28,5 @@ Après la création, figer les scènes retenues avant montage selon [le contrôl
 Un seul propriétaire compose la source canonique. La correction suit le défaut : wording local → édition ; idée faible → brief ; incohérence de DA → direction ; source modifiée → invalidation des dépendants. Une boucle sans amélioration conserve un checkpoint et explique le blocage. Elle ne baisse pas le seuil.
 
 Références de méthode : [collecte et récit modulaires](https://github.com/ilexlyu/ad-proposal-skills), [contexte marketing](https://github.com/coreyhaines31/marketingskills/tree/main/skills/product-marketing). Les versions réellement chargées sont celles du reçu upstream, pas implicitement ces branches mobiles.
+
+Avant chaque passage, utiliser `next-stage RUN_DIR`. Le [contrat de preuves de progression](experience-evidence.md) relie brief, quatre méthodes réellement transmises, scènes rendues, actions conservées et carte client aux gates existants. Aucun pipeline parallèle : une faiblesse locale revient au passage responsable. En mode client seul, les dossiers internes sont exclus explicitement, jamais marqués comme réalisés.

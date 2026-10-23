@@ -132,15 +132,17 @@ def export_pdf(source: Path, output: Path, *, audience: str = "client") -> dict:
     return {"path": str(output), "sha256": sha256(output), "source_sha256": sha256(source), "page_count": len(PdfReader(output).pages), "audience": audience, "scope": "export_only"}
 
 
-def inspect_pdf(pdf: Path, output_dir: Path, *, audience: str = "client") -> dict:
+def inspect_pdf(pdf: Path, output_dir: Path, *, audience: str = "client", max_pages: int | None = None) -> dict:
     from pypdf import PdfReader
     import pypdfium2 as pdfium
     pdf, output_dir = Path(pdf).resolve(), Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     reader = PdfReader(pdf)
     issues, pages, texts = [], [], []
-    if audience == "client" and len(reader.pages) > 5:
-        issues.append({"code": "client_page_limit", "detail": "Client document exceeds five pages"})
+    if max_pages is not None and (type(max_pages) is not int or max_pages < 1):
+        raise ValueError("max_pages must be a positive integer or None")
+    if audience == "client" and max_pages is not None and len(reader.pages) > max_pages:
+        issues.append({"code": "client_page_limit", "detail": f"Client document exceeds the configured {max_pages} pages"})
     if not reader.pages:
         issues.append({"code": "empty_document"})
     # Actions may be attached to pages, annotations or chained dictionaries,
