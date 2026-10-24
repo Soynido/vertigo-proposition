@@ -78,6 +78,8 @@ Enregistrer `client-story.json` avec l’ID `client-story` :
 - `observation_decisions` : `{id, page, reason}` pour chaque observation des inputs. Une retenue a une page réelle ; une exclusion conserve sa raison. Corriger sélection ou montage si la donnée existe, plutôt que relancer un crawl.
 - `next_step` : `{decision, followup}` intelligibles et concrets. Responsable, adresse et modalité ne sont jamais inventés ; un manque décisif demeure visible dans le contrôle.
 
+Le JSON vérifie les liens ; la carte éditoriale `client-story-map` suit [le contrat de montage](../../proposition-story/references/argument.md) et démontre sur les pages exactes la chaîne preuve → changement visible → bénéfice envisagé → mission → décision. Les scènes du site ne dictent pas le plan du deck. Les variantes restent identifiées ; les compléments conservés vont en annexe à la taille requise par le verrou, pas en simples miniatures.
+
 L’univers peut se montrer par moodboard, matières ou scènes développées. La valeur d’agence explique pourquoi le changement justifie Vertigo ; la mission ne dit pas seulement « faire un beau site ». Le prochain échange indique comment poursuivre.
 
 Conserver le rapport `client-copy-review`, avec méthode Stop Slop réellement lue et relecture du sens en français : action/objet, conséquence, preuve/condition. Garder le relevé de surfaces, la comparaison PDF/PPTX et l’essai d’édition dans leurs preuves existantes. Une fonction déclarée dans ce JSON ne prouve pas sa qualité dans la slide.

@@ -12,7 +12,7 @@ Une URL ouvre la recherche, pas une demande obligatoire de brief. Le brief est u
 | company.v2 | Contradictions réconciliées et questions ciblées encore ouvertes | proposition-strategy |
 | brief.public | Sources analysées, observations, changements recommandés, objectifs, codes à préserver, idée, démonstration, mission et décision ; projection autorisée hachée | proposition-strategy |
 | creative.direction | Contrat créatif ; mondes rendus depuis ce brief, comparaison, continuité de marque et lien aux recommandations | proposition-creative + proposition-story |
-| client.composition | Source HTML/CSS et médias locaux ; board, desktop/mobile, comparaison réellement exploités | proposition-composition |
+| client.composition | Récit depuis les preuves ; carte éditoriale, scènes utiles et mission concrète ; source HTML/CSS et médias locaux | proposition-composition |
 | review.client | Revues distinctes sur la même révision et défauts localisés | proposition-quality |
 | internal.handoffs | Playbook de vente de la mission d'agence ; transmission de sa réalisation | proposition-sales + proposition-technical |
 | export.documents | Trois PDF, PowerPoint client à structure modifiable, contexte compilé, sources, médias utiles, email local et manifeste | proposition-composition |
@@ -25,7 +25,9 @@ La passation reste sources → analyse → observations/recommandations → brie
 
 Après la création, figer les scènes retenues avant montage selon [le contrôle de préservation](../../proposition-composition/references/preservation.md). La sélection est requise au gate créatif ; la présence et la fidélité dans les PDF/PPTX exacts bloquent les gates de composition/export et le verdict global si elles ne sont pas démontrées. Ce contrôle ne remplace ni la revue visuelle ni les notes.
 
-Un seul propriétaire compose la source canonique. La correction suit le défaut : wording local → édition ; idée faible → brief ; incohérence de DA → direction ; source modifiée → invalidation des dépendants. Une boucle sans amélioration conserve un checkpoint et explique le blocage. Elle ne baisse pas le seuil.
+Un seul propriétaire compose la source canonique selon [le contrat de montage](../../proposition-story/references/argument.md) : la carte des pages suit l’argument, pas l’inventaire des scènes. Les états du site ne sont pas des pages imposées du deck ; les compléments retenus restent préservés en annexes lisibles. La portée client seule limite les fichiers remis, pas la prestation à vendre.
+
+La correction suit le défaut : wording local → édition ; idée faible → brief ; incohérence de DA → direction ; source modifiée → invalidation des dépendants. Une boucle sans amélioration conserve un checkpoint et explique le blocage. Elle ne baisse pas le seuil.
 
 Références de méthode : [collecte et récit modulaires](https://github.com/ilexlyu/ad-proposal-skills), [contexte marketing](https://github.com/coreyhaines31/marketingskills/tree/main/skills/product-marketing). Les versions réellement chargées sont celles du reçu upstream, pas implicitement ces branches mobiles.
 

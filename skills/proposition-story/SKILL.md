@@ -6,14 +6,12 @@ license: MIT
 
 # Raconter la mission proposée
 
-Recevoir brief public, direction, preuves et contraintes. Lire [le contrat d'argument](references/argument.md). Le client doit comprendre la proposition en lisant seul le document.
+Recevoir brief public, observations et créations inspectées. Lire [le contrat de montage](references/argument.md). La proposition doit permettre au client de comprendre seul pourquoi faire évoluer son expérience et pourquoi confier ce travail à Vertigo.
 
-Construire la chaîne : compréhension du client → difficulté observée → transformation proposée → démonstration → **mission de l'agence et livrables** → **décision demandée**. Distinguer la mission que l'agence vend des produits que le prospect vend à ses clients.
+Construire le récit depuis les preuves : identité et acquis reconnus → opportunité précise → changement montré → conséquence concrète pour le visiteur → mission de l'agence → décision suivante. Le travail de Vertigo et l'offre vendue par le prospect sont deux choses distinctes. Le périmètre de fichiers demandés ne change pas la mission proposée.
 
-Déterminer l'ordre et le nombre de pages selon l'argument, sans plafond implicite de pages. Une page reçoit un message décisif, sa preuve ou démonstration, son rôle dans la décision et sa transition. Board, desktop/mobile et comparaison servent ce récit ; ils ne fixent pas chacun une page obligatoire.
+Préparer la carte `client-story-map` avant composition : chaque page a un titre-conclusion, une idée décisive, une preuve et sa limite, un visuel précis, le bénéfice envisagé, l'apport de Vertigo et la transition. Regrouper les répétitions ; réserver le récit aux scènes qui font comprendre l'évolution et conserver les autres selon le contrat de préservation. Une exploration seule ne devient pas une proposition complète.
 
-Écrire dans les mots du client, avec bénéfices concrets et conditionnels si la preuve manque. Employer le mode adapté : rédiger depuis les faits, restaurer une voix existante ou corriger le seul élément demandé. Garder les formulations réussies. Remplacer une promesse sans preuve par l'alternative soutenable et indiquer la donnée qui permettrait d'aller plus loin.
+## Sortie et relecture
 
-## Sortie
-
-Fil argumentaire, message central, mission/livrables/limites, décision, carte des pages adaptée, notes de preuve et transitions, wording client prêt à composer. Relire seulement les titres, puis le texte : une direction doit pouvoir reformuler ce qu'elle achèterait et pourquoi. Aucun montant ou élément interne dans le client.
+Fil argumentaire, mission/livrables/limites, décision, carte des pages et wording prêt à composer. Lire les titres seuls puis le texte : le lecteur peut reformuler ce qu'il achèterait, ce que cela changerait et ce qu'il doit décider. Relire avec Stop Slop et vérifier le sens en français. Les légendes parlent d'actions et de conséquences utiles, pas de fabrication graphique. Préserver une voix réussie ; conditionner les bénéfices non mesurés. Aucun prix ni élément interne dans le client.

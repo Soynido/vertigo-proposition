@@ -32,6 +32,8 @@ Le verrou est à écriture unique. Ne pas le supprimer ni réécrire les métado
 
 ## 2. Relier les scènes aux deux exports
 
+Le récit principal sélectionne les scènes utiles à son argument ; les autres créations retenues restent dans une annexe lisible des mêmes PDF/PPTX. Ce rangement ne retire aucune création du verrou : chaque placement respecte sa fraction de page et son recadrage déjà figés. Donner plusieurs pages à une annexe si nécessaire ; un index miniature est facultatif, jamais la preuve de conservation à lui seul. Un extrait explicatif supplémentaire ne remplace pas la vue complète requise. Les seuils ne sont ni abaissés ni réinterprétés après montage pour faire passer un format.
+
 Composer depuis les fichiers figés, comme images indépendantes. Ne pas les redessiner, aplatir toute la slide, remplacer un mobile par un schéma ou réencoder les fichiers retenus. Garder les textes et la structure du deck natifs éditables autour des visuels.
 
 Pour le gate de composition, produire les deux exports client candidats depuis la source stabilisée. Le passage `export.documents` reprend ces mêmes octets s’ils sont inchangés, sinon il recontrôle les nouveaux exports ; les dossiers internes n’ont pas besoin d’être produits prématurément.

@@ -13,7 +13,7 @@ Pour chacun des cinq critères : note, observation localisée, preuve et emprein
 | company.v2 | Contradictions explicites ; arbitrages sourcés ou conditionnels ; manque actif et effet sur la décision ; dépendants mis à jour ; modèle cohérent utilisable pour le brief. |
 | brief.public | Enjeu/public/changement intelligibles depuis observations et recommandations ; idée et démonstration ; mission d’agence et décision ; preuve/contre-hypothèse/inconnu ; projection autorisée autonome et hachée. |
 | creative.direction | Spécificité factuelle et signes client préservés ; cohérence avec le brief d'analyse ; fidélité/droits des médias ; visions rendues et comparées prolongeant l’idée ; lecture/faisabilité desktop-mobile. |
-| client.composition | Offre/enjeu compris seul ; mission/décision explicites ; visuels qui démontrent ; hiérarchie et mots lisibles ; source éditable et séparation client. |
+| client.composition | Histoire preuve → changement visible → bénéfice → mission → décision ; mots concrets ; équilibre utile mesuré ; desktop/mobile lisibles dans le deck ; séparation client. |
 | review.client | Contextes réellement isolés ; entrées identiques et empreintes ; obligations et qualité séparées ; observations/défauts localisés ; correction et décision sans moyenne entre réviseurs. |
 | internal.handoffs | Fidélité au projet final ; vente de la mission d’agence et actions suivables ; technique avec critères de reprise ; preuves/dépendances/certitudes ; séparation et limites privées. |
 | export.documents | Révision source commune ; trois projections réelles plus PPTX client et contexte compilé ; impression/ressources fidèles ; sources et actifs autonomes ; manifeste et empreintes exacts. |

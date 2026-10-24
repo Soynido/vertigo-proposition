@@ -607,14 +607,14 @@
       "criteria": [
         {
           "id": "story",
-          "observable": "The client narrative stays within the configured page limit and resolves its opening intent",
+          "observable": "The client can follow a sourced opportunity through a visible change, concrete visitor value, the proposed agency mission and the next decision; page count follows the argument",
           "evidence": [
             "client-story-map"
           ],
           "anchors": {
-            "0": "Missing, misleading or contradicted evidence for: The client narrative stays within the configured page limit and resolves its opening intent",
-            "1": "Partially demonstrated, with a material unresolved weakness: The client narrative stays within the configured page limit and resolves its opening intent",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: The client narrative stays within the configured page limit and resolves its opening intent"
+            "0": "Catalogue, unsupported problem, absent agency mission or no next decision; the reader cannot explain the proposed change",
+            "1": "The functions exist, but the proof-to-change-to-value chain is implicit, repeated scene states drive the deck, or the mission is reduced to mockups without a scoped reason",
+            "2": "Exact pages connect a dated observation, proposed scene, credible visitor benefit, scoped agency realization and concrete next decision; titles alone form the story and secondary retained scenes remain preserved"
           }
         },
         {
@@ -624,9 +624,9 @@
             "client-copy-review"
           ],
           "anchors": {
-            "0": "Missing, misleading or contradicted evidence for: Every statement is understandable in context and preserves the client voice",
-            "1": "Partially demonstrated, with a material unresolved weakness: Every statement is understandable in context and preserves the client voice",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: Every statement is understandable in context and preserves the client voice"
+            "0": "Jargon, misleading claim or unnatural wording prevents understanding",
+            "1": "Readable but generic or literal captions describe graphics instead of useful actions and consequences, or a decisive benefit lacks its condition",
+            "2": "Natural client-specific French names concrete actions and credible consequences; titles advance the argument and Stop Slop plus meaning review are evidenced"
           }
         },
         {
@@ -648,9 +648,9 @@
             "desktop-mobile-compositions"
           ],
           "anchors": {
-            "0": "Missing, misleading or contradicted evidence for: Desktop moments and a distinct mobile composition show useful proposed behavior",
-            "1": "Partially demonstrated, with a material unresolved weakness: Desktop moments and a distinct mobile composition show useful proposed behavior",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: Desktop moments and a distinct mobile composition show useful proposed behavior"
+            "0": "Decisive scene absent, unreadable or disconnected from the recommendation",
+            "1": "Scenes exist but are too small in the final deck, repeat without advancing understanding or replace the evidence-to-benefit demonstration",
+            "2": "Desktop and mobile at useful size show what changes for the visitor; explicit excerpts and preserved complete views agree, directions remain identifiable and the deck composition serves this client"
           }
         },
         {
@@ -683,6 +683,7 @@
         "independence_receipt": true,
         "rubric_status": "candidate-not-human-calibrated",
         "required_full_scores": [
+          "story",
           "demonstration",
           "language"
         ]

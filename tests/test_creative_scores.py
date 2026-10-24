@@ -23,3 +23,17 @@ class CreativeScoreTests(unittest.TestCase):
         run=self.complete_run()
         self.stage_review(run,'review.client',scores=[2,1,2,2,2])
         self.assertEqual(state.stage_report(run['root'],'review.client')['status'],'BLOCKED')
+
+    def test_nine_with_partial_client_story_still_blocks(self):
+        run=self.complete_run()
+        self.stage_review(run,'client.composition',scores=[1,2,2,2,2])
+        report=state.stage_report(run['root'],'client.composition')
+        self.assertEqual(report['score'],9)
+        self.assertEqual(report['status'],'BLOCKED')
+        self.assertIn('stage_critical_score',{x['code'] for x in report['issues']})
+
+    def test_complete_client_story_does_not_trigger_critical_score_issue(self):
+        run=self.complete_run()
+        self.stage_review(run,'client.composition',scores=[2,2,2,2,2])
+        report=state.stage_report(run['root'],'client.composition')
+        self.assertNotIn('stage_critical_score',{x['code'] for x in report['issues']})

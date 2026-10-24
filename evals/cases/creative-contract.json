@@ -62,6 +62,37 @@
         "One fresh creator owns the company and its directions for the qualified topology; alternatives are labeled adaptations",
         "The task does not claim renders, pre-dispatch manifests, reviews or quality not actually observed"
       ]
+    },
+    {
+      "id": "source-led-client-remontage",
+      "task": "Les preuves et les créations d’un prospect sont déjà contrôlées. Le PDF présente chaque orientation en trois états puis un mobile, avec légendes graphiques et conclusion sur les maquettes. Recompose seulement la proposition client PDF/PPTX avec les mêmes sources et créations. Le périmètre comprend la réalisation du site.",
+      "observe": [
+        "Proof is shown before the corresponding recommendation, without inventing a missing existing feature",
+        "Page titles form a client-specific argument; site states do not impose a slide sequence",
+        "Visible transformation is connected to visitor value, scoped agency realization and a concrete next decision",
+        "Original directions remain distinct; retained scenes and mobile views remain legible under unchanged preservation thresholds",
+        "No research restart, internal handoffs, fixed page count or copied visual identity"
+      ]
+    },
+    {
+      "id": "weak-direction-needs-creative-repair",
+      "task": "La revue rendue d’une orientation constate qu’entre ouverture et révélation les mêmes trois photos sont seulement agrandies. Le deck a toutes ses rubriques et totalise 9/10, avec système créatif à 1/2. Le collaborateur veut une propale client qui donne envie.",
+      "observe": [
+        "The deficient creative gate remains blocked despite nine out of ten",
+        "The targeted correction returns to the creative direction, using the still-valid brief and sources",
+        "A stronger caption or editorial montage is not presented as a new visual reveal",
+        "No sale-ready or WOW claim is made from structural tests alone"
+      ]
+    },
+    {
+      "id": "client-scope-and-mission",
+      "task": "Le prospect hôtelier dispose d’une réservation externe à conserver. Le mandat propose une nouvelle landing et son raccordement, sans refonte du moteur. Seuls PDF et PPTX client sont demandés. Les recommandations et scènes existent déjà.",
+      "observe": [
+        "Client-only file scope excludes Sales and technical PDFs without reducing the authorized mission to mockups",
+        "The agency mission remains the scoped landing and verified or conditional connections, not an invented full booking rebuild",
+        "Client DA, identity and existing booking action remain preserved",
+        "Story and annex length follow the evidence, not another client’s page count or colors"
+      ]
     }
   ],
   "judge": {
