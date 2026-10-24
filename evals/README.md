@@ -11,3 +11,9 @@ Pour un essai aveugle, transmettre uniquement le paquet et les champs `id`/`task
 Le juge vérifie les choix et livrables, pas la présence de mots. `PASS` signifie critère satisfait dans la réponse, `PARTIAL` signifie réponse utile mais preuve ou partie manquante, `FAIL` signifie comportement contraire/omission décisive. `NOT_RUN` n'est pas un échec comportemental. Les cas textuels ne prouvent pas l'utilisation du navigateur, la qualité graphique ou l'export réel d'un PDF.
 
 Les barèmes d'évaluation métier restent candidats sans calibration humaine. Voir `docs/qualification.md` pour le protocole et ses limites.
+
+## Contrat créatif
+
+`cases/creative-contract.json` décrit six situations : mondes réellement distincts en PDF, prolongement d'une direction déjà choisie, précision « immersif » sous pression de remise, analyse avant création, livraison éditable avec contexte compilé et dispatch explicite du contrat. Transmettre seulement `id`/`task` au créatif avec son paquet public ; les champs `observe` et `judge` servent à la revue indépendante. Le [contrat](../skills/proposition-creative/references/creative-contract.md) est la guidance de la variante guidée, pas un résultat de test.
+
+Conserver rendus, chronologie scène→inspection→comparaison→composition, fichiers exacts et observations hors checkout pour les clients réels. Les secteurs doivent varier sans recycler une identité. Une génération réussie ne garantit ni un effet WOW reproductible, ni une hausse de performance ; la conformité au protocole et la qualité esthétique sont deux jugements distincts.

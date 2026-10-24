@@ -6,16 +6,20 @@ license: MIT
 
 # Composer et exporter une révision
 
-Recevoir brief public, histoire, direction et actifs utilisables. Lire [le contrat de composition](references/composition.md). Un seul propriétaire maintient la source HTML/CSS canonique et les médias locaux.
+Recevoir brief public, observations, créations inspectées et histoire. Lire [le contrat de montage](../proposition-story/references/argument.md) puis [la composition](references/composition.md). Un propriétaire maintient la source HTML/CSS canonique et les médias locaux.
 
-Composer d'abord une page centrale à taille finale. Comparer son rendu à l'intention : lisibilité de la mission, poids des preuves, image réelle et cohérence de direction. Corriger cette page avant de décliner tout le document. Le nombre de pages suit l'histoire, avec cinq pages client au plus.
+## Composer depuis l'argument
 
-Exploiter réellement board, vues desktop/mobile et comparaison pour expliquer les décisions. Viser environ 70 % de surface visuelle utile, avec des textes natifs éditables. Si Sites est disponible et autorisé, tracer son rôle d'atelier ; sinon continuer localement sans prétendre l'avoir utilisé.
+Préparer `client-story-map` : titres-conclusions, preuves, scènes, bénéfices envisagés, travail de Vertigo et transitions. Le récit conduit de l'identité reconnue à une opportunité étayée, sa réponse visible, la mission et la prochaine décision. Choisir nombre de pages, cadrages et rythme selon cette marque. Les moments ouverture/révélation/action qualifient la création du site ; ils ne deviennent pas trois slides obligatoires par piste.
 
-Après stabilisation, dériver trois projections séparées : client, Sales et technique. Les dossiers internes ne sont pas des onglets cachés d'un document client. Garder ressources, styles, composants et textes éditables ; l'export ne devient pas une nouvelle source de vérité.
+Les scènes fortes servent la démonstration principale ; les compléments retenus vont en annexe utile. Avant montage, [figer la sélection](references/preservation.md), sans choisir silencieusement une orientation ni retirer une création. Les annexes respectent les tailles verrouillées et les placements dans les deux exports. Un extrait mobile explicitement signalé peut accompagner la vue complète conservée ; une silhouette minuscule ne démontre pas l'usage.
 
-## Sortie et preuves
+Rendre une page centrale à taille finale. Comparer l'intention au rendu : identité, hiérarchie, preuve, lisibilité, conséquence pour le visiteur et valeur de Vertigo. Corriger puis décliner ce niveau de composition. Le document lui-même doit porter le monde du client ; ne pas imposer palette, police ou gabarit d'une autre réussite.
 
-Sources HTML/CSS et actifs autorisés ; page centrale contrôlée ; vues et leur rôle dans l'histoire ; placements et surfaces photographiques ; trois PDF d'une même révision avec manifeste et empreintes ; email local de remise. Vérifier les sorties passives puis faire inspecter toutes les pages des fichiers exacts. Après modification, les exports et revues dépendants deviennent périmés.
+Enregistrer `client-story` selon [les preuves de progression](../proposition/references/experience-evidence.md). Les huit fonctions éditoriales ne sont pas huit pages. Contrôler `check-experience RUN_DIR --stage client.composition` et `check-creatives RUN_DIR`. Une maquette statique montre une intention, pas une animation exécutée.
 
-Un export réussi prouve une opération de rendu, pas la qualité commerciale ni le droit d'envoyer.
+## Livrer à la portée demandée
+
+En `client`, produire seulement PDF/PPTX client et leurs sources ; exclure les dossiers internes. Dans le parcours complet, dériver ensuite les projections Sales et technique. Préserver le format du brief, le [contrat créatif](../proposition-creative/references/creative-contract.md), la structure PowerPoint native et le contexte autonome selon [la livraison éditable](../proposition/references/editable-delivery.md).
+
+Viser environ 70 % de visuel utile ; le relevé constate le résultat, sans compenser une page faible par sa surface. Sites peut servir d'atelier si disponible et autorisé ; sinon continuer localement. Inspecter toutes les pages PDF et slides PPTX exactes, sources, notes, métadonnées et édition. Après correction, exports et revues dépendants sont périmés. Un export réussi ne certifie ni force commerciale ni diffusion.

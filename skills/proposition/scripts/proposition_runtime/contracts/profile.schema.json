@@ -37,7 +37,15 @@
       }
     },
     "parameters": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "delivery_scope": {
+          "enum": [
+            "full",
+            "client"
+          ]
+        }
+      }
     },
     "metadata": {
       "type": "object"

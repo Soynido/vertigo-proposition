@@ -30,6 +30,12 @@ class CliTests(unittest.TestCase):
         self.assertEqual(checked['status'], 'BLOCKED')
         self.assertTrue(any(i['code'] == 'missing_evaluation' for i in checked['issues']))
 
+    def test_experience_stage_flag_reaches_the_gate(self):
+        run = self.command('init', 'https://example.com', '--runs-root', self.base / 'runs')
+        checked = self.command('check-experience', run['root'], '--stage', 'client.composition', ok=False)
+        self.assertEqual(checked['status'], 'BLOCKED')
+        self.assertIn('scope', checked)
+
     def test_source_fact_and_receipt_persist_without_exposing_private_value(self):
         run = self.command('init', 'https://example.com', '--runs-root', self.base / 'runs')
         root = Path(run['root'])

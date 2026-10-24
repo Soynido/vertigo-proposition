@@ -14,7 +14,7 @@ Un brief rédigé n'exige pas systématiquement un rendez-vous d'approbation sup
 
 Construire la chaîne : ce que nous avons compris → difficulté précise → transformation proposée → démonstration → travail de l'agence → prochaine décision. Le lecteur doit pouvoir dire ce que l'agence propose de faire, pourquoi et ce qui serait accepté. Un audit illustré sans mission n'est pas une proposition.
 
-Le nombre et le rôle des pages suivent l'argument, avec cinq pages client au plus. Le board, les vues desktop/mobile et la comparaison servent des affirmations ; ils ne fixent pas un plan universel. La signature de l'agence ne remplace pas l'univers du prospect. Aucun montant, jargon inutile ou contenu interne dans le client.
+Le nombre et le rôle des pages suivent l'argument, sans plafond implicite de pages. Le board, les vues desktop/mobile et la comparaison servent des affirmations ; ils ne fixent pas un plan universel. La signature de l'agence ne remplace pas l'univers du prospect. Aucun montant, jargon inutile ou contenu interne dans le client.
 
 La composition vise environ 70 % de surface visuelle utile. Les photographies authentiques ou retouches fidèles couvrent au moins 80 % de la surface photographique visible par livrable ; les scènes synthétiques au plus 20 %. Consigner chaque placement, recadrage et transformation. Un masque non mesuré reste à revoir, pas une proportion exacte inventée.
 

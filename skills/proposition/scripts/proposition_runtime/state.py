@@ -136,6 +136,16 @@ def _stages():
     return {row["id"]: row for row in rows}
 
 
+def delivery_scope(state):
+    return state["profile"]["parameters"].get("delivery_scope", "full")
+
+
+def _quality_stages(state):
+    return {key: row for key, row in _stages().items()
+            if key != PUBLICATION_STAGE
+            and not (delivery_scope(state) == "client" and key == "internal.handoffs")}
+
+
 def _validate_structure(state):
     _schema("run", state)
     _schema("profile", state["profile"])
@@ -491,6 +501,9 @@ def _stage_report(state, stage_id):
     stage = _stages().get(stage_id)
     if stage is None:
         raise ValueError("Unknown named stage")
+    if stage_id == "internal.handoffs" and delivery_scope(state) == "client":
+        return {"stage_id": stage_id, "status": "NOT_APPLICABLE", "score": None,
+                "issues": [], "reason": "Internal deliverables excluded by explicit client scope"}
     requirements = [row for row in _requirements() if row["stage_id"] == stage_id]
     issues = []
 
@@ -512,6 +525,15 @@ def _stage_report(state, stage_id):
             issue("requirement_not_passed", requirement["id"], "Stage requirement has not passed")
         if not evaluation["evidence"] or evaluation["unknowns"]:
             issue("missing_evidence", requirement["id"], "Stage needs evidence without decisive unknowns")
+    if stage_id in {"creative.direction", "client.composition", "export.documents"}:
+        from .preservation import inspect_preservation
+        preservation = inspect_preservation(state, selection_only=stage_id == "creative.direction")
+        for message in preservation["issues"]:
+            issue("creative_preservation", stage_id, message)
+    if stage_id in {"creative.direction", "client.composition", "export.documents", "verify.final"}:
+        from .experience import inspect_experience
+        for message in inspect_experience(state, stage_id)["issues"]:
+            issue("creative_experience", stage_id, message)
     review = state["stage_reviews"].get(stage_id)
     score = None
     if review is None:
@@ -535,6 +557,9 @@ def _stage_report(state, stage_id):
             issue("stage_review_not_passed", stage_id, "The explicit stage review has not passed")
         if score < stage["gate"]["minimum_score"]:
             issue("stage_review_score", stage_id, "The stage score must be at least 9/10")
+        for index, criterion in enumerate(stage["criteria"]):
+            if criterion["id"] in stage["gate"].get("required_full_scores", []) and review["scores"][index] != 2:
+                issue("stage_critical_score", stage_id, "Critical criterion requires 2/2: " + criterion["id"])
         for message in _review_receipt_issues(state, Path(state["root"]), review, stage_id):
             issue("review_independence", stage_id, message)
     status = "STALE" if any(row["code"] == "stale_evidence" for row in issues) else "BLOCKED"
@@ -550,6 +575,22 @@ def stage_report(run_dir, stage_id):
     return _stage_report(load_run(run_dir), stage_id)
 
 
+def next_stage(run_dir):
+    """Return the first unpassed active stage from registered evidence, never sidecars."""
+    invalidate_changed(run_dir)
+    state = load_run(run_dir)
+    for stage_id in _quality_stages(state):
+        report = _stage_report(state, stage_id)
+        if report["status"] != "PASS":
+            return {"status": "BLOCKED", "scope": delivery_scope(state),
+                    "stage_id": stage_id, "score": report["score"],
+                    "issues": report["issues"], "can_promote": False}
+    final = validate_run(run_dir)
+    return {"status": final["status"], "scope": delivery_scope(state),
+            "stage_id": None if final["status"] == "PASS" else "final.reviews",
+            "issues": final["issues"], "can_promote": final["status"] == "PASS"}
+
+
 def validate_run(run_dir):
     """Return {status, issues}; no averaging, no default PASS, no external action."""
     try:
@@ -559,6 +600,9 @@ def validate_run(run_dir):
         return {"status": "BLOCKED", "issues": [{"code": "invalid_state", "message": str(error)}]}
     issues = []
     root = Path(state["root"])
+    active_stages = _quality_stages(state)
+    active_requirements = [row for row in _requirements()
+                           if row["stage_id"] in active_stages or row["stage_id"] == PUBLICATION_STAGE]
     publication_ids = {row["id"] for row in _requirements() if row["stage_id"] == PUBLICATION_STAGE}
     quality_roots = [f"evaluation:{identifier}" for identifier in state["evaluations"]
                      if identifier not in publication_ids]
@@ -598,7 +642,7 @@ def validate_run(run_dir):
                     source = state["sources"].get(source_id)
                     if source is None or source["status"] != "COLLECTED":
                         issue("missing_source", identifier, "A fact's source is missing or unavailable")
-    for requirement in _requirements():
+    for requirement in active_requirements:
         if requirement["stage_id"] == PUBLICATION_STAGE:
             continue
         identifier = requirement["id"]
@@ -628,9 +672,7 @@ def validate_run(run_dir):
         for message in _review_receipt_issues(state, root, review):
             issue("review_independence", reviewer, message)
     stage_reports = {}
-    for stage_id in _stages():
-        if stage_id == PUBLICATION_STAGE:
-            continue
+    for stage_id in active_stages:
         report = _stage_report(state, stage_id)
         stage_reports[stage_id] = {"status": report["status"], "score": report["score"]}
         issues.extend(report["issues"])
@@ -642,8 +684,10 @@ def validate_run(run_dir):
     publication["execution"] = "NOT_REPORTED_BY_THIS_LOCAL_RUNTIME"
     return {"status": ("STALE" if any(i["code"] == "stale_evidence" for i in issues)
                        else "BLOCKED") if issues else "PASS", "issues": issues,
-            "coverage": {"required": 81, "recorded": len(state["evaluations"]),
-                         "preparation_required": 81 - len(publication_ids)},
+            "scope": delivery_scope(state),
+            "excluded_stages": ["internal.handoffs"] if delivery_scope(state) == "client" else [],
+            "coverage": {"required": len(active_requirements), "recorded": len(state["evaluations"]),
+                         "preparation_required": len(active_requirements) - len(publication_ids)},
             "stages": stage_reports,
             "publication": publication,
             "quality_rubric": "candidate-not-human-calibrated"}
@@ -702,6 +746,8 @@ def build_context_packet(run_dir, output_dir, files):
     """Prepare approved creative inputs after the brief gate, before final work."""
     if stage_report(run_dir, "brief.public")["status"] != "PASS":
         raise ValueError("The current public brief has not passed its stage gate")
+    from .experience import require_packet_methods
+    require_packet_methods(load_run(run_dir), files)
     return _build_packet(run_dir, output_dir, files, "creative_input")
 
 

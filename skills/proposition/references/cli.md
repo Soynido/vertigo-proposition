@@ -21,6 +21,7 @@ La commande peut aussi être installée par le paquet. Vérifier `--help` sur la
 | Revue / rapport d'étape | `stage-review RUN_DIR STAGE_ID JSON_FILE` ; `stage-report RUN_DIR STAGE_ID` |
 | Projection | `packet RUN_DIR --output DIR --files RELPATH...` |
 | Entrée créative | `context-packet RUN_DIR --output DIR --files RELPATH...` — brief public validé, distinct du paquet de livraison final |
+| Conservation créative | `freeze-creatives RUN_DIR SELECTION_JSON` ; `check-creatives RUN_DIR` — [contrat et formats](../../proposition-composition/references/preservation.md) |
 | Export / inspection | `export SOURCE_HTML OUTPUT_PDF --audience client|sales|technical` ; `inspect PDF --output DIR` |
 | Plan / accord | `plan RUN_DIR JSON_FILE` ; `approve RUN_DIR --plan-hash HASH --actor ID --evidence FILE` |
 | Publication de test | `publish RUN_DIR --adapter fixture` — explicite, aucun système métier réel |
@@ -35,3 +36,7 @@ L'export imprime une source passive et ses ressources locales ; il n'autorise pa
 `layout MANIFEST_JSON` calcule les surfaces à partir de rectangles de placement déclarés (`pages`, `placements` avec `page`, `kind`, `rect`, `source_id`). Sa portée est géométrique : les masques complexes et chevauchements restent bloqués tant que leur surface visible n'est pas établie ; la qualité, les droits et la fidélité ne sont pas déduits du ratio.
 
 La revue d'étape fournit cinq notes explicites, un rôle de réviseur, ses preuves et un reçu d'indépendance lié au même run et au même passage. Les critères/ancres sont dans `data/stages.json` embarqué. `stage-report` calcule l'état à partir des obligations et de cette revue ; il ne génère pas une note à la place du réviseur. Les deux revues globales finales restent requises en plus des treize rapports d'étape.
+
+## Progression et portée
+
+`next-stage RUN_DIR` indique le premier passage applicable non validé. `check-experience RUN_DIR` vérifie la chaîne de preuves créative ; `--stage client.composition` inclut la carte de récit et les pages du PDF. Lire [les champs attendus](experience-evidence.md) avant de créer les artefacts. `inspect --help` expose `--max-pages` pour une limite explicitement demandée ; aucune limite par défaut. Ces contrôles ne produisent pas une note esthétique.
