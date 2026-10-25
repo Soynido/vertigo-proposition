@@ -70,6 +70,11 @@ def freeze_creatives(run_dir, selection):
                      'min_page_fraction':minimum})
     data={k:selection[k] for k in ('revision','actor','decision')}
     data.update(run_id=run['id'],retained=rows)
+    if run.get('metadata',{}).get('creative_exploration_contract') is not None:
+        from .experience import inspect_experience
+        report=inspect_experience(run,proposed_selection=rows)
+        if report['status']!='PASS':
+            raise ValueError('Cannot freeze creative selection: '+'; '.join(report['issues']))
     path=root/LOCK
     with path.open('x',encoding='utf-8') as f:
         f.write(json.dumps(data,ensure_ascii=False,indent=2)+'\n')

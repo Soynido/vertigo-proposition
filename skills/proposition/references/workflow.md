@@ -11,7 +11,7 @@ Une URL ouvre la recherche, pas une demande obligatoire de brief. Le brief est u
 | analysis.specialists | SEO/GEO, UX, design et marché utiles à la décision, reliés aux preuves | proposition-strategy |
 | company.v2 | Contradictions réconciliées et questions ciblées encore ouvertes | proposition-strategy |
 | brief.public | Sources analysées, observations, changements recommandés, objectifs, codes à préserver, idée, démonstration, mission et décision ; projection autorisée hachée | proposition-strategy |
-| creative.direction | Scène maîtresse qualifiée avant déclinaison ; interfaces web/mobile rendues, comparaison et recommandations | proposition-creative + proposition-story |
+| creative.direction | Mondes candidats sourcés ; scène centrale inspectée par monde ; comparaison puis sélection ; progression web et mobile des directions retenues | proposition-creative + proposition-story |
 | client.composition | Récit depuis les preuves ; carte éditoriale, scènes utiles et mission concrète ; source HTML/CSS et médias locaux | proposition-composition |
 | review.client | Revues distinctes sur la même révision et défauts localisés | proposition-quality |
 | internal.handoffs | Playbook de vente de la mission d'agence ; transmission de sa réalisation | proposition-sales + proposition-technical |
@@ -23,7 +23,7 @@ Les phases peuvent se chevaucher si leurs entrées sont valides ; un travail con
 
 La passation reste sources → analyse → observations/recommandations → brief → création. Préparer les médias en parallèle n'autorise pas à présenter une création libre comme la réponse à une analyse encore absente. Le contrat créatif consomme le brief ; il ne remplace pas la recherche. Une exploration seule reste un candidat de portée créative, sans verdict de parcours complet.
 
-Après la création, figer les scènes retenues avant montage selon [le contrôle de préservation](../../proposition-composition/references/preservation.md). La sélection est requise au gate créatif ; la présence et la fidélité dans les PDF/PPTX exacts bloquent les gates de composition/export et le verdict global si elles ne sont pas démontrées. Ce contrôle ne remplace ni la revue visuelle ni les notes.
+L'exploration précède la sélection : pour un nouveau prospect, rendre au moins deux mondes centraux distincts avant de choisir. La même opportunité peut recevoir plusieurs réponses créatives ; une nouvelle tâche n'est pas exigée. Le mandat par défaut autorise le choix motivé après comparaison. Une instruction externe de nombre ou de direction déjà choisie garde sa preuve ; elle ne se déduit pas du brief auto-rédigé. Développer ensuite les seuls mondes retenus jusqu'à leurs trois moments et mobile. Figer ces scènes avant montage selon [le contrôle de préservation](../../proposition-composition/references/preservation.md). La présence et la fidélité dans les PDF/PPTX exacts bloquent les gates de composition/export et le verdict global. Les candidats écartés restent archivés dans les preuves, sans imposer un catalogue de pistes au client.
 
 Un seul propriétaire compose la source canonique selon [le contrat de montage](../../proposition-story/references/argument.md) : la carte des pages suit l’argument, pas l’inventaire des scènes. Les états du site ne sont pas des pages imposées du deck ; les compléments retenus restent préservés en annexes lisibles. La portée client seule limite les fichiers remis, pas la prestation à vendre.
 

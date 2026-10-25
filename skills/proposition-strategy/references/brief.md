@@ -24,6 +24,8 @@ Le créatif reçoit ce brief, les sources et médias sélectionnés, leurs droit
 
 Fixer une opportunité principale : public et statut de preuve, tâche, observation, changement, bénéfice prudent, périmètre utile et alternative. Choisir entre maintien, amélioration ciblée, landing ou refonte plus large ; le CMS et l’âge apparent ne décident pas seuls. Sans besoin actuel démontré, garder une exploration ou hypothèse explicitement nommée.
 
+Cette opportunité cadre le problème, pas son unique réponse visuelle. Le brief prépare plusieurs mondes candidats pour le même besoin et laisse leur comparaison au créatif. Le nombre et une éventuelle direction déjà imposée viennent du mandat enregistré ; « une direction forte » auto-rédigée ne remplace pas l'exploration. La recommandation finale peut être unique après comparaison.
+
 Rendre explicites trois classes de codes : confirmés à préserver, observés mais adaptables, inconnus. L’absence de charte n’autorise pas une nouvelle identité affirmée ; proposer les évolutions importantes de façon réversible. Le résultat doit exprimer la même marque avec plus de clarté et de force. Les qualités observées sur le site ne sont pas automatiquement une charte imposée ; une refonte d'identité n'est pas déduite d'une demande de refonte de site.
 
 Une observation décisive manquante reste une inconnue à résoudre ou une hypothèse signalée avant création. Si l'utilisateur demande seulement une exploration créative depuis des sources partielles, conserver cette portée et ses hypothèses ; ne pas annoncer une analyse préalable complète. Toute modification utile du brief invalide les créations et jugements qui en dépendent.

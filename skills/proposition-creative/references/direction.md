@@ -2,9 +2,9 @@
 
 La séquence de création, de rendu, de comparaison et de remise est définie uniquement dans le [contrat créatif](creative-contract.md). Cette référence précise les données transmises à la composition, sans seconde procédure de création.
 
-Avant transmission au montage, figer les scènes retenues et la décision selon [le contrôle de préservation](../../proposition-composition/references/preservation.md). Toutes les directions encore ouvertes restent dans la sélection ; les exports ne peuvent pas choisir à leur place. Ce verrou complète la passation sans changer la procédure créative.
+Avant transmission au montage, vérifier `creative-exploration`, sa comparaison et la décision, puis figer les scènes développées retenues selon [le contrôle de préservation](../../proposition-composition/references/preservation.md). Toutes les directions explicitement laissées ouvertes restent dans la sélection ; les exports ne choisissent pas à leur place. Les candidats écartés avant gel gardent leurs scènes et motifs dans les preuves et le contexte ; ils ne sont pas des créations retenues à placer obligatoirement dans le deck.
 
-Transmettre l'idée et son origine, les signes préservés, les recommandations matérialisées, les scènes exactes et leur rôle dans le récit, la décision ou les choix laissés ouverts, les compromis et défauts. Une direction déjà choisie reçoit ses prolongements ; la présence d'une « alternative » n'est pas une condition de sa passation.
+Transmettre l'idée et son origine, les signes préservés, les recommandations matérialisées, les candidats explorés et leurs différences, la comparaison, les scènes retenues et leur rôle, la décision ou les choix laissés ouverts, les compromis et défauts. La continuation d'une direction imposée garde la preuve du mandat externe ; le brief auto-rédigé ne constitue pas cette preuve.
 
 Pour chaque actif ou placement : identifier source et fichier, sujet réellement montré, droits et usage autorisé, recadrage, retouche fidèle ou scène synthétique, surface visible et rôle dans l'argument. L'incertitude sur un droit indispensable bloque sa diffusion. Sans générateur, aucune scène synthétique n'est présentée comme produite ; un schéma fondé sur des faits reste distinct d'une photographie de produit.
 

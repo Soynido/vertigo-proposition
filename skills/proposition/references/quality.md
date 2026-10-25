@@ -37,6 +37,8 @@ Ces décisions existent à chaque étape, selon [ses cinq critères spécifiques
 
 La composition exige `story`, `demonstration` et `language` à 2/2 dans le registre d’étape : 9/10 ne compense pas une histoire partielle. Appliquer [le contrat de montage](../../proposition-story/references/argument.md). Distinguer une création faible à retravailler d’un montage faible à recomposer ; une revue de documentation ne certifie pas un rendu créatif.
 
+Pour les nouveaux runs, `creative.direction.options` exige également 2/2. Examiner les scènes centrales de mondes distincts et leur comparaison avant sélection. Ouverture, révélation, action, mobile et board d'une seule direction n'établissent pas plusieurs options. Une instruction externe fixant déjà la direction ou le nombre suit son mandat enregistré ; le brief de l'auteur ne crée pas cette exception. Les preuves mécaniques fixent les liens, pas la distinction artistique ni l'authenticité de l'instruction : les vérifier dans la revue.
+
 Le gate client exige deux revues de contextes distincts sans historique auteur ni verdict partagé. Chaque reçu comprend identité de rôle et mécanisme de contexte séparé, paquet d'entrée exact et empreintes, versions revues, notes critère par critère, défauts localisés, résultat et correction demandée. Sans séparation réelle : `BLOCKED`. Sans fichier exporté et inspecté : contrôle final `NOT_RUN`, pas `PASS`. Un avis d'une autre révision devient `STALE`.
 
 ## Fichiers finaux

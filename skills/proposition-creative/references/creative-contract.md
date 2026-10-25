@@ -1,4 +1,4 @@
-# Contrat créatif v2 — un univers reconnaissable, une expérience qui avance
+# Contrat créatif v3 — explorer les mondes avant de choisir
 
 Cette source est l’unique procédure de création. Elle décrit des choix et des contrôles observables, pas une chaîne de pensée interne. « WOW » est une ambition : aucun prompt ni score ne garantit le goût du client. La conformité des fichiers ne remplace pas la revue des artefacts.
 
@@ -19,31 +19,36 @@ Lire les références transmises et les fichiers utiles de leurs arbres publics 
 
 Préserver faits, sujets des médias, actions utiles, signes confirmés et contraintes explicites. Distinguer ces signes de l’exécution actuelle : une grille ancienne, une typo par défaut ou des photos faibles ne deviennent pas une identité intangible. Réinventer composition, échelles, rapprochements, rôle de la photo et rythme pour matérialiser l’opportunité. Les évolutions importantes de codes dominants non confirmés restent proposées et réversibles. Un rétro volontaire se respecte ; l’ancienneté apparente ne démontre ni échec commercial ni besoin de refonte. Aucun ancien client, template maison ou catalogue de styles ne décide de la forme.
 
-## 2. Une progression, pas seulement un accueil
+## 2. Explorer avant sélection
 
-Pour chaque direction encore proposée, écrire une courte partition : **ce que le visiteur comprend à l’entrée → ce qu’il découvre → ce qu’il peut faire**. Chaque moment apporte un changement perceptible lié à une source et à une intention utile. Justifier une transition par ce qu’elle révèle, pas par le nom d’une animation.
+Pour un nouveau prospect, le mandat par défaut ouvre **au moins deux mondes candidats**. Une troisième voie est utile si elle porte une réponse structurellement différente. La même opportunité commerciale peut recevoir plusieurs réponses créatives ; une autre tâche ou un autre public n'est pas nécessaire. Le nombre ne désigne ni des palettes ni des états de scroll.
 
-Rendre au minimum trois moments distincts :
+Chaque monde porte une idée issue de cette entreprise : signes conservés, architecture de lecture, rôle des images, geste visuel, place des contenus et action. Réinventer composition, échelles, cadrages, typographie compatible et séquence. Une recoloration ou une image différente dans la même grille ne suffit pas. Aucun catalogue de styles ou ancien client ne fournit la réponse.
 
-- **Ouverture** : reconnaître l’entreprise et vouloir continuer.
-- **Révélation** : découvrir une preuve, une matière, un usage ou un regard propre à cette entreprise. C’est le sommet visuel, au-delà de sa première image.
-- **Action** : aboutir au choix, à l’information ou au contact utile, sans perdre une action importante du site actuel.
+1. **Rendre une scène centrale par monde**, à taille d'usage : une vraie proposition de site, avec orientation/navigation, contenu hiérarchisé et action utile. Soigner aussi les cadres, les rapports d'échelle et l'espace autour des photos.
+2. **Ouvrir et inspecter chaque scène** : sujet réel, mots, hiérarchie, contraste, coupures, actions, différence visible et défauts. Qualifier chaque scène centrale avant les déclinaisons coûteuses. Le premier essai d'un monde faible se corrige ici.
+3. **Comparer les mondes exacts avant de choisir** : signe client et source, différence de composition et de mécanisme visuel, découverte apportée, intérêt pour le visiteur et compromis. Conserver scènes, empreintes et dates dans `creative-exploration`. Les mots « A » et « B » dans un tableau n'établissent pas la différence.
+4. **Décider après comparaison** : le mandat par défaut autorise une recommandation et une sélection autonomes motivées. Les candidats écartés restent archivés avec leurs raisons. Une exploration réelle peut révéler une piste moins juste ; elle n'exige pas son développement complet ni sa présentation commerciale.
 
-Ces moments sont des fonctions narratives, pas trois cartes, trois slides ou trois sections identiques imposées. Concevoir la proposition comme une expérience éditoriale aussi soignée qu’un site : cadrages, typographie, respiration, rapports d’échelle et transitions composent aussi l’univers autour des photos.
+Le mandat est fixé à l'initialisation selon [les preuves d'expérience](../../proposition/references/experience-evidence.md). Un utilisateur peut imposer un nombre, garder les choix ouverts ou demander le prolongement d'une direction déjà sélectionnée. Consigner son instruction externe et sa portée. « Une direction forte » écrit par le coordinateur n'est pas un mandat utilisateur et ne ferme pas la recherche.
 
-Inventer une signature visible issue d’un élément client prouvé : relation matière/usage, changement d’échelle, découpe photographique, détail qui révèle un ensemble, profondeur ou révélation éditoriale appropriée. Montrer son passage ou ses états. Une grande photo et un titre séduisant ne suffisent pas. Ne pas imposer parallaxe, vidéo, 3D, défilement horizontal ou pinning à toutes les marques. Une retenue maîtrisée peut être plus juste qu’un spectacle.
+En reprise, réutiliser les bonnes scènes et preuves de comparaison encore valides. Des fichiers existants ne prouvent pas seuls qu'une sélection antérieure était qualifiée. Documenter ce qui manque, sans rejouer les recherches valides. Une comparaison faite après coup garde sa vraie date.
 
-Les mondes diffèrent par leur architecture et leur progression, pas seulement leur couleur. Comparer ouverture, navigation, rôle des médias, composition, sommet et conclusion, avec les différences réellement visibles. Changer un libellé dans un tableau ne les crée pas. Respecter le nombre demandé ; sinon ne proposer une alternative que pour une réponse utile distincte, pas pour remplir « A/B ». Une exploration non retenue reste archivée et identifiée avant gel. Les options encore proposées restent ouvertes. Si une direction est déjà choisie, la prolonger sans relancer un concours.
+## 3. Développer les mondes retenus
 
-## 3. Rendre, regarder, comparer
+Après sélection, chaque direction retenue montre **ce que le visiteur comprend à l'entrée → ce qu'il découvre → ce qu'il peut faire** :
 
-Qualifier d’abord une scène maîtresse et sa courte démonstration : preuve actuelle, changement visible, utilité pour le public, signes préservés. En reprise, réutiliser une scène inspectée encore pertinente. Si elle est faible, corriger cette scène avant les déclinaisons. Comparer à l’actuel et, si disponible, à un témoin du même rôle sans copier sa DA ; localiser zones et compromis. Une retenue maîtrisée se démontre par la composition.
+- **Ouverture** : reconnaître l'entreprise et vouloir continuer.
+- **Révélation** : découvrir une preuve, une matière, un usage ou un regard propre au client ; le sommet dépasse la première image.
+- **Action** : aboutir au choix, à l'information ou au contact utile, en conservant les actions importantes existantes.
 
-Puis produire les trois moments à taille d’usage et ouvrir leurs pixels. Ce sont des interfaces proposées avec orientation/navigation, contenu hiérarchisé et action pertinente. Un poster, un moodboard ou un cadre d’appareil ne remplace pas une vue web. Ils existent en fichiers, montrent une progression et portent des sens distincts ; trois copies du même accueil ne sont pas trois moments. Vérifier sujet, mots, contraste, cadrage, coupures et actions. Consigner empreintes, dates et défauts avant comparaison et sélection. Corriger la scène concernée.
+Rendre ces moments en vraies interfaces à taille d'usage et inspecter leurs pixels. La scène centrale explorée peut servir un de ces moments si elle reste pertinente. Montrer une signature issue d'un élément client prouvé : changement d'échelle, relation matière/usage, découpe, profondeur ou révélation éditoriale. Une grande photo et un titre seuls ne démontrent pas cette idée. La retenue peut être juste ; aucun effet de parallaxe, vidéo, 3D ou pinning n'est imposé.
 
-Comparer ensuite les scènes exactes : signe conservé et source, changement visible et zone, découverte apportée, fonction dans le parcours, compromis. Les alternatives laissées au client ont une finition comparable. Pas de vainqueur sans mandat ; une comparaison rétrospective porte sa vraie date.
+Ouverture, révélation, action, mobile et board d'une même direction sont **ses prolongements**, pas des options d'exploration. Vérifier séparément diversité des mondes et cohérence d'un monde. Une alternative encore offerte au client garde une finition comparable ; le montage ne choisit pas à sa place.
 
-Décliner chaque direction retenue en un **mobile distinct**, en privilégiant découverte et action. Consigner la largeur CSS cible et l’adaptation réellement faite : priorité des contenus, navigation, actions. Un crop ou rétrécissement desktop ne constitue pas une adaptation. Observer à largeur cible sans zoom. Cible de confort : 16 px pour l’action utile ; plancher interne de promotion : 14 px, étayé par mesures de la source et contrôle des pixels. Ce n’est pas une norme WCAG. Une légende secondaire peut être plus petite, jamais une information indispensable au choix. Préférer une scène plus longue à des actions tassées pour tout faire tenir dans une capture.
+Composer un **mobile distinct** par direction retenue : largeur CSS cible, ordre des contenus, navigation et actions réorganisés. Un crop ou rétrécissement desktop n'est pas une adaptation. Observer sans zoom : cible de confort 16 px pour l'action utile, plancher interne de promotion 14 px, étayé par source et pixels. Ce n'est pas une norme WCAG. Préférer une scène longue à des actions tassées.
+
+Les fonctions narratives ne prescrivent ni trois cartes ni trois slides par direction. Les états statiques restent des intentions tant qu'un prototype n'est pas développé et testé. Conserver les contrôles de progression, de méthodes et de préservation.
 
 ## 4. Préserver les actions qui font vivre le site
 
@@ -75,7 +80,7 @@ Enregistrer preuves et revues dans le moteur, puis contrôler `next-stage`, `che
 
 ## Capsule de dispatch réutilisable
 
-> Depuis ce brief public et son inventaire de méthodes, crée les directions demandées pour cette entreprise. Lis le contrat créatif et les références identifiées de SEO/GEO, Impeccable, Apple Design et Scroll Craft ; un téléchargement ne prouve pas leur usage. Préserve signes, faits, sujets et actions utiles de la marque. Invente une architecture et une signature qui lui appartiennent. Qualifie d’abord la scène maîtresse qui matérialise l’opportunité ; réutilise une bonne scène existante en reprise. Pour chaque direction retenue, rends puis inspecte de vraies interfaces web, avec navigation, contenu et action : une ouverture, une révélation marquante et un aboutissement utile ; trois variantes du même accueil ne suffisent pas. En exploration, compare les scènes exactes avant de choisir ; si la direction est déjà choisie, prolonge-la sans nouvelles alternatives. Compose un mobile distinct et lisible. Traduis le mouvement par des états statiques dans le format demandé ; ne déclare aucun comportement non testé. Transmets scènes, empreintes, progression, compromis, actions préservées et applications des méthodes. En exploration, garde les alternatives ouvertes tant que le choix n’est pas arrêté. Le montage conserve les éléments retenus et raconte une mission d’agence convaincante. Aucun fait, droit, résultat, outil utilisé ou score ne doit être inventé.
+> Depuis ce brief public et son inventaire de méthodes, explore les mondes créatifs de cette entreprise avant de sélectionner. Lis le contrat installé et les références SEO/GEO, Impeccable, Apple Design et Scroll Craft ; trace leur application réelle. Préserve signes, faits, sujets et actions utiles, puis réinvente composition, architecture, rôle des images et signature. Applique le mandat enregistré : par défaut, au moins deux réponses créatives au même besoin. Rends et inspecte une scène centrale par monde ; compare les scènes exactes et leurs compromis avant le choix. Enregistre cette exploration, puis développe les seuls mondes retenus en ouverture, révélation, action et mobile autonome. Plusieurs vues d'une idée ne sont pas plusieurs mondes. Une instruction externe déjà choisie se prolonge à sa portée vérifiée ; le brief auto-rédigé ne crée pas cette exception. Réutilise les bonnes preuves en reprise. Transmets fichiers, empreintes, choix, exclusions, progression et limites ; conserve les créations retenues au montage. Compose la présentation entière comme un site éditorial, avec un récit commercial et des mots concrets. Le PDF montre des intentions statiques ; aucun comportement, fait, droit, résultat, usage d'outil ou score n'est inventé.
 
 ## Reçu et portée
 

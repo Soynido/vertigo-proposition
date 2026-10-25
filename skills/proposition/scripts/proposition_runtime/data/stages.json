@@ -520,14 +520,15 @@
       "criteria": [
         {
           "id": "options",
-          "observable": "Distinct creative options are materialized before selection",
+          "observable": "The initialized creative mandate is honored: by default structurally distinct candidate worlds have central scenes rendered, inspected and compared before selection; an explicit initialized instruction may prescribe the exact count or an already chosen direction",
           "evidence": [
-            "creative-option-compositions"
+            "creative-option-compositions",
+            "creative-exploration"
           ],
           "anchors": {
-            "0": "Missing, misleading or contradicted evidence for: Distinct creative options are materialized before selection",
-            "1": "Partially demonstrated, with a material unresolved weakness: Distinct creative options are materialized before selection",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: Distinct creative options are materialized before selection"
+            "0": "Default exploration is absent, scroll states of one world are mislabeled as alternatives, or a single-direction exception lacks its initialized current instruction authority",
+            "1": "Candidate worlds or an explicit exception are declared, but central render inspection, structural comparison, selection chronology or exact mandate compliance is incomplete",
+            "2": "The initialized mandate is honored by current evidence: default distinct central worlds are inspected and compared before selection, or an explicit count/already-chosen instruction is hash-and-quote bound; each retained direction alone is then fully developed"
           }
         },
         {
@@ -584,7 +585,8 @@
         "direction-rationale",
         "full-direction-board",
         "original-and-transformation-evidence",
-        "photographic-surface-ledger"
+        "photographic-surface-ledger",
+        "creative-exploration"
       ],
       "gate": {
         "minimum_score": 9,

@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 import time
@@ -18,6 +19,24 @@ def _copy(source, target):
             outgoing.write(chunk)
             digest.update(chunk)
     print(digest.hexdigest())
+
+
+def _read_small(source, limit):
+    """Child-only bounded snapshot, including type checks on the opened file."""
+    path=Path(os.path.abspath(source))
+    if any(part.is_symlink() for part in (path,*path.parents)):
+        raise ValueError('Symlink input is not supported')
+    info=path.lstat()
+    if not stat.S_ISREG(info.st_mode) or info.st_size>limit:
+        raise ValueError('Input must be a small regular file')
+    flags=os.O_RDONLY|getattr(os,'O_NONBLOCK',0)|getattr(os,'O_NOFOLLOW',0)
+    with os.fdopen(os.open(path,flags),'rb') as incoming:
+        info=os.fstat(incoming.fileno())
+        if not stat.S_ISREG(info.st_mode) or info.st_size>limit:
+            raise ValueError('Opened input must be a small regular file')
+        content=incoming.read(limit+1)
+    if len(content)>limit:raise ValueError('Input grew past the byte limit')
+    sys.stdout.buffer.write(content)
 
 
 def prepare_inputs(run_dir, manifest, output_dir, *, timeout_seconds=5):
@@ -72,4 +91,5 @@ def prepare_inputs(run_dir, manifest, output_dir, *, timeout_seconds=5):
 
 
 if __name__ == '__main__':
-    _copy(sys.argv[1], sys.argv[2])
+    if sys.argv[1]=='--read-small':_read_small(sys.argv[2],int(sys.argv[3]))
+    else:_copy(sys.argv[1], sys.argv[2])

@@ -12,6 +12,11 @@ class PreservationTests(unittest.TestCase):
         self.tmp=tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
         self.run=state.init_run('https://example.test/',Path(self.tmp.name)/'runs')
         self.root=Path(self.run['root'])
+        # These lower-level raster/OOXML cases model an already-created historical
+        # selection, not new-run exploration. Full experience fixtures exercise v1.
+        path=self.root/'state.json';historical=json.loads(path.read_text())
+        historical['metadata'].pop('creative_exploration_contract')
+        path.write_text(json.dumps(historical));self.run=state.load_run(self.root)
 
     def freeze(self):
         from proposition_runtime import preservation
