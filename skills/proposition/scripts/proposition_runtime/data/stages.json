@@ -556,14 +556,14 @@
         },
         {
           "id": "system",
-          "observable": "The concept governs imagery, language, type, scale and sequence beyond the opening",
+          "observable": "A qualified master scene supports genuine website opening, reveal and useful action interfaces, with a distinct mobile arrangement at its declared target width",
           "evidence": [
             "full-direction-board"
           ],
           "anchors": {
-            "0": "Missing, misleading or contradicted evidence for: The concept governs imagery, language, type, scale and sequence beyond the opening",
-            "1": "Partially demonstrated, with a material unresolved weakness: The concept governs imagery, language, type, scale and sequence beyond the opening",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: The concept governs imagery, language, type, scale and sequence beyond the opening"
+            "0": "Hero only, absent mobile or no client-specific reveal",
+            "1": "A sequence exists but its reveal is generic, website structure is missing, or mobile merely crops desktop",
+            "2": "Exact rendered interface zones show a useful client-specific discovery, controlled composition, progression and genuinely rearranged readable mobile"
           }
         },
         {
@@ -594,7 +594,11 @@
           "NOT_APPLICABLE"
         ],
         "independence_receipt": true,
-        "rubric_status": "candidate-not-human-calibrated"
+        "rubric_status": "candidate-not-human-calibrated",
+        "required_full_scores": [
+          "specificity",
+          "system"
+        ]
       }
     },
     {
@@ -603,14 +607,14 @@
       "criteria": [
         {
           "id": "story",
-          "observable": "The client narrative stays within the configured page limit and resolves its opening intent",
+          "observable": "The client can follow a sourced opportunity through a visible change, concrete visitor value, the proposed agency mission and the next decision; page count follows the argument",
           "evidence": [
             "client-story-map"
           ],
           "anchors": {
-            "0": "Missing, misleading or contradicted evidence for: The client narrative stays within the configured page limit and resolves its opening intent",
-            "1": "Partially demonstrated, with a material unresolved weakness: The client narrative stays within the configured page limit and resolves its opening intent",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: The client narrative stays within the configured page limit and resolves its opening intent"
+            "0": "Catalogue, unsupported problem, absent agency mission or no next decision; the reader cannot explain the proposed change",
+            "1": "The functions exist, but the proof-to-change-to-value chain is implicit, repeated scene states drive the deck, or the mission is reduced to mockups without a scoped reason",
+            "2": "Exact pages connect a dated observation, proposed scene, credible visitor benefit, scoped agency realization and concrete next decision; titles alone form the story and secondary retained scenes remain preserved"
           }
         },
         {
@@ -620,9 +624,9 @@
             "client-copy-review"
           ],
           "anchors": {
-            "0": "Missing, misleading or contradicted evidence for: Every statement is understandable in context and preserves the client voice",
-            "1": "Partially demonstrated, with a material unresolved weakness: Every statement is understandable in context and preserves the client voice",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: Every statement is understandable in context and preserves the client voice"
+            "0": "Jargon, misleading claim or unnatural wording prevents understanding",
+            "1": "Readable but generic or literal captions describe graphics instead of useful actions and consequences, or a decisive benefit lacks its condition",
+            "2": "Natural client-specific French names concrete actions and credible consequences; titles advance the argument and Stop Slop plus meaning review are evidenced"
           }
         },
         {
@@ -644,9 +648,9 @@
             "desktop-mobile-compositions"
           ],
           "anchors": {
-            "0": "Missing, misleading or contradicted evidence for: Desktop moments and a distinct mobile composition show useful proposed behavior",
-            "1": "Partially demonstrated, with a material unresolved weakness: Desktop moments and a distinct mobile composition show useful proposed behavior",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: Desktop moments and a distinct mobile composition show useful proposed behavior"
+            "0": "Decisive scene absent, unreadable or disconnected from the recommendation",
+            "1": "Scenes exist but are too small in the final deck, repeat without advancing understanding or replace the evidence-to-benefit demonstration",
+            "2": "Desktop and mobile at useful size show what changes for the visitor; explicit excerpts and preserved complete views agree, directions remain identifiable and the deck composition serves this client"
           }
         },
         {
@@ -677,7 +681,12 @@
           "NOT_APPLICABLE"
         ],
         "independence_receipt": true,
-        "rubric_status": "candidate-not-human-calibrated"
+        "rubric_status": "candidate-not-human-calibrated",
+        "required_full_scores": [
+          "story",
+          "demonstration",
+          "language"
+        ]
       }
     },
     {
@@ -698,14 +707,14 @@
         },
         {
           "id": "visual",
-          "observable": "Full-size rendered compositions support readability and hierarchy without severe defects",
+          "observable": "Exact full-size web/mobile views and deck pages show controlled composition and a useful client-specific discovery, not merely absence of overflow",
           "evidence": [
             "full-size-review-index"
           ],
           "anchors": {
             "0": "Missing, misleading or contradicted evidence for: Full-size rendered compositions support readability and hierarchy without severe defects",
-            "1": "Partially demonstrated, with a material unresolved weakness: Full-size rendered compositions support readability and hierarchy without severe defects",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: Full-size rendered compositions support readability and hierarchy without severe defects"
+            "1": "Readable and consistent but decisive scenes are generic, flat, poster-like or require a verbal explanation",
+            "2": "Situated comparison shows distinctive composition, clear hierarchy, visible useful change and a credible website/mobile experience"
           }
         },
         {
@@ -760,7 +769,12 @@
           "NOT_APPLICABLE"
         ],
         "independence_receipt": true,
-        "rubric_status": "candidate-not-human-calibrated"
+        "rubric_status": "candidate-not-human-calibrated",
+        "required_full_scores": [
+          "narrative",
+          "visual",
+          "specificity"
+        ]
       }
     },
     {

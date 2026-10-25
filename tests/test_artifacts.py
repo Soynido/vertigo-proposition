@@ -50,7 +50,7 @@ class ArtifactTests(unittest.TestCase):
         self.assertIn("Maison Boreale", report["text"])
         self.assertTrue(all((self.root / "inspection" / p["image"]).exists() for p in report["pages"]))
 
-    def test_six_client_pages_fail_even_when_pdf_opens(self):
+    def test_client_page_count_is_unlimited_unless_explicitly_configured(self):
         from pypdf import PdfWriter
         pdf = self.root / "six.pdf"
         writer = PdfWriter()
@@ -60,7 +60,9 @@ class ArtifactTests(unittest.TestCase):
             writer.write(stream)
         report = self.module().inspect_pdf(pdf, self.root / "inspection", audience="client")
         self.assertEqual(report["status"], "FAIL")
-        self.assertIn("client_page_limit", [i["code"] for i in report["issues"]])
+        self.assertNotIn("client_page_limit", [i["code"] for i in report["issues"]])
+        limited = self.module().inspect_pdf(pdf, self.root / "limited", audience="client", max_pages=5)
+        self.assertIn("client_page_limit", [i["code"] for i in limited["issues"]])
         self.assertEqual(len(report["pages"]), 6)
 
     def test_archive_cannot_include_an_internal_sales_file(self):

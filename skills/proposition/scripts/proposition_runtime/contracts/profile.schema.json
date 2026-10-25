@@ -37,7 +37,49 @@
       }
     },
     "parameters": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "delivery_scope": {
+          "enum": [
+            "full",
+            "client"
+          ]
+        },
+        "proposal_contract": {
+          "const": 2
+        },
+        "history_mode": {
+          "enum": [
+            "auto",
+            "off"
+          ]
+        },
+        "history_deadline_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 90
+        },
+        "history_request_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 8
+        },
+        "history_max_requests": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 8
+        },
+        "history_max_urls": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2
+        },
+        "history_max_captures": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 4
+        }
+      }
     },
     "metadata": {
       "type": "object"

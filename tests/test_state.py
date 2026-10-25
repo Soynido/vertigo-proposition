@@ -49,6 +49,8 @@ class StateTests(unittest.TestCase):
             self.write(run, f"exports/{audience}.pdf", f"Fixture {audience} file")
             state.add_artifact(run["root"], f"{audience}-pdf", f"exports/{audience}.pdf",
                                audience, ["fact:offer"])
+        from creative_fixture import install_preservation
+        install_preservation(state.load_run(run['root']))
         for number in range(1, 82):
             state.record_evaluation(run["root"], f"R{number:02}", {
                 "status": "PASS", "applicable": True,
@@ -338,27 +340,35 @@ class StateTests(unittest.TestCase):
         state.record_evaluation(run["root"], "R78", {
             "status": "PASS", "evidence": ["artifact:brief"], "reason": "Autonomous fixture brief inspected",
         })
+        from experience_fixture import prepare_inputs
+        prepare_inputs(state.load_run(run["root"]))
         self.stage_review(run, "brief.public", {"artifact:brief": artifact["sha256"]})
         run = state.load_run(run["root"])
-        run["artifacts"]["brief"]["public_allowed"] = True
-        run["artifacts"]["brief"]["approval"] = {"actor": "operator", "sha256": artifact["sha256"]}
+        for key,row in run["artifacts"].items():
+            row["public_allowed"] = True
+            row["approval"] = {"actor": "operator", "sha256": row["sha256"]}
         state.save_run(run["root"], run)
         return run
 
     def test_context_packet_is_possible_before_final_documents_exist(self):
         run = self.initial_context()
         self.assertNotEqual(state.validate_run(run["root"])["status"], "PASS")
-        receipt = state.build_context_packet(run["root"], self.base / "creative", ["brief"])
+        receipt = state.build_context_packet(run["root"], self.base / "creative", ["brief", "creative-inputs", "method-claude-seo", "method-impeccable", "method-apple-design", "method-scroll-craft"])
         self.assertEqual(receipt["status"], "PREPARED")
         self.assertEqual(receipt["scope"], "creative_input")
         self.assertEqual((self.base / "creative/brief.txt").read_text(), "Approved fixture creative input")
         self.assertFalse(any((Path(run["root"]) / "exports").glob("*.pdf")))
 
+    def test_context_packet_cannot_drop_the_named_creative_methods(self):
+        run = self.initial_context()
+        with self.assertRaises(ValueError):
+            state.build_context_packet(run["root"], self.base / "creative", ["brief"])
+
     def test_stale_brief_prevents_a_context_packet(self):
         run = self.initial_context()
         self.write(run, "brief.txt", "Changed after brief review")
         with self.assertRaises(ValueError):
-            state.build_context_packet(run["root"], self.base / "creative", ["brief"])
+            state.build_context_packet(run["root"], self.base / "creative", ["brief", "creative-inputs", "method-claude-seo", "method-impeccable", "method-apple-design", "method-scroll-craft"])
         self.assertFalse((self.base / "creative").exists())
 
     def test_review_id_without_hashed_receipt_cannot_pass(self):
@@ -468,10 +478,11 @@ class StateTests(unittest.TestCase):
         self.assertEqual(receipt["status"], "PREPARED")
         packet = self.base / "packet"
         self.assertEqual({p.name for p in packet.iterdir()}, {"client.pdf", "manifest.json"})
-        self.assertEqual((packet / "client.pdf").read_text(), "Fixture client file")
+        expected=(Path(run["root"])/"exports/client.pdf").read_bytes()
+        self.assertEqual((packet / "client.pdf").read_bytes(), expected)
         manifest = json.loads((packet / "manifest.json").read_text())
         self.assertEqual(manifest["files"][0]["sha256"],
-                         hashlib.sha256(b"Fixture client file").hexdigest())
+                         hashlib.sha256(expected).hexdigest())
         self.assertNotIn(str(self.base), json.dumps(manifest))
         self.assertNotIn("sales", json.dumps(manifest))
 

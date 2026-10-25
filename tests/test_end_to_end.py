@@ -51,7 +51,10 @@ class EndToEndTests(unittest.TestCase):
             self.assertNotEqual(receipt['quality'],'PASS')
             client_source = run_dir/'client/index.html'
             client_source.write_text(client_source.read_text().replace('Source éditable','Source modifiée'))
-            export = command('export',client_source,run_dir/'client/document.pdf','--audience','client')
+            original_pdf=(run_dir/'client/document.pdf').read_bytes()
+            command('export',client_source,run_dir/'client/document.pdf','--audience','client',success=False)
+            self.assertEqual((run_dir/'client/document.pdf').read_bytes(),original_pdf)
+            export = command('export',client_source,run_dir/'client/document-r2.pdf','--audience','client')
             invalidated = state.invalidate_changed(run_dir)
             self.assertIn('artifact:client-source',invalidated['invalidated'])
             self.assertIn('artifact:client-pdf',invalidated['invalidated'])

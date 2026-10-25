@@ -12,6 +12,8 @@ L'URL suffit pour commencer. Rechercher le contexte au lieu de réclamer un brie
 
 Recevoir l'URL, les contraintes connues et l'état de collecte encore valide. Utiliser le navigateur rendu du moteur installé lorsqu'il est disponible ; conserver un reçu exact de son usage. Sur desktop puis mobile, ouvrir tous les menus et sous-menus, scroller les contenus révélés et documenter les destinations, états et erreurs. Consigner aussi les réseaux, documents, médias et parcours reliés à l'entreprise.
 
+Après confirmation de l’entité et de l’actuel, appliquer [l’enrichissement historique borné](references/history.md) : consulter Wayback pour l’accueil, puis une seconde page seulement si utile. L’historique ne remplace aucune analyse actuelle et ne date pas la dernière mise à jour.
+
 Une URL recensée reçoit une issue de tentative. L'inaccessible n'est pas analysé ; une destination sans tentative laisse la couverture incomplète. Analyser en profondeur par familles avec échantillon déclaré si nécessaire. Les recommandations de parcours définitives attendent le registre complet des issues.
 
 ## Sortie contrôlable

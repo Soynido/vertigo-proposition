@@ -1,42 +1,9 @@
-# Décision de qualité et de remise
+# Revue : une matrice canonique
 
-Les barèmes suivants sont **candidats**, sans calibration humaine. Ils structurent un jugement, pas une garantie créative. Évaluer chaque critère à 0, 1 ou 2 avec observation localisée : 0 = défaut majeur, 1 = résultat partiel, 2 = critère démontré. Les ancrages spécifiques sont ci-dessous.
+Lire [la matrice et les règles de qualité du principal](../../proposition/references/quality.md). Cette source unique définit les critères 0/1/2, les seuils, les revues isolées, les contrôles finaux et les limites ; ne pas maintenir une copie locale concurrente.
 
-| Revue direction | 0 | 1 | 2 |
-|---|---|---|---|
-| Spécificité client | Direction interchangeable | Quelques signes client sans idée propre | Idée et choix dérivés de caractéristiques prouvées |
-| Cohérence du monde | Styles incompatibles | Cohérence locale, rupture entre vues | Composition, image, mots et interaction portent la même idée |
-| Fidélité des médias | Produit/scène trompeur ou droit indispensable inconnu | Provenance ou transformation incomplète | Sources, droits et transformations utiles vérifiés et tracés |
-| Diversité et prolongement | Répétition d'un modèle | Variations décoratives | Plusieurs visions prolongent réellement la proposition |
-| Lecture et faisabilité | Vue essentielle illisible/incohérente | Vue plausible, un état essentiel incomplet | Desktop/mobile et réalisabilité soutenus par les vues et contraintes |
+Pour une revue créative, examiner le [contrat créatif exact](../../proposition-creative/references/creative-contract.md), sa tâche de lancement, le brief transmis et les artefacts. Vérifier le lien observations/recommandations → scènes, les signes préservés et la chronologie rendus → inspection → comparaison. Une direction déjà choisie se juge sur les prolongements demandés, sans exiger une alternative.
 
-| Revue client | 0 | 1 | 2 |
-|---|---|---|---|
-| Offre et enjeu | Lecteur ne sait pas de quoi il s'agit | Offre claire, enjeu flou | Offre, public et enjeu se comprennent sans contexte oral |
-| Histoire et proposition | Audit sans mission ou décision | Mission/décision implicite | Transformation, travail d'agence et décision explicites |
-| Preuve et honnêteté | Fait/promesse trompeur | Limite ou source importante peu visible | Chaque affirmation décisive est soutenue ou conditionnelle |
-| Composition et hiérarchie | Vue décisive absente/illisible | Vue présente mais rôle ou lecture partiel | Visuels et textes prouvent la chaîne de décision |
-| Mots et lisibilité | Jargon ou ambiguïté change le sens | Compréhension possible avec effort | Phrases concrètes, bénéfices crédibles et légendes utiles |
+Pour les rapports d'étape, lire [les cinq critères du passage](../../proposition/references/stage-quality.md) et [ses preuves d'acceptation](../../proposition/references/acceptance.md). Les identifiants et ancrages embarqués du principal font autorité. Les exports PPTX et le contexte suivent [leur contrat de livraison](../../proposition/references/editable-delivery.md).
 
-| Revue interne | 0 | 1 | 2 |
-|---|---|---|---|
-| Fidélité au projet | Offre/direction différente | Quelques décisions mal reportées | Dossier dérivé de la révision finale stabilisée |
-| Utilité des actions | Actions génériques ou mauvais vendeur | Actions utiles sans déclencheur/responsable | Actions conditionnelles, par rôle, suivables avec preuve et arrêt |
-| Complétude de reprise | Blocage essentiel caché | Reprise possible avec lacunes signalées | Prochaine personne sait reprendre et vérifier sans l'historique |
-| Sources et dépendances | Certitude inventée | Source/validité partielle | Preuves, inconnues, dépendances et acceptation localisées |
-| Séparation des informations | Fuite de contenu privé | Classification/paquet incertain | Projections et fichiers exacts contrôlés pour leur audience |
-
-## Deux décisions distinctes
-
-Appliquer ces décisions à chaque étape. Le skill principal embarque `references/stage-quality.md` (cinq objets de jugement par passage) et `references/acceptance.md` (81 preuves minimales), ainsi que les critères canoniques sous `scripts/proposition_runtime/data/stages.json`. Localiser son dossier installé, sans supposer le checkout ou le répertoire de travail. Une revue globale n'est pas un rapport d'étape.
-
-1. **Complétude** : énumérer chaque obligation applicable avec preuve et empreinte, issue, défaut et correction. Une obligation non prouvée ne disparaît pas dans une moyenne. Une exclusion exige une justification d'applicabilité.
-2. **Qualité** : chaque réviseur requis rend ses cinq critères, preuves, total et défauts. Chacun doit atteindre au moins 9/10 sans défaut bloquant. Pas de moyenne entre personnes/agents, ni substitution d'une auto-note.
-
-Le client exige deux revues de contextes distincts sans historique auteur ni verdict partagé, en plus des rapports des treize étapes. Chaque reçu comprend identité de rôle et mécanisme de contexte séparé, paquet d'entrée exact et empreintes, versions revues, notes critère par critère, défauts localisés, résultat et correction demandée. Sans séparation réelle : `BLOCKED`. Sans fichier exporté et inspecté : contrôle final `NOT_RUN`, pas `PASS`. Un avis d'une autre révision devient `STALE`.
-
-## Fichiers finaux
-
-Rendre puis lire toutes les pages de chacun des trois PDF exacts : récit, mission, mots, preuves, légendes, sources, liens, images, marges, coupures, débordements, nombre de pages, polices et séparation d'audience. Comparer aux sources éditables de la même révision ; inspecter le paquet distribuable, pas seulement l'écran de composition. Attacher les résultats aux empreintes. Après réexport, invalider et recontrôler les dépendants.
-
-Le scan de confidentialité est un signal complémentaire, pas une preuve universelle d'absence de fuite. Droit de diffusion, responsable confirmé et accord de publication restent des champs séparés. Aucun « enregistré » sans effet relu ; aucun « consommé » déduit d'une simple écriture.
+Rendre les observations, fichiers/empreintes, notes, obligations, défauts et limites sur la même révision. Une procédure suivie, un export mécanique ou une présence de fichier ne certifient pas la qualité esthétique, l'édition dans une application ou le droit de diffusion.

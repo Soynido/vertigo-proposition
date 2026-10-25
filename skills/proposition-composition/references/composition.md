@@ -2,9 +2,11 @@
 
 Créer la source client depuis le paquet public seulement. Les sources internes sont dérivées du projet final et peuvent recevoir un contexte privé autorisé distinct. Aucune donnée interne dans un commentaire HTML, une note, un actif ou un onglet masqué du paquet client.
 
+Le document est composé avec le même soin qu’un site : hiérarchie typographique, grands visuels, cadrages et transitions servent une idée propre au client. Les couleurs et la forme viennent du monde validé, pas d’un gabarit d’agence universel.
+
 Le board établit les règles ; les vues desktop/mobile montrent une proposition praticable ; la comparaison relie état sourcé et changement proposé. Choisir où les montrer selon l'argument. Les vues complètes jointes complètent le document, sans cacher un élément indispensable à sa compréhension.
 
-Preuve de page centrale : révision source, rendu à taille finale, intention comparée, observations localisées, décision de correction ou de déclinaison. Une miniature ou un board seul ne remplit pas ce contrôle.
+Preuve de page centrale : révision source, rendu à taille finale, intention comparée, observations localisées, décision de correction ou de déclinaison. Une miniature ou un board seul ne remplit pas ce contrôle. Produire les exports client candidats PDF/PPTX exacts avant les deux revues ; promouvoir ces mêmes octets. Tout changement impose une nouvelle révision et les contrôles dépendants, sans dossiers internes prématurés.
 
 Pour les photographies, mesurer la surface visible de chaque placement dans chaque livrable. Distinguer authentique, retouche fidèle et scène synthétique ; tracer recadrages et transformations. La cible est au moins 80 % authentique/fidèle et au plus 20 % synthétique. Un ratio non mesurable est une limite à revoir, pas un nombre deviné.
 
