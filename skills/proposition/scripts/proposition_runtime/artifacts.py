@@ -7,10 +7,12 @@ from __future__ import annotations
 import hashlib
 from html.parser import HTMLParser
 import json
+import io
 import os
 from pathlib import Path
 import re
 import zipfile
+import tempfile
 from urllib.parse import unquote, urlsplit
 
 
@@ -95,6 +97,8 @@ class PassiveHTML(HTMLParser):
 def export_pdf(source: Path, output: Path, *, audience: str = "client") -> dict:
     from playwright.sync_api import sync_playwright
     source, output = Path(source).resolve(), Path(output).resolve()
+    if output.exists():
+        raise ValueError('Export exists: use a new revision, never overwrite validated bytes')
     if not source.is_file():
         raise ValueError("Source HTML is missing")
     checker = PassiveHTML(source.parent)
@@ -124,12 +128,20 @@ def export_pdf(source: Path, output: Path, *, audience: str = "client") -> dict:
             broken = page.locator("img").evaluate_all("images => images.filter(i => !i.complete || i.naturalWidth === 0).map(i => i.getAttribute('src'))")
             if broken:
                 raise ValueError("Some source images did not load")
-            page.pdf(path=str(output), print_background=True, prefer_css_page_size=True, tagged=True)
+            pdf_bytes = page.pdf(print_background=True, prefer_css_page_size=True, tagged=True)
         finally:
             context.close()
             browser.close()
     from pypdf import PdfReader
-    return {"path": str(output), "sha256": sha256(output), "source_sha256": sha256(source), "page_count": len(PdfReader(output).pages), "audience": audience, "scope": "export_only"}
+    count = len(PdfReader(io.BytesIO(pdf_bytes)).pages)
+    with tempfile.NamedTemporaryFile(dir=output.parent, suffix='.pdf', delete=False) as stream:
+        temporary = Path(stream.name)
+        stream.write(pdf_bytes)
+    try:
+        os.link(temporary, output)  # Atomic exclusive publication; collisions preserve prior bytes.
+    finally:
+        temporary.unlink(missing_ok=True)
+    return {"path": str(output), "sha256": sha256(output), "source_sha256": sha256(source), "page_count": count, "audience": audience, "scope": "export_only"}
 
 
 def inspect_pdf(pdf: Path, output_dir: Path, *, audience: str = "client", max_pages: int | None = None) -> dict:

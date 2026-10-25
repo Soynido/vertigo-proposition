@@ -22,7 +22,9 @@ Dans le parcours complet, le brief suit la collecte, les analyses et leur récon
 
 Le créatif reçoit ce brief, les sources et médias sélectionnés, leurs droits/transformations et les fichiers/empreintes du paquet public. Il explore les formes qui rendent ces recommandations visibles. Les constats ne sont pas reconstruits après coup pour justifier une image séduisante. Les recommandations SEO/GEO peuvent guider contenus, messages et navigation ; les détails techniques sans effet visuel restent dans le dossier interne.
 
-Rendre explicites les codes confirmés à préserver et ce qui peut évoluer. Le résultat doit exprimer la même marque avec plus de clarté et de force. Les qualités observées sur le site ne sont pas automatiquement une charte imposée ; une refonte d'identité n'est pas déduite d'une demande de refonte de site.
+Fixer une opportunité principale : public et statut de preuve, tâche, observation, changement, bénéfice prudent, périmètre utile et alternative. Choisir entre maintien, amélioration ciblée, landing ou refonte plus large ; le CMS et l’âge apparent ne décident pas seuls. Sans besoin actuel démontré, garder une exploration ou hypothèse explicitement nommée.
+
+Rendre explicites trois classes de codes : confirmés à préserver, observés mais adaptables, inconnus. L’absence de charte n’autorise pas une nouvelle identité affirmée ; proposer les évolutions importantes de façon réversible. Le résultat doit exprimer la même marque avec plus de clarté et de force. Les qualités observées sur le site ne sont pas automatiquement une charte imposée ; une refonte d'identité n'est pas déduite d'une demande de refonte de site.
 
 Une observation décisive manquante reste une inconnue à résoudre ou une hypothèse signalée avant création. Si l'utilisateur demande seulement une exploration créative depuis des sources partielles, conserver cette portée et ses hypothèses ; ne pas annoncer une analyse préalable complète. Toute modification utile du brief invalide les créations et jugements qui en dépendent.
 

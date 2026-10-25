@@ -11,3 +11,5 @@ Structurer les faits par `declaration` (la source dit), `observation` (constaté
 La provenance d'un rapport ne garantit pas son applicabilité : regarder méthode, définitions, population, période et conflit éventuel avant d'en tirer une conclusion marché. Conserver une piste vers la contradiction plutôt que lisser les sources.
 
 Sources de méthode : [profils et séparation des observations](https://github.com/coreyhaines31/marketingskills/tree/main/skills/competitor-profiling), [collecte sourcée](https://github.com/ilexlyu/ad-proposal-skills/tree/main/skills/ad-research-collector), [limite méthodologique documentée](https://github.com/ilexlyu/ad-proposal-skills/pull/3). La dernière est une proposition de correction, pas une fonctionnalité prétendue fusionnée.
+
+L’historique suit [son contrat borné](history.md), après identification actuelle. Distinguer état archivé, publication et consultation ; une capture ne démontre pas une date de refonte ou une absence de mises à jour.

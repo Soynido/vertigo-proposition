@@ -556,14 +556,14 @@
         },
         {
           "id": "system",
-          "observable": "A rendered opening, client-specific reveal and usable action form a coherent progression, with a separate readable mobile composition",
+          "observable": "A qualified master scene supports genuine website opening, reveal and useful action interfaces, with a distinct mobile arrangement at its declared target width",
           "evidence": [
             "full-direction-board"
           ],
           "anchors": {
             "0": "Hero only, absent mobile or no client-specific reveal",
-            "1": "Progression exists but a reveal, action, method application or mobile readability is materially weak",
-            "2": "All narrative moments and mobile are inspected at useful size; signature is client-specific, actions preserved and four methods applied with references"
+            "1": "A sequence exists but its reveal is generic, website structure is missing, or mobile merely crops desktop",
+            "2": "Exact rendered interface zones show a useful client-specific discovery, controlled composition, progression and genuinely rearranged readable mobile"
           }
         },
         {
@@ -707,14 +707,14 @@
         },
         {
           "id": "visual",
-          "observable": "Full-size rendered compositions support readability and hierarchy without severe defects",
+          "observable": "Exact full-size web/mobile views and deck pages show controlled composition and a useful client-specific discovery, not merely absence of overflow",
           "evidence": [
             "full-size-review-index"
           ],
           "anchors": {
             "0": "Missing, misleading or contradicted evidence for: Full-size rendered compositions support readability and hierarchy without severe defects",
-            "1": "Partially demonstrated, with a material unresolved weakness: Full-size rendered compositions support readability and hierarchy without severe defects",
-            "2": "Demonstrated by current inspectable evidence at the stated scope: Full-size rendered compositions support readability and hierarchy without severe defects"
+            "1": "Readable and consistent but decisive scenes are generic, flat, poster-like or require a verbal explanation",
+            "2": "Situated comparison shows distinctive composition, clear hierarchy, visible useful change and a credible website/mobile experience"
           }
         },
         {

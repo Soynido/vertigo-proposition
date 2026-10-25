@@ -1,0 +1,44 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"Optional bounded historical observations, never a site update date",
+  "type":"object","additionalProperties":false,
+  "required":["schema_version","revision","collected_at","mode","outcome","entity_source_refs","limits","attempts","snapshots","comparisons","unknowns"],
+  "properties":{
+    "schema_version":{"const":"site-history/1"},"revision":{"type":"string","minLength":1},
+    "collected_at":{"type":"string","minLength":1},"mode":{"enum":["auto","off"]},
+    "outcome":{"enum":["COMPARED","LIMITED","UNAVAILABLE","OFF"]},
+    "entity_source_refs":{"type":"array","items":{"type":"string","pattern":"^source:.+$"}},
+    "limits":{"type":"object"},"request_count":{"type":"integer","minimum":0,"maximum":8},
+    "unknowns":{"type":"array","items":{"type":"string"}},
+    "attempts":{"type":"array","maxItems":8,"items":{"type":"object","additionalProperties":false,
+      "required":["original_url","requested_target_at","status"],"properties":{
+        "original_url":{"type":"string"},"requested_target_at":{"type":["string","null"]},
+        "status":{"enum":["UNAVAILABLE","DUPLICATE","INDEX_ONLY","RETRIEVED_NOT_RENDERED"]},
+        "reason":{"type":"string"},"index_path":{"type":"string"},"index_locator":{"type":"string"},
+        "index_source_ref":{"type":"string","pattern":"^source:.+$"}
+    }}},
+    "snapshots":{"type":"array","maxItems":4,"items":{"type":"object","additionalProperties":false,
+      "required":["id","original_url","requested_target_at","archive_captured_at","retrieved_at","replay_url","index_source_ref","index_path","content_source_ref","content_path","entity_match","entity_evidence","render_completeness","render_ref","missing_assets","live_resource_contamination"],
+      "properties":{
+        "id":{"type":"string"},"original_url":{"type":"string"},"requested_target_at":{"type":["string","null"]},
+        "archive_captured_at":{"type":"string"},"retrieved_at":{"type":"string"},"replay_url":{"type":"string"},
+        "index_source_ref":{"type":"string","pattern":"^source:.+$"},"index_path":{"type":"string"},
+        "content_source_ref":{"type":["string","null"],"pattern":"^source:.+$"},"content_path":{"type":["string","null"]},
+        "entity_match":{"enum":["confirmed","rejected","unknown"]},
+        "entity_evidence":{"type":"array","items":{"type":"string","pattern":"^source:.+$"}},
+        "render_completeness":{"enum":["not_rendered","partial","complete"]},
+        "render_ref":{"type":["string","null"],"pattern":"^artifact:.+$"},
+        "missing_assets":{"type":"array","items":{"type":"string"}},
+        "live_resource_contamination":{"type":["boolean","null"]}
+    }}},
+    "comparisons":{"type":"array","items":{"type":"object","additionalProperties":false,
+      "required":["historical_source_ref","current_source_ref","observation","page_zone","difference_type","limitation","client_allowed"],
+      "properties":{
+        "historical_source_ref":{"type":"string","pattern":"^source:.+$"},
+        "current_source_ref":{"type":"string","pattern":"^source:.+$"},
+        "observation":{"type":"string","minLength":1},"page_zone":{"type":"string","minLength":1},
+        "difference_type":{"enum":["content","structure","visual"]},"limitation":{"type":"string"},
+        "client_allowed":{"type":"boolean"}
+    }}}
+  }
+}

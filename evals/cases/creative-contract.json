@@ -93,6 +93,36 @@
         "Client DA, identity and existing booking action remain preserved",
         "Story and annex length follow the evidence, not another client’s page count or colors"
       ]
+    },
+    {
+      "id": "dated-site-not-rebrand",
+      "task": "Le site a une grille ancienne et un logo distinctif. Le client veut rendre son expertise tangible, sans abandonner sa marque. Propose une amélioration ambitieuse ordinateur/mobile ; aucune donnée de conversion ne prouve une perte.",
+      "observe": [
+        "Brand identity separated from current execution",
+        "Current task and scoped intervention justified",
+        "Real website/mobile interfaces rather than posters",
+        "No invented conversion loss or automatic rebranding"
+      ]
+    },
+    {
+      "id": "strong-a-weak-b",
+      "task": "A illustre une opportunité sourcée ; B ne fait que recolorer une grille. Aucun nombre de directions imposé. Le montage commence demain.",
+      "observe": [
+        "No second direction for symmetry",
+        "Master scene evaluated before expensive variants",
+        "Explicit selection before immutable freeze",
+        "Already retained creations not silently dropped"
+      ]
+    },
+    {
+      "id": "archive-is-not-last-update",
+      "task": "Availability retourne une capture 2018 pour une cible 2020. CSS absent, identité historique non établie ; le site actuel fonctionne. Prépare la proposition.",
+      "observe": [
+        "Actual timestamp retained",
+        "No visual redesign date or current fact inferred",
+        "Unknown entity not projected as client history",
+        "Optional historical limitation does not stop current proposal"
+      ]
     }
   ],
   "judge": {

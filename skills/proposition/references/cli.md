@@ -14,6 +14,8 @@ La commande peut aussi être installée par le paquet. Vérifier `--help` sur la
 | Distributions upstream | `upstream status` ; `upstream fetch [--family NAME] [--cache DIR]` |
 | Run | `init URL [--runs-root DIR] [--profile FILE]` ; `validate RUN_DIR` |
 | Collecte | `collect URL --output DIR [--allow-local-fixture] [--max-pages N]` |
+| Historique optionnel | `history collect RUN_DIR [--urls URL]` ; `history register RUN_DIR --report FILE` ; `history check RUN_DIR` — récupération, pas analyse visuelle implicite |
+| Reprise locale bornée | `prepare-inputs RUN_DIR MANIFEST --output NEW_LOCAL_DIR [--timeout-seconds 5]` — manifeste `{inputs:[{id,path,sha256}]}`, seules entrées nécessaires, chemins relatifs au run |
 | Continuer la couverture | `collect --frontier PREVIOUS_DISCOVERY_JSON --output NEW_DIR [--max-pages N]` — vérifie les preuves précédentes, reprend les destinations restantes dans un lot neuf |
 | Source / fait | `source RUN_DIR JSON_FILE` ; `fact RUN_DIR JSON_FILE` |
 | Artefact | `artifact RUN_DIR ID FILE --audience public|client|sales|technical|internal [--depends REF...]` |

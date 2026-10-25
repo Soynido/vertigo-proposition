@@ -15,7 +15,7 @@ Les barèmes suivants sont **candidats**, sans calibration humaine. Ils structur
 | Offre et enjeu | Lecteur ne sait pas de quoi il s'agit | Offre claire, enjeu flou | Offre, public et enjeu se comprennent sans contexte oral |
 | Histoire et proposition | Catalogue ou diagnostic sans mission/décision | Rubriques présentes mais lien preuve → changement → bénéfice implicite, répétitif ou mission réduite sans raison à des maquettes | Pages exactes démontrant une opportunité sourcée, sa réponse visible, la valeur de réalisation de l’agence et la prochaine décision |
 | Preuve et honnêteté | Fait/promesse trompeur | Limite ou source importante peu visible | Chaque affirmation décisive est soutenue ou conditionnelle |
-| Composition et hiérarchie | Vue décisive absente/illisible | Vue présente mais rôle ou lecture partiel | Visuels et textes prouvent la chaîne de décision |
+| Composition et hiérarchie | Vue décisive absente/illisible | Lecture possible mais composition générique ou révélation faible | Zones exactes montrant composition maîtrisée, découverte utile propre au client et chaîne de décision lisible |
 | Mots et lisibilité | Jargon ou ambiguïté change le sens | Compréhension possible avec effort | Phrases concrètes, bénéfices crédibles et légendes utiles |
 
 | Revue interne | 0 | 1 | 2 |
@@ -49,6 +49,6 @@ Le scan de confidentialité est un signal complémentaire, pas une preuve univer
 
 ## Progression créative et critères non compensables
 
-Appliquer [les preuves de progression](experience-evidence.md) et les critères `required_full_scores` du registre : ils exigent chacun 2/2. Un total de 9 ne compense pas un système créatif partiel ou une faiblesse majeure de démonstration, langage ou spécificité. Le contrôle des fichiers ne mesure pas l’émotion : inspecter les scènes, leur rythme et le moment singulier. Une belle couverture seule ne qualifie pas une direction. Les mesures déclarées de lisibilité doivent être confrontées aux styles et aux images réelles.
+Appliquer [les preuves de progression](experience-evidence.md) et les critères `required_full_scores` du registre : ils exigent chacun 2/2. Un total de 9 ne compense pas un système créatif partiel ou une faiblesse majeure de démonstration, langage ou spécificité. Le maximum de `creative.direction.system/specificity` et `review.client.visual/specificity` exige une comparaison située : actuel, proposition, changement découvert, composition et usage. Une scène banale ou un poster ne devient pas une interface convaincante parce que le total atteint 9. Le refus artistique se traduit dans le statut de revue, pas seulement dans un commentaire. Aucun nouveau score « WOW ». Le contrôle des fichiers ne mesure pas l’émotion : inspecter les scènes, leur rythme et le moment singulier. Une belle couverture seule ne qualifie pas une direction. Les mesures déclarées de lisibilité doivent être confrontées aux styles et aux images réelles.
 
 Le mode `parameters.delivery_scope: client` exclut les dossiers internes de la validation applicable ; il ne dispense d’aucune analyse ni revue client. `next-stage` utilise les enregistrements du run, pas les notes annexes. Aucun plafond implicite de pages ; seule une limite explicite s’applique.

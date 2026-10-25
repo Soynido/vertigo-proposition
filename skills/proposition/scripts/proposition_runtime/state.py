@@ -177,6 +177,8 @@ def init_run(url, run_root, profile=None):
                 "required_reviewers": ["review-a", "review-b"], "parameters": {}}
     if profile is not None:
         selected.update(deepcopy(profile))
+    _schema('profile',selected)
+    selected['parameters'].setdefault('proposal_contract',2)
     _schema("profile", selected)
     run_id = f"run-{uuid4().hex}"
     root = base / run_id
@@ -272,6 +274,16 @@ def add_source(run_dir, source_id, path=None, *, kind="public", locator=None,
                status="COLLECTED", audience="internal", required=True):
     """Register a collected local copy or an explicit unavailable source."""
     state = load_run(run_dir)
+    record = _source_record(state, source_id, path, kind=kind, locator=locator,
+                            status=status, audience=audience, required=required)
+    state['sources'][source_id] = record
+    save_run(run_dir,state)
+    return record
+
+
+def _source_record(state, source_id, path=None, *, kind='public', locator=None,
+                   status='COLLECTED', audience='internal', required=True):
+    """Build and validate without writing; used by atomic evidence bundles."""
     root = Path(state["root"])
     evidence = _safe_path(root, path) if path is not None else None
     record = {"id": _identifier(source_id), "kind": kind, "locator": locator,
@@ -279,8 +291,6 @@ def add_source(run_dir, source_id, path=None, *, kind="public", locator=None,
               "sha256": _sha(evidence) if evidence else None, "status": status,
               "audience": audience, "required": required, "observed_at": _now()}
     _schema("source", record)
-    state["sources"][source_id] = record
-    save_run(root, state)
     return record
 
 
@@ -302,6 +312,13 @@ def add_fact(run_dir, fact_id, value, source_ids, *, status="CONFIRMED",
 def add_artifact(run_dir, artifact_id, path, audience, dependencies=()):
     """Hash a local file. Registration alone grants no quality/release approval."""
     state = load_run(run_dir)
+    record = _artifact_record(state,artifact_id,path,audience,dependencies)
+    state['artifacts'][artifact_id] = record
+    save_run(run_dir,state)
+    return record
+
+
+def _artifact_record(state, artifact_id, path, audience, dependencies=()):
     root = Path(state["root"])
     evidence = _safe_path(root, path)
     record = {"id": _identifier(artifact_id), "path": evidence.relative_to(root).as_posix(),
@@ -310,8 +327,6 @@ def add_artifact(run_dir, artifact_id, path, audience, dependencies=()):
               "approval": None, "recorded_at": _now()}
     _bind(state, record, dependencies)
     _schema("artifact", record)
-    state["artifacts"][artifact_id] = record
-    save_run(root, state)
     return record
 
 
@@ -506,6 +521,10 @@ def _stage_report(state, stage_id):
                 "issues": [], "reason": "Internal deliverables excluded by explicit client scope"}
     requirements = [row for row in _requirements() if row["stage_id"] == stage_id]
     issues = []
+    if stage_id in {'discovery.channels','company.v1','company.v2','analysis.specialists','brief.public','creative.direction','client.composition','verify.final'}:
+        from .history import inspect_history
+        for message in inspect_history(state)['issues']:
+            issues.append({'code':'historical_provenance','id':stage_id,'message':message})
 
     def issue(code, identifier, message):
         issues.append({"code": code, "id": identifier, "message": message})

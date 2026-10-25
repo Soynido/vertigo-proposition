@@ -56,3 +56,5 @@ Les chemins sont relatifs au paquet ; les médias nécessaires sont joints, pas 
 - Séparer fichier généré, structure vérifiée, rendu inspecté, import testé et modification/réexport testés. Le statut de l'un ne valide pas les autres.
 
 La composition source et ses projections restent d'une même révision. Toute édition externe utile crée une nouvelle révision à réconcilier avec les sources et le contexte ; les anciennes revues ne se reportent pas automatiquement. La qualité esthétique et le droit de diffusion restent des décisions distinctes de l'édition.
+
+L’historique éventuel dans `Contexte client.md` distingue capture, publication, consultation et limites ; il ne date pas une dernière MAJ supposée. N’y inclure que les observations autorisées issues du corpus interne, selon le contrat de découverte.

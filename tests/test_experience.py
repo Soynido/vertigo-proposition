@@ -14,6 +14,14 @@ class ExperienceTests(unittest.TestCase):
         self.run=state.init_run('https://fixture.example/',Path(self.tmp.name)/'runs')
         self.root=Path(self.run['root']);prepare_experience(self.run)
 
+    def test_new_runs_require_a_sourced_opportunity_before_creation(self):
+        self.mutate('creative-inputs',lambda data:data.pop('opportunity',None))
+        self.assertEqual(self.check()['status'],'BLOCKED')
+
+    def test_new_mobile_requires_target_width_and_real_adaptation_evidence(self):
+        self.mutate('creative-experience',lambda data:data['directions'][0]['mobile'].pop('adaptation',None))
+        self.assertEqual(self.check()['status'],'BLOCKED')
+
     def check(self,stage='creative.direction'):
         from proposition_runtime.experience import inspect_experience
         return inspect_experience(state.load_run(self.root),stage)

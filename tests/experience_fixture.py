@@ -49,6 +49,10 @@ def prepare_inputs(run):
                              'application':'Check a specific aspect of the rendered evidence.',
                              'moment_ids':['a-opening','a-reveal','a-action']})
     inputs={'revision':'r1','direction_ids':['a'],'methods':families,
+            'opportunity':{'audience':'Architects','task':'Understand material before requesting quote',
+                'proof':proof,'change':'Show light through the real material','benefit':'Choose the appropriate application',
+                'scope':'targeted journey','alternative':'Existing product information may already answer the need',
+                'brand_codes':{'preserve':['Material and product truth'],'adapt':['Page composition'],'unknown':[]}},
             'observations':[{'id':'o1','proof':proof,'decision':'retained','reason':'Demonstrate the real material before the quote action.','benefit':'Understand the product before requesting a quote.'}],
             'actions':[{'id':'quote','proof':proof,'target':'https://fixture.example/quote','label':'Request a quote'}]}
     source=write_artifact(run,'creative-inputs','creative-inputs.json',inputs)
@@ -73,7 +77,8 @@ def prepare_experience(run):
     plan={'revision':'r1','inputs_sha256':source['sha256'],'method_applications':applications,
           'directions':[{'id':'a','signature':{'moment_id':'reveal','client_anchor':proof,'visible_change':'Material opens to reveal its effect on the room.'},
                          'motion_status':'static_intent','moments':moments,
-                         'mobile':{'creative_id':'a-mobile','render_ref':'artifact:scene-mobile','action_text_px':16,'action_id':'quote'},
+                         'mobile':{'creative_id':'a-mobile','render_ref':'artifact:scene-mobile','action_text_px':16,'action_id':'quote',
+                                   'viewport_width_px':390,'adaptation':'Stack material explanation before the preserved quote action'},
                          'actions':[{'id':'quote','target':'https://fixture.example/quote','moment_id':'action','label':'Request a quote','disposition':'preserved'}]}]}
     write_artifact(run,'creative-experience','creative-experience.json',plan)
     return retained

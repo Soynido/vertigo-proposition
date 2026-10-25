@@ -74,6 +74,15 @@ def _render(run, reference):
 
 def _inputs(run):
     data,row=_json(run,'creative-inputs')
+    if run['profile']['parameters'].get('proposal_contract')==2:
+        opportunity=data['opportunity']
+        for field in ('audience','task','change','benefit','scope','alternative'):
+            _text(opportunity[field],'opportunity '+field)
+        _proof(run,opportunity['proof'])
+        for field in ('preserve','adapt','unknown'):
+            codes=opportunity['brand_codes'][field]
+            if not isinstance(codes,list) or any(not isinstance(c,str) or not c.strip() for c in codes):
+                raise ValueError('Brand codes must separate preserved, adaptable and unknown choices')
     _text(data['revision'],'input revision')
     ids=data['direction_ids']
     if not isinstance(ids,list) or not ids or len(set(ids))!=len(ids):
@@ -202,6 +211,11 @@ def inspect_experience(run, stage='creative.direction'):
                 raise ValueError('The signature moment must be a rendered reveal beyond the opening')
             _proof(run,signature['client_anchor']);_text(signature['visible_change'],'visible client-specific signature')
             mobile=direction['mobile'];row,fingerprint,size=_render(run,mobile['render_ref'])
+            if run['profile']['parameters'].get('proposal_contract')==2:
+                width=mobile['viewport_width_px']
+                if type(width) is not int or not 240<=width<=768:
+                    raise ValueError('Mobile needs its actual target CSS viewport width')
+                _text(mobile['adaptation'],'actual mobile rearrangement to inspect')
             if fingerprint in fingerprints or size[1]<=size[0]:
                 raise ValueError('Mobile must be a separate portrait composition, not the desktop image')
             identifier=mobile['creative_id'];state._identifier(identifier)

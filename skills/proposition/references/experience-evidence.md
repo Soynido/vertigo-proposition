@@ -27,6 +27,7 @@ Enregistrer un JSON avec l’ID `creative-inputs` :
 | `methods` | Une entrée par famille exacte `claude-seo`, `impeccable`, `apple-design`, `scroll-craft`. Chacune : `{family, commit, reference_ref, reference_root}`. |
 | `observations` | Entrées `{id, proof, decision, reason, benefit}`. `decision` vaut `retained` ou `excluded`. Une retenue a son bénéfice envisagé ; une exclusion sa raison. |
 | `actions` | Entrées `{id, proof, target, label}` pour les actions importantes existantes, y compris les chemins rapides. Inventaire établi avant création, sans suppression rétrospective. |
+| `opportunity` | Nouveaux runs contrat 2 : `{audience, task, proof, change, benefit, scope, alternative, brand_codes:{preserve:[], adapt:[], unknown:[]}}`. Une opportunité principale et un périmètre justifié ; l’esthétique ne démontre pas seule la nécessité de refonte. |
 
 `proof` référence une vraie `source:ID` ou `fact:ID` enregistrée, avec bytes courants. Ne pas inventer un défaut pour atteindre un quota d’opportunités.
 
@@ -63,6 +64,8 @@ Enregistrer un JSON avec l’ID `creative-experience`. Structure fictive à comp
 L’exemple abrège les applications : le fichier réel nomme **les quatre familles** avec mode, empreinte et application à des `creative_id` rendus. `moment_ids` référence les `creative_id` des rendus (par exemple `a-reveal`), et non les IDs locaux des moments (`reveal`). `native` exige `execution_ref` vers un artefact JSON `{family, reference_sha256, status:"PASS", outputs:["artifact:ID"]}` avec sorties enregistrées et courantes ; ce reçu déclaré doit être confronté à l’exécution réelle. Sinon employer `adapted`. `unavailable` n’autorise pas une promotion ni un faux usage.
 
 Chaque direction a au moins trois moments distincts en pixels et en sens, en progression, avec ouverture, révélation et action ; une signature sur une révélation liée à une source ; un mobile portrait distinct. Les positions de scroll décrivent l’intention statique, pas un comportement exécuté.
+
+Les nouveaux runs fixent `parameters.proposal_contract: 2` à l’initialisation : opportunité requise ; le mobile ajoute `viewport_width_px` (largeur CSS cible) et `adaptation` (réorganisation concrète à inspecter). Ces déclarations ne prouvent ni responsive ni beauté. Les anciens profils sans ce paramètre gardent leur portée historique ; ne pas les réécrire pour reprendre un montage. Qualifier la scène maîtresse avant les déclinaisons, ou réutiliser une scène inspectée toujours valable.
 
 `action_text_px` est une mesure déclarée à étayer par capture et styles observés à la largeur mobile cible. La revue la vérifie. Le moteur bloque sous le plancher interne de 14 px ; il ne mesure pas la police depuis un PNG et ne certifie pas WCAG.
 

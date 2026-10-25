@@ -105,6 +105,8 @@ def parser():
     sub.add_parser('doctor')
     s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path)
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
+    s = sub.add_parser('prepare-inputs'); s.add_argument('run_dir', type=Path); s.add_argument('manifest', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--timeout-seconds', type=float, default=5)
+    s = sub.add_parser('history'); s.add_argument('operation', choices=['collect','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--urls', nargs='*', default=[]); s.add_argument('--report', type=Path)
     for command in ('validate', 'receipt', 'workbench', 'next-stage', 'check-experience'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path)
         if command == 'check-experience':
@@ -135,6 +137,17 @@ def execute(a):
         from .preservation import freeze_creatives, inspect_preservation
         return freeze_creatives(a.run_dir, read_json(a.selection)) if c == 'freeze-creatives' else inspect_preservation(state.load_run(a.run_dir))
     if c == 'doctor': return doctor()
+    if c == 'history':
+        from . import history
+        if a.operation == 'collect': return history.collect(a.run_dir,a.urls)
+        if a.operation == 'register':
+            if not a.report:raise ValueError('history register requires --report')
+            return history.register(a.run_dir,a.report)
+        state.invalidate_changed(a.run_dir)
+        return history.inspect_history(state.load_run(a.run_dir))
+    if c == 'prepare-inputs':
+        from .recovery import prepare_inputs
+        return prepare_inputs(a.run_dir, a.manifest, a.output, timeout_seconds=a.timeout_seconds)
     if c == 'layout':
         from .layout import assess_placements
         data = read_json(a.manifest)

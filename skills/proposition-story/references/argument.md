@@ -15,7 +15,7 @@ Ces fonctions ne sont ni six pages ni un ordre graphique universel. Le nombre de
 
 ## Carte éditoriale avant montage
 
-Dans le document de travail `client-story-map`, associer chaque page à un titre-conclusion, une idée décisive, la preuve datée et sa limite, le visuel exact retenu, le bénéfice envisagé, l'action de Vertigo et la transition. Pour chaque opportunité, la preuve et la scène proposée se répondent sur des pages identifiables. Reporter les fonctions et observations dans le JSON `client-story` existant ; ne pas inventer des champs de moteur.
+Dans le document de travail `client-story-map`, associer chaque page à un titre-conclusion, une idée décisive, la preuve datée et sa limite, le visuel exact retenu, le bénéfice envisagé, l'action de Vertigo et la transition. Pour chaque opportunité principale, rapprocher preuve cadrée, réponse montrée et utilité sur des pages identifiables. Comparer la même tâche ; un menu capturé ne prouve pas que les visiteurs sont perdus. Une amélioration ciblée peut suffire. Relier la mission de réalisation à cette opportunité, pas à une liste de prestations interchangeable. Reporter les fonctions et observations dans le JSON `client-story` existant ; ne pas inventer des champs de moteur.
 
 Lire seulement les titres : l'enchaînement explique pourquoi changer quelque chose, ce que cela apporte et ce que l'agence ferait. Lire ensuite les textes : objets et actions sont concrets, pronoms clairs, français naturel. Une légende apporte une conséquence utile plutôt que « le cadrage s'élargit » ou « l'index se révèle ». Un bénéfice non mesuré reste une hypothèse ; une formulation réussie se conserve. Relire avec Stop Slop puis vérifier le sens, au-delà des mots repérés.
 
