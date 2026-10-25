@@ -1,12 +1,18 @@
 ---
 name: proposition-quality
-description: Use when a proposal direction, client document, internal handoff, or final export needs a review, especially after edits, missing evidence, self-ratings or conflicting versions.
+description: Use when a proposal needs review, or when repository skills, contracts, workflow or runtime changes need production qualification, especially after assisted tests, self-ratings or conflicting versions.
 license: MIT
 ---
 
 # Vérifier une proposition
 
 Décider sur les fichiers précis et leurs preuves. Lire [les ancrages et le reçu](references/review.md). Le barème est candidat tant qu'il n'est pas calibré humainement.
+
+## Validation production du repo
+
+Pour une étape, un skill ou un contrat nouvellement figé, modifié ou intégré, appliquer [la validation production sans accompagnement](references/production-validation.md). Les essais indépendants d'une capacité servent à la qualifier avant intégration ; la promotion exige ensuite un E2E neuf recevant uniquement **URL REPO + URL SITEWEB**, sans consigne de création ajoutée par le mainteneur. Cette règle s'applique aussi à ce skill de validation : son contrôle documentaire ne vaut pas validation E2E du repo.
+
+Ce mode concerne la maintenance d'une version du kit. Une simple exécution de proposition, son brief client ou le gel de ses images ne déclenchent pas un autre test E2E récursif.
 
 ## Revue
 

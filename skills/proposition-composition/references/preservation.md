@@ -1,6 +1,6 @@
 # Préserver les créations retenues au montage
 
-Ce contrôle complète la passation de direction. Il ne change ni le contrat créatif ni sa capsule. Il intervient **après les scènes rendues et leur comparaison, avant le montage**, puis sur les fichiers finaux. Il ne relance pas la découverte ou la création.
+Ce contrôle complète la passation de direction. Il intervient **après les scènes centrales candidates, leur comparaison et la sélection, puis les déclinaisons retenues, avant le montage**, et de nouveau sur les fichiers finaux. Pour les nouveaux runs, le gel vérifie d'abord les preuves d'exploration et la correspondance des créations retenues. Les candidats écartés restent archivés hors du verrou ; ils ne deviennent pas des slides obligatoires. Le contrôle ne relance pas la découverte ou la création.
 
 ## 1. Figer ce qui doit rester
 

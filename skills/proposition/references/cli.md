@@ -12,7 +12,7 @@ La commande peut aussi être installée par le paquet. Vérifier `--help` sur la
 |---|---|
 | Capacités | `doctor` |
 | Distributions upstream | `upstream status` ; `upstream fetch [--family NAME] [--cache DIR]` |
-| Run | `init URL [--runs-root DIR] [--profile FILE]` ; `validate RUN_DIR` |
+| Run | `init URL [--runs-root DIR] [--profile FILE] [--creative-mandate FILE]` ; `validate RUN_DIR` |
 | Collecte | `collect URL --output DIR [--allow-local-fixture] [--max-pages N]` |
 | Historique optionnel | `history collect RUN_DIR [--urls URL]` ; `history register RUN_DIR --report FILE` ; `history check RUN_DIR` — récupération, pas analyse visuelle implicite |
 | Reprise locale bornée | `prepare-inputs RUN_DIR MANIFEST --output NEW_LOCAL_DIR [--timeout-seconds 5]` — manifeste `{inputs:[{id,path,sha256}]}`, seules entrées nécessaires, chemins relatifs au run |
@@ -41,4 +41,4 @@ La revue d'étape fournit cinq notes explicites, un rôle de réviseur, ses preu
 
 ## Progression et portée
 
-`next-stage RUN_DIR` indique le premier passage applicable non validé. `check-experience RUN_DIR` vérifie la chaîne de preuves créative ; `--stage client.composition` inclut la carte de récit et les pages du PDF. Lire [les champs attendus](experience-evidence.md) avant de créer les artefacts. `inspect --help` expose `--max-pages` pour une limite explicitement demandée ; aucune limite par défaut. Ces contrôles ne produisent pas une note esthétique.
+`next-stage RUN_DIR` indique le premier passage applicable non validé. `check-experience RUN_DIR` vérifie exploration, sélection et développement ; `--stage client.composition` inclut la carte de récit et les pages du PDF. Le défaut d'un nouveau run demande au moins deux mondes centraux avant sélection. `--creative-mandate` s'emploie seulement avec une instruction externe de nombre ou de direction déjà choisie, vérifiée et liée dès l'initialisation. Lire [les champs attendus](experience-evidence.md) avant de créer les artefacts. `freeze-creatives` refuse le gel sans ces preuves. `inspect --help` expose `--max-pages` pour une limite explicitement demandée ; aucune limite par défaut. Ces contrôles ne produisent pas une note esthétique.

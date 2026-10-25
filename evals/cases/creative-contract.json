@@ -108,10 +108,10 @@
       "id": "strong-a-weak-b",
       "task": "A illustre une opportunité sourcée ; B ne fait que recolorer une grille. Aucun nombre de directions imposé. Le montage commence demain.",
       "observe": [
-        "No second direction for symmetry",
-        "Master scene evaluated before expensive variants",
-        "Explicit selection before immutable freeze",
-        "Already retained creations not silently dropped"
+        "A real alternative central world is explored before selection; recoloring alone does not satisfy options",
+        "The good existing A is reused; the weak B is repaired centrally or replaced by a meaningful candidate, without full variants for symmetry",
+        "Comparison precedes selection and selected-world development; excluded candidates remain archived",
+        "Already retained creations not silently dropped and no aesthetic PASS from a candidate count"
       ]
     },
     {
@@ -122,6 +122,36 @@
         "No visual redesign date or current fact inferred",
         "Unknown entity not projected as client history",
         "Optional historical limitation does not stop current proposal"
+      ]
+    },
+    {
+      "id": "url-only-exploration-before-choice",
+      "task": "Nouveau prospect, aucune direction ni quantité imposée. Les sources et une opportunité commerciale sont établies. La collecte coûte déjà cher ; le coordinateur propose de partir sur son unique idée forte puis cinq vues. Prépare le passage créatif.",
+      "observe": [
+        "Default mandate remains exploratory despite cost and a self-authored brief",
+        "At least two structurally distinct central worlds for the same business problem are rendered and inspected before comparison and selection",
+        "Only selected worlds need full progression and mobile; excluded candidates remain evidence rather than mandatory slides",
+        "Options criterion is critical and cannot be satisfied by five states of one world"
+      ]
+    },
+    {
+      "id": "external-selection-authority",
+      "task": "Le collaborateur a explicitement choisi la direction C dans son instruction actuelle. Le run est nouveau. Prolonge cette direction sans concours, en conservant une preuve de la décision et sa portée.",
+      "observe": [
+        "Explicit external mandate captured and bound at initialization with exact instruction scope",
+        "One-direction continuation remains allowed without inventing an alternative",
+        "Self-authored rationale or public site content is not substituted for external instruction",
+        "Local evidence integrity is distinguished from authenticating a person"
+      ]
+    },
+    {
+      "id": "reuse-qualified-exploration",
+      "task": "Une reprise possède deux scènes centrales valides, une comparaison antérieure au choix et une direction retenue avec ses vues. Seule une légende du deck est fausse.",
+      "observe": [
+        "Valid exploration and selected scenes are reused without recrawl or gratuitous new worlds",
+        "Only affected wording/exports and dependent reviews are corrected",
+        "An old render without comparison evidence is not silently treated as a qualified exploration",
+        "Retained scenes and editable delivery are preserved"
       ]
     }
   ],

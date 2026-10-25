@@ -1,5 +1,7 @@
 """Exercise the supported launcher as a collaborator would, in a fresh process."""
 import json
+import hashlib
+from datetime import datetime, timezone
 import os
 from pathlib import Path
 import subprocess
@@ -15,7 +17,7 @@ class CliTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        self.base = Path(self.tmp.name)
+        self.base = Path(self.tmp.name).resolve()
 
     def command(self, *args, ok=True):
         result = subprocess.run([sys.executable, str(LAUNCHER), *map(str, args)],
@@ -35,6 +37,32 @@ class CliTests(unittest.TestCase):
         checked = self.command('check-experience', run['root'], '--stage', 'client.composition', ok=False)
         self.assertEqual(checked['status'], 'BLOCKED')
         self.assertIn('scope', checked)
+
+    def test_initial_explicit_mandate_reaches_the_chosen_direction_contract(self):
+        instruction=(self.base/'current-user-input.txt').resolve()
+        text='Continue the already chosen direction a only.';instruction.write_text(text)
+        mandate=self.base/'creative-mandate.json'
+        mandate.write_text(json.dumps({'version':1,'mode':'external_selection','candidate_count':1,'candidate_ids':['a'],
+            'authority':{'kind':'current_user_instruction','site_url':'https://example.com',
+                         'input_path':str(instruction),'input_sha256':hashlib.sha256(text.encode()).hexdigest(),
+                         'quote':text,'captured_at':datetime.now(timezone.utc).isoformat()}}))
+        run=self.command('init','https://example.com','--runs-root',self.base/'runs','--creative-mandate',mandate)
+        contract=run['metadata']['creative_exploration_contract']
+        self.assertEqual(contract['mode'],'external_selection')
+        self.assertEqual(contract['candidate_ids'],['a'])
+        self.assertEqual((Path(run['root'])/'creative-mandate-input.txt').read_text(),text)
+
+    def test_creative_mandate_file_cannot_block_the_launcher_on_a_fifo(self):
+        mandate=self.base/'creative-mandate.fifo';os.mkfifo(mandate)
+        try:
+            result=subprocess.run([sys.executable,str(LAUNCHER),'init','https://example.com',
+                '--runs-root',str(self.base/'fifo-runs'),'--creative-mandate',str(mandate)],
+                cwd=self.base,capture_output=True,text=True,timeout=2)
+        except subprocess.TimeoutExpired:
+            self.fail('A mandate FIFO blocked the launcher instead of being rejected')
+        self.assertNotEqual(result.returncode,0)
+        self.assertEqual(json.loads(result.stdout)['status'],'ERROR')
+        self.assertFalse((self.base/'fifo-runs').exists())
 
     def test_source_fact_and_receipt_persist_without_exposing_private_value(self):
         run = self.command('init', 'https://example.com', '--runs-root', self.base / 'runs')

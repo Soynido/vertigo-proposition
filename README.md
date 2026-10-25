@@ -6,6 +6,17 @@ Un ensemble de skills pour Codex, avec collecte rendue, preuves versionnées, m�
 
 **Version alpha.** Les tests vérifient des comportements précis du moteur et des méthodes. Ils ne certifient ni une qualité créative universelle, ni une intégration Notion réelle. Les états non vérifiés restent visibles. Voir [qualification](docs/qualification.md) et [capacités](docs/capabilities.md).
 
+## Démarrage avec les deux URL
+
+Quand le message contient l'URL de ce dépôt et celle d'un site prospect, exécuter la proposition complète. Le dépôt fournit la méthode ; le second lien fournit le point de départ de la recherche. Aucun autre prompt créatif n'est nécessaire.
+
+1. Lire ce README, `AGENTS.md` et les scripts d'installation. Cloner la révision distribuée dans un dossier neuf ; relever commit et arbre. Installer les dépendances, les neuf skills et les quatre distributions verrouillées dans une destination isolée avec `python3 scripts/setup.py --dest CHEMIN --browser --with-upstream`, sans remplacer les skills globaux.
+2. Lire le `proposition/SKILL.md` effectivement installé et suivre ses références. Commencer la recherche depuis l'URL prospect ; aucun ancien dossier client n'est une entrée implicite.
+3. Suivre le parcours complet : sources et analyses, brief, **au moins deux mondes créatifs matérialisés et comparés avant sélection**, développement des directions retenues, récit, trois PDF, PowerPoint client, contexte compilé, sources et contrôles.
+4. Produire et inspecter les fichiers locaux avec les capacités disponibles. Les coordonnées, profils privés ou droits absents restent inconnus ; poursuivre les travaux indépendants et déclarer les blocages réels. Aucun nom, actif d'agence ou PASS n'est inventé.
+
+Une instruction explicite de l'utilisateur peut préciser un autre périmètre ou une direction déjà choisie. Elle est consignée avec sa preuve ; le coordinateur ne crée pas cette exception dans son propre brief. L'exploration est le défaut de tout nouveau prospect, même sans le mot « WOW ». La sélection autonome intervient **après** comparaison des scènes centrales ; elle n'impose pas de montrer toutes les explorations dans le PDF final.
+
 ## Installation pour un collaborateur
 
 Donner ce dépôt à Codex avec cette demande :
@@ -64,7 +75,7 @@ Les créations retenues sont figées avant montage puis contrôlées dans les fi
 
 Une direction différente par entreprise ; la signature de l'agence accompagne l'univers du client. Environ 70 % de visuel utile / 30 % de texte. Au plus 20 % de surface photographique synthétique, mesurée sur les placements visibles. Les retouches fidèles gardent original, source et recette. Provenance et droit de diffusion sont deux vérifications différentes. Le logo officiel et les paramètres privés sont apportés localement, jamais inventés.
 
-Une demande « ultra créatif / WOW » active le [contrat créatif](skills/proposition-creative/references/creative-contract.md) : préserver les signes de marque, matérialiser des mondes distincts, inspecter les scènes avant comparaison et conserver le format demandé. Un PDF peut montrer une intention de site immersif sans publication de site. La méthode est vérifiable ; l'effet WOW et la répétabilité exacte ne sont pas garantis.
+Tout nouveau prospect active le [contrat créatif](skills/proposition-creative/references/creative-contract.md) : préserver les signes de marque, rendre une scène centrale par monde, inspecter et comparer avant sélection, puis développer les directions retenues. Deux réponses créatives au même besoin sont valides ; une recoloration et plusieurs états d'une seule idée ne sont pas des mondes distincts. Un PDF peut montrer une intention de site immersif sans publication de site. La méthode est vérifiable ; l'effet WOW et la répétabilité exacte ne sont pas garantis.
 
 Dans le parcours complet, les créatifs reçoivent les sources sélectionnées **et les observations/changements recommandés après analyse**, avec objectifs, signes à préserver et libertés de conception. Les images traduisent ces choix ; elles ne servent pas à inventer après coup un diagnostic. Une demande limitée à une exploration ou à un seul format garde sa portée, sans remise complète prétendument validée.
 

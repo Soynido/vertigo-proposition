@@ -23,7 +23,7 @@ Enregistrer un JSON avec l’ID `creative-inputs` :
 | Champ | Contenu obligatoire |
 |---|---|
 | `revision` | Version stable du brief. |
-| `direction_ids` | IDs uniques des directions demandées ou encore ouvertes. |
+| `direction_ids` | IDs uniques des mondes candidats avant création. Sur les nouveaux runs, le défaut exige au moins deux candidats ; les IDs développés sont ensuite le sous-ensemble retenu par la comparaison. |
 | `methods` | Une entrée par famille exacte `claude-seo`, `impeccable`, `apple-design`, `scroll-craft`. Chacune : `{family, commit, reference_ref, reference_root}`. |
 | `observations` | Entrées `{id, proof, decision, reason, benefit}`. `decision` vaut `retained` ou `excluded`. Une retenue a son bénéfice envisagé ; une exclusion sa raison. |
 | `actions` | Entrées `{id, proof, target, label}` pour les actions importantes existantes, y compris les chemins rapides. Inventaire établi avant création, sans suppression rétrospective. |
@@ -34,6 +34,64 @@ Enregistrer un JSON avec l’ID `creative-inputs` :
 Pour les méthodes : `commit` vient du verrou installé ; `reference_ref` pointe un artefact Markdown copié depuis l’entrypoint primaire de la famille ; `reference_root` indique son arbre public complet vérifié dans le cache. `upstream status` fournit les chemins et l’état ; utiliser `upstream fetch` si nécessaire, sans exécuter de script/installateur. Enregistrer la source publique (URL de commit, copie locale), puis l’artefact avec provenance. Le moteur vérifie la concordance d’octets de l’entrypoint et réutilise le contrôle du cache complet : reçu, inventaire et fichiers doivent correspondre au verrou. Ce contrôle d’intégrité local ne prouve pas qu’une méthode a été lue ou exécutée.
 
 Le créatif reçoit le paquet public **et l’accès explicite à ces arbres publics**, sans autre client ni historique privé. Il lit progressivement les fichiers pertinents, y compris les références liées par les SKILL. L’allowlist de `context-packet` inclut brief, `creative-inputs` et les quatre artefacts de méthodes, approuvés localement pour cette projection et avec provenance. La commande refuse une passation amputée de ces références. Les chemins de travail ne sont jamais recopiés dans le document client.
+
+## Exploration avant sélection : artefact `creative-exploration`
+
+Les nouveaux runs fixent dans leurs métadonnées `creative_exploration_contract`, version 1 : mode `explore`, au moins deux candidats, sélection par l'agent après comparaison. Le brief et `creative-inputs` ne changent pas ce mandat. Les anciens runs sans ce marqueur conservent leur portée historique ; les rouvrir ne vaut pas qualification du nouveau contrat.
+
+Une instruction externe explicite peut être fixée **à l'initialisation** par `init --creative-mandate FILE`. Le fichier JSON contient :
+
+- `version:1`, `mode:"exact_count"` et `candidate_count:N` si le nombre est demandé ; `selection_policy:"keep_open"` conserve toutes les options pour le client, sinon `agent_after_comparison`.
+- Ou `mode:"external_selection"`, `candidate_count:N` et `candidate_ids:[...]` pour les directions déjà choisies à prolonger.
+- `authority:{kind:"current_user_instruction",input_path:"/chemin/absolu/instruction.txt",input_sha256:"...",quote:"instruction exacte",captured_at:"ISO8601 avec fuseau",site_url:"URL du run"}`.
+
+La capture locale est récente (24 h maximum, aucune date future), son empreinte et l'extrait correspondent, et l'URL visée est exactement celle du run. Le JSON du mandat et la capture sont des fichiers réguliers d'au plus 256 Kio ; leur lecture possède une échéance réelle de cinq secondes, sans réessai. Le moteur copie et lie cette pièce au mandat. La revue vérifie que l'extrait impose réellement ce nombre ou cette direction ; un simple lien, un texte du site ou un brief auto-rédigé ne l'autorise pas. Ces contrôles établissent une cohérence locale, **pas l'authentification d'une personne**. L'entrée à deux URL n'apporte aucun mandat particulier : appliquer l'exploration par défaut.
+
+Le propriétaire vérifie ce mandat avant dispatch. Le créatif isolé reçoit seulement son résumé public autorisé (mode, nombre, IDs et politique de choix), dans le brief existant, avec l'extrait utile si sa projection est autorisée. Ce résumé dérive du mandat fixé ; il n'est pas une nouvelle autorité. Ne pas ajouter la capture brute d'une conversation privée à l'allowlist du paquet créatif. Le réviseur vérifie l'instruction réelle dans le périmètre autorisé.
+
+Après les scènes centrales et leur inspection, enregistrer le JSON `creative-exploration` :
+
+```json
+{
+  "version":1,
+  "inputs_sha256":"<empreinte-reelle-creative-inputs>",
+  "candidates":[{
+    "id":"a",
+    "central_scene_ref":"artifact:a-central",
+    "central_scene_sha256":"<empreinte-du-rendu>",
+    "client_anchor":"source:material",
+    "structure":{
+      "composition":"Relation des masses et architecture de lecture visibles",
+      "visual_mechanism":"Rôle singulier de l'image ou de la matière",
+      "narrative_entry":"Manière dont le visiteur entre dans le sujet"
+    },
+    "inspected_at":"<date-reelle-avec-fuseau>",
+    "inspection":"Zones vues, qualité, défauts et correction"
+  }],
+  "comparison":{
+    "compared_at":"<date-reelle-avec-fuseau>",
+    "candidate_ids":["a","b"],
+    "structural_differences":"Différences localisées dans les scènes exactes et compromis"
+  },
+  "selection":{
+    "selected_at":"<date-reelle-avec-fuseau>",
+    "selected_candidate_ids":["a"],
+    "reason":"Choix motivé depuis la comparaison"
+  }
+}
+```
+
+L'exemple abrège les candidats : le fichier réel inclut aussi `b`, ou le nombre du mandat. Deux scènes de pixels identiques, deux recolorations ou cinq vues d'une seule idée ne prouvent pas deux mondes. Le moteur vérifie rendus, empreintes, différences déclarées sur au moins deux dimensions, provenance et ordre daté ; la revue juge les différences effectivement visibles et leur intérêt.
+
+Pour un mandat explicite à un seul candidat, conserver ce même reçu avec une scène centrale inspectée, `candidate_ids:["c"]` et `selected_candidate_ids:["c"]`. La comparaison consigne la vérification de la continuation et ses compromis, sans inventer de concours. C'est le mandat fixé qui autorise la cardinalité un ; cette forme de JSON seule ne l'autorise pas.
+
+Ordre contrôlé : enregistrement de chaque scène centrale → inspection → comparaison → sélection → enregistrement de l'exploration → enregistrement du plan développé. Les nouvelles scènes de déclinaison suivent la sélection. Une scène centrale choisie peut être réutilisée comme un moment final. Le moteur ne prouve pas que les dates déclarées correspondent à une inspection humaine : conserver les opérations et leurs reçus réels.
+
+Le propriétaire enregistre les rendus retournés par le créateur, puis les ouvre pour l'inspection et la comparaison retenues dans ce reçu. Une inspection antérieure du créateur peut rester dans ses notes ; elle ne devient pas une inspection rétrodatée après enregistrement. Il transmet ensuite au créateur la décision publique pour les prolongements, sans exposer l'état privé. En reprise, reprendre la même logique sur les seules preuves modifiées.
+
+Les IDs de `creative-inputs` couvrent tous les candidats. Les directions de `creative-experience` correspondent exactement aux IDs sélectionnés. Les scènes centrales écartées restent dans les preuves et le contexte, sans obligation de les placer dans les exports client. Cette séparation préserve l'exploration et évite le catalogue de huit slides par défaut.
+
+Chaque direction développée consomme sa scène centrale sélectionnée à l'empreinte comparée. Une correction de cette scène demande une nouvelle inspection/comparaison et une décision courantes, puis les seules validations dépendantes ; elle ne commande pas un nouveau crawl. Aucun ancien rendu n'est renommé pour simuler une création faite après sélection.
 
 ## Sortie : artefact `creative-experience`
 
@@ -98,5 +156,7 @@ python3 <MAIN_SKILL_DIR>/scripts/proposition.py validate RUN_DIR
 ```
 
 Le contrôle d’expérience bloque direction, composition, export et vérification finale si les preuves manquent ou divergent. Figer tous les `creative_id` retenus, moments et mobiles compris, avec leurs empreintes : la préservation les retrouve ensuite dans les exports exacts. Une révision modifiée demande reprise explicite et invalidation des dépendants.
+
+Sur les nouveaux runs, `freeze-creatives` vérifie aussi l'exploration, la sélection et les scènes développées **avant** d'écrire le verrou. Une note maximale ne contourne pas ce contrôle. Le critère créatif `options` exige 2/2 sur ces preuves, distinctement de `system`, qui juge la progression d'une direction retenue.
 
 PASS signifie cohérence de pièces, pas beauté, phrases justes, mesures déclarées véridiques ou satisfaction client. Les deux revues isolées et les critères visuels renforcés ne peuvent pas être remplacés par ces JSON. Une référence non lue ou un constat inventé reste faux même si le fichier est bien formé.

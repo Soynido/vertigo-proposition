@@ -103,7 +103,7 @@ def parser():
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest='command', required=True)
     sub.add_parser('doctor')
-    s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path)
+    s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path); s.add_argument('--creative-mandate', type=Path)
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
     s = sub.add_parser('prepare-inputs'); s.add_argument('run_dir', type=Path); s.add_argument('manifest', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--timeout-seconds', type=float, default=5)
     s = sub.add_parser('history'); s.add_argument('operation', choices=['collect','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--urls', nargs='*', default=[]); s.add_argument('--report', type=Path)
@@ -152,7 +152,10 @@ def execute(a):
         from .layout import assess_placements
         data = read_json(a.manifest)
         return assess_placements(data['placements'], data['pages'])
-    if c == 'init': return state.init_run(a.url, a.runs_root, read_json(a.profile) if a.profile else None)
+    if c == 'init':
+        from .experience import read_mandate_input
+        return state.init_run(a.url, a.runs_root, read_json(a.profile) if a.profile else None,
+            creative_mandate=json.loads(read_mandate_input(a.creative_mandate)) if a.creative_mandate else None)
     if c == 'validate': return state.validate_run(a.run_dir)
     if c == 'next-stage': return state.next_stage(a.run_dir)
     if c == 'check-experience':

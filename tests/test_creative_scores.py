@@ -37,3 +37,10 @@ class CreativeScoreTests(unittest.TestCase):
         self.stage_review(run,'client.composition',scores=[2,2,2,2,2])
         report=state.stage_report(run['root'],'client.composition')
         self.assertNotIn('stage_critical_score',{x['code'] for x in report['issues']})
+
+    def test_new_contract_options_are_a_noncompensable_full_score(self):
+        run=self.complete_run()
+        self.stage_review(run,'creative.direction',scores=[1,2,2,2,2])
+        report=state.stage_report(run['root'],'creative.direction')
+        self.assertEqual(report['score'],9)
+        self.assertTrue(any(row['code']=='stage_critical_score' and 'options' in row['message'] for row in report['issues']))

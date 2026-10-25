@@ -8,6 +8,9 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import subprocess
+import sys
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -17,6 +20,88 @@ from .artifacts import sha256
 
 STORY_ROLES = {'understanding','evidence','opportunity','creative_world',
                'transformation','agency_value','mission','next_step'}
+MANDATE_INPUT_LIMIT = 256 * 1024
+
+
+def read_mandate_input(path):
+    """Bound regular-file checks and reading by bytes and a killable 5s child."""
+    try:
+        result=subprocess.run([sys.executable,str(Path(__file__).with_name('recovery.py')),
+            '--read-small',str(path),str(MANDATE_INPUT_LIMIT)],capture_output=True,timeout=5)
+    except subprocess.TimeoutExpired as error:
+        raise ValueError('Creative mandate input read deadline exceeded (5s)') from error
+    if result.returncode!=0 or len(result.stdout)>MANDATE_INPUT_LIMIT:
+        raise ValueError('Creative mandate input must be a readable regular file of at most 256 KiB, without symlinks')
+    return result.stdout
+
+
+def _time(value):
+    moment=datetime.fromisoformat(_text(value,'dated exploration evidence'))
+    if moment.tzinfo is None:
+        raise ValueError('Exploration timestamps must include a timezone')
+    return moment
+
+
+def initial_exploration_contract(url, mandate, initialized_at):
+    """Pin invocation evidence, not a claim to authenticate its human author."""
+    contract={'version':1,'mode':'explore','minimum_candidates':2,
+              'selection_policy':'agent_after_comparison'}
+    if mandate is None:return contract,None
+    try:
+        if mandate['version']!=1 or mandate['mode'] not in ('exact_count','external_selection'):
+            raise ValueError('Unsupported creative mandate; new runs cannot downgrade exploration')
+        count=mandate['candidate_count']
+        if type(count) is not int or count<1:
+            raise ValueError('Explicit candidate count must be a positive integer')
+        policy=mandate.get('selection_policy','agent_after_comparison')
+        if policy not in ('agent_after_comparison','keep_open'):
+            raise ValueError('Unknown creative selection policy')
+        authority=mandate['authority']
+        if authority['kind']!='current_user_instruction' or authority['site_url']!=url:
+            raise ValueError('A creative exception needs the current user instruction for this site')
+        age=(_time(initialized_at)-_time(authority['captured_at'])).total_seconds()
+        if not 0<=age<=86400:
+            raise ValueError('Creative mandate instruction capture is stale or future-dated')
+        path=Path(authority['input_path'])
+        if not path.is_absolute():raise ValueError('Instruction capture needs an absolute input path')
+        content=read_mandate_input(path);instruction=content.decode('utf-8')
+        if hashlib.sha256(content).hexdigest()!=authority['input_sha256']:
+            raise ValueError('Creative mandate instruction hash does not match')
+        if _text(authority['quote'],'explicit instruction quote') not in instruction:
+            raise ValueError('Creative mandate quote is absent from the current instruction')
+        contract.pop('minimum_candidates')
+        contract.update(mode=mandate['mode'],candidate_count=count,selection_policy=policy,
+            authority={**authority,'input_path':'creative-mandate-input.txt'})
+        if mandate['mode']=='external_selection':
+            ids=mandate['candidate_ids']
+            if not isinstance(ids,list) or len(ids)!=count or len(set(ids))!=count:
+                raise ValueError('External selection must name exactly the mandated candidate IDs')
+            for identifier in ids:state._identifier(identifier)
+            contract['candidate_ids']=ids
+        return contract,content
+    except (KeyError,TypeError,UnicodeError,OSError) as error:
+        raise ValueError('Creative mandate lacks a coherent current instruction authority') from error
+
+
+def exploration_contract(run):
+    contract=run.get('metadata',{}).get('creative_exploration_contract')
+    if contract is None:return None  # Historical evidence remains readable without recrawling.
+    if contract.get('version')!=1 or contract.get('mode') not in ('explore','exact_count','external_selection'):
+        raise ValueError('Invalid initialized creative exploration contract')
+    if contract['mode']=='explore':
+        if contract.get('minimum_candidates')!=2 or contract.get('selection_policy')!='agent_after_comparison':
+            raise ValueError('Default exploration cannot be downgraded')
+    else:
+        authority=contract['authority']
+        if authority['input_path']!='creative-mandate-input.txt':
+            raise ValueError('Initialized creative mandate authority path changed')
+        path=Path(run['root'])/authority['input_path']
+        content=read_mandate_input(path)
+        if (authority['kind']!='current_user_instruction' or authority['site_url']!=run['url']
+                or hashlib.sha256(content).hexdigest()!=authority['input_sha256']
+                or authority['quote'] not in content.decode('utf-8')):
+            raise ValueError('Initialized creative mandate authority changed')
+    return contract
 
 
 def _text(value, label):
@@ -88,6 +173,14 @@ def _inputs(run):
     if not isinstance(ids,list) or not ids or len(set(ids))!=len(ids):
         raise ValueError('Direction IDs must be explicit and unique before creation')
     for identifier in ids:state._identifier(identifier)
+    contract=exploration_contract(run)
+    if contract:
+        if contract['mode']=='explore' and len(ids)<contract['minimum_candidates']:
+            raise ValueError('Default exploration needs at least two candidate worlds before selection')
+        if contract['mode']!='explore' and len(ids)!=contract['candidate_count']:
+            raise ValueError('Candidate count differs from the initialized explicit mandate')
+        if contract['mode']=='external_selection' and set(ids)!=set(contract['candidate_ids']):
+            raise ValueError('Candidate IDs differ from the initialized external selection')
     specs={s['id']:s for s in json.loads((state.DATA_ROOT/'upstream-lock.json').read_text())['families'] if s.get('default',True)}
     methods=data['methods']
     if len(methods)!=len(specs) or {m['family'] for m in methods}!=set(specs):
@@ -129,6 +222,53 @@ def _inputs(run):
     return data,row
 
 
+def _check_exploration(run, inputs, input_row, plan_row):
+    """Check declared comparison and local registration order, not artistic truth."""
+    contract=exploration_contract(run)
+    if contract is None:return set(inputs['direction_ids']),None
+    data,row=_json(run,'creative-exploration')
+    if data['version']!=1 or data['inputs_sha256']!=input_row['sha256']:
+        raise ValueError('Exploration belongs to a different creative input version')
+    candidates=data['candidates'];ids=set(inputs['direction_ids'])
+    if len(candidates)!=len(ids) or {c['id'] for c in candidates}!=ids:
+        raise ValueError('Every candidate world needs its own inspected central scene')
+    structures=[];fingerprints=set();central_hashes={};inspected=[]
+    for candidate in candidates:
+        image,fingerprint,_=_render(run,candidate['central_scene_ref'])
+        if candidate['central_scene_sha256']!=image['sha256']:
+            raise ValueError('Candidate central scene hash is stale')
+        if fingerprint in fingerprints:
+            raise ValueError('Repeated central scene pixels are not distinct candidate worlds')
+        fingerprints.add(fingerprint);central_hashes[candidate['id']]=image['sha256']
+        _proof(run,candidate['client_anchor'])
+        structure=tuple(_text(candidate['structure'][key],key).strip().casefold()
+                        for key in ('composition','visual_mechanism','narrative_entry'))
+        # Changing a label or scrolling the same world does not declare a new structure.
+        if any(sum(a!=b for a,b in zip(structure,other))<2 for other in structures):
+            raise ValueError('Candidate worlds need distinct composition and creative structure')
+        structures.append(structure)
+        _text(candidate['inspection'],'actual central-scene inspection')
+        seen=_time(candidate['inspected_at']);inspected.append(seen)
+        if not _time(image['recorded_at'])<=seen:
+            raise ValueError('A central scene must be registered before its declared inspection')
+    comparison=data['comparison']
+    compared_ids=comparison['candidate_ids']
+    if len(compared_ids)!=len(ids) or set(compared_ids)!=ids:
+        raise ValueError('Comparison must account for every rendered candidate world')
+    _text(comparison['structural_differences'],'comparison of structural differences')
+    compared=_time(comparison['compared_at']);selection=data['selection']
+    selected_ids=selection['selected_candidate_ids']
+    if not isinstance(selected_ids,list) or not selected_ids or len(set(selected_ids))!=len(selected_ids) or not set(selected_ids).issubset(ids):
+        raise ValueError('Selection must retain an explicit nonempty subset of compared candidates')
+    if (contract.get('selection_policy')=='keep_open' or contract['mode']=='external_selection') and set(selected_ids)!=ids:
+        raise ValueError('The initialized mandate requires keeping every named direction')
+    _text(selection['reason'],'selection after rendered comparison')
+    selected=_time(selection['selected_at'])
+    if not (max(inspected)<=compared<=selected<=_time(row['recorded_at'])<=_time(plan_row['recorded_at'])):
+        raise ValueError('Inspection and comparison must precede selection and developed plan registration')
+    return set(selected_ids),{'selected_at':selected,'central_hashes':central_hashes}
+
+
 def require_packet_methods(run, selected_files):
     """An isolated creator must receive the named method index and reference files."""
     inputs,_=_inputs(run)
@@ -168,16 +308,17 @@ def _check_story(run, inputs):
     _text(story['next_step']['followup'],'concrete next exchange')
 
 
-def inspect_experience(run, stage='creative.direction'):
+def inspect_experience(run, stage='creative.direction', *, proposed_selection=None):
     """Fail closed on missing evidence; never derive aesthetic scores from JSON."""
     checks=[]
     try:
         inputs,input_row=_inputs(run)
-        plan,_=_json(run,'creative-experience')
+        plan,plan_row=_json(run,'creative-experience')
         if plan['inputs_sha256']!=input_row['sha256'] or plan['revision']!=inputs['revision']:
             raise ValueError('Creative plan is based on a different input revision')
+        retained_ids,exploration=_check_exploration(run,inputs,input_row,plan_row)
         directions=plan['directions']
-        if len(directions)!=len(inputs['direction_ids']) or {d['id'] for d in directions}!=set(inputs['direction_ids']):
+        if len(directions)!=len(retained_ids) or {d['id'] for d in directions}!=retained_ids:
             raise ValueError('A retained direction was dropped or an unbriefed direction added')
         all_ids=set(); render_hashes={}
         actions={a['id']:a for a in inputs['actions']}
@@ -196,21 +337,28 @@ def inspect_experience(run, stage='creative.direction'):
             if (any(type(p) not in (int,float) or not math.isfinite(p) or not 0<=p<=1 for p in positions)
                     or any(a>=b for a,b in zip(positions,positions[1:]))):
                 raise ValueError('Scroll moments must describe a forward, finite progression')
-            meanings=set();fingerprints=set();roles={}
+            meanings=set();fingerprints=set();roles={};direction_hashes=set()
             for moment in moments:
                 _proof(run,moment['proof']);meanings.add(_text(moment['meaning'],'meaning of this moment'))
                 row,fingerprint,_=_render(run,moment['render_ref'])
+                if exploration and row['sha256']!=exploration['central_hashes'][direction['id']] and _time(row['recorded_at'])<exploration['selected_at']:
+                    raise ValueError('Developed beats must be registered after candidate comparison and selection')
                 creative_id=moment['creative_id'];state._identifier(creative_id)
                 if creative_id in all_ids:raise ValueError('Creative IDs must be unique across directions and viewports')
                 all_ids.add(creative_id);render_hashes[creative_id]=row['sha256']
+                direction_hashes.add(row['sha256'])
                 fingerprints.add(fingerprint);roles[moment['id']]=moment['role']
             if len(fingerprints)!=len(moments) or len(meanings)!=len(moments):
                 raise ValueError('Repeated scene pixels or repeated meaning do not prove a scroll narrative')
+            if exploration and exploration['central_hashes'][direction['id']] not in direction_hashes:
+                raise ValueError('A selected central scene must be preserved in its developed direction')
             signature=direction['signature']
             if roles.get(signature['moment_id'])!='reveal':
                 raise ValueError('The signature moment must be a rendered reveal beyond the opening')
             _proof(run,signature['client_anchor']);_text(signature['visible_change'],'visible client-specific signature')
             mobile=direction['mobile'];row,fingerprint,size=_render(run,mobile['render_ref'])
+            if exploration and _time(row['recorded_at'])<exploration['selected_at']:
+                raise ValueError('Developed mobile view must follow candidate comparison and selection')
             if run['profile']['parameters'].get('proposal_contract')==2:
                 width=mobile['viewport_width_px']
                 if type(width) is not int or not 240<=width<=768:
@@ -263,10 +411,10 @@ def inspect_experience(run, stage='creative.direction'):
             if not application['moment_ids'] or not set(application['moment_ids']).issubset(all_ids):
                 raise ValueError('Method application must identify actual rendered creative IDs')
         # Preserve every retained beat, not just the preferred hero, at downstream montage.
-        if run.get('metadata',{}).get('creative_selection'):
+        if proposed_selection is not None or run.get('metadata',{}).get('creative_selection'):
             from .preservation import _selection
-            locked=_selection(run)['retained']
-            if {r['id'] for r in locked}!=all_ids or any(r['sha256']!=render_hashes[r['id']] for r in locked):
+            locked=proposed_selection if proposed_selection is not None else _selection(run)['retained']
+            if len(locked)!=len(all_ids) or {r['id'] for r in locked}!=all_ids or any(r['sha256']!=render_hashes[r['id']] for r in locked):
                 raise ValueError('Frozen selection does not preserve all rendered narrative moments')
         if stage in ('client.composition','export.documents','verify.final'):
             _check_story(run,inputs)

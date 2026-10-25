@@ -1,6 +1,7 @@
 """Fictional evidence graphs. They exercise consistency, never aesthetic quality."""
 import json
 import hashlib
+from datetime import datetime, timezone
 from PIL import Image
 from pathlib import Path
 from proposition_runtime import state
@@ -13,7 +14,7 @@ def write_artifact(run,identifier,name,data):
     return state.add_artifact(root,identifier,name,'public')
 
 
-def prepare_inputs(run):
+def prepare_inputs(run, candidate_ids=None):
     root=Path(run['root'])
     (root/'observation.txt').write_text('Fictional manufacturer, existing quote action and sourced material proof.')
     state.add_source(root,'experience-source','observation.txt',kind='public',audience='public')
@@ -48,7 +49,7 @@ def prepare_inputs(run):
         applications.append({'family':spec['id'],'mode':'adapted','read_sha256':reference['sha256'],
                              'application':'Check a specific aspect of the rendered evidence.',
                              'moment_ids':['a-opening','a-reveal','a-action']})
-    inputs={'revision':'r1','direction_ids':['a'],'methods':families,
+    inputs={'revision':'r1','direction_ids':candidate_ids or ['a','b'],'methods':families,
             'opportunity':{'audience':'Architects','task':'Understand material before requesting quote',
                 'proof':proof,'change':'Show light through the real material','benefit':'Choose the appropriate application',
                 'scope':'targeted journey','alternative':'Existing product information may already answer the need',
@@ -60,16 +61,46 @@ def prepare_inputs(run):
     return inputs,source,applications
 
 
-def prepare_experience(run):
-    root=Path(run['root']);inputs,source,applications=prepare_inputs(run)
+def prepare_exploration(run, source, candidate_ids):
+    """Two fictional visual structures; no assertion of artistic qualification."""
+    root=Path(run['root']);candidates=[]
+    for index,identifier in enumerate(candidate_ids):
+        name='scene.png' if identifier=='a' else 'candidate-'+identifier+'.png'
+        make_scene(root,name,'navy' if identifier=='a' else 'orange')
+        if identifier!='a':
+            from PIL import ImageDraw
+            with Image.open(root/name) as im:
+                ImageDraw.Draw(im).rectangle((140,0,230,120),fill='black');im.save(root/name)
+        ref='scene-opening' if identifier=='a' else 'candidate-'+identifier
+        row=state.add_artifact(root,ref,name,'public')
+        candidates.append({'id':identifier,'central_scene_ref':'artifact:'+ref,
+            'central_scene_sha256':row['sha256'],'client_anchor':'source:experience-source',
+            'structure':{'composition':'full room panorama' if index==0 else 'vertical material assembly '+identifier,
+                         'visual_mechanism':'transmitted light' if index==0 else 'exploded product layers '+identifier,
+                         'narrative_entry':'inhabited room' if index==0 else 'material component '+identifier},
+            'inspected_at':datetime.now(timezone.utc).isoformat(),
+            'inspection':'Synthetic fixture inspection: the central structure and client material are visible.'})
+    compared=datetime.now(timezone.utc).isoformat()
+    selected=datetime.now(timezone.utc).isoformat()
+    data={'version':1,'inputs_sha256':source['sha256'],'candidates':candidates,
+        'comparison':{'compared_at':compared,'candidate_ids':candidate_ids,
+                      'structural_differences':'Panoramic inhabited space versus vertical exploded material structure; both answer the same material-understanding problem.'},
+        'selection':{'selected_at':selected,'selected_candidate_ids':[candidate_ids[0]],
+                     'reason':'The room and light world best explains the sourced product benefit.'}}
+    write_artifact(run,'creative-exploration','creative-exploration.json',data)
+
+
+def prepare_experience(run, *, exploration=True, candidate_ids=None):
+    root=Path(run['root']);inputs,source,applications=prepare_inputs(run,candidate_ids)
+    if exploration:prepare_exploration(run,source,inputs['direction_ids'])
     proof='source:experience-source'
     moments=[];retained=[]
     for name,color,role in [('opening','navy','opening'),('reveal','green','reveal'),('action','purple','action'),('mobile','teal','mobile')]:
         filename='scene.png' if name=='opening' else 'scene-'+name+'.png'
-        make_scene(root,filename,color)
+        if name!='opening' or not exploration:make_scene(root,filename,color)
         if name=='mobile':
             with Image.open(root/filename) as im: im.resize((390,844)).save(root/filename)
-        state.add_artifact(root,'scene-'+name,filename,'public')
+        if name!='opening' or not exploration:state.add_artifact(root,'scene-'+name,filename,'public')
         retained.append({'id':'a-'+name,'path':filename,'role':'mobile' if name=='mobile' else 'desktop','crop':[0,0,1,1],'min_page_fraction':.15})
         if role!='mobile':moments.append({'id':name,'role':role,'creative_id':'a-'+name,'render_ref':'artifact:scene-'+name,
                             'meaning':{'opening':'Recognize the manufacturer.','reveal':'See how the material changes the light.','action':'Request the existing quote.'}[name],

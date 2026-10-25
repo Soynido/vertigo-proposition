@@ -12,6 +12,10 @@ Le juge vérifie les choix et livrables, pas la présence de mots. `PASS` signif
 
 Les barèmes d'évaluation métier restent candidats sans calibration humaine. Voir `docs/qualification.md` pour le protocole et ses limites.
 
+## Acceptation après intégration
+
+Les essais guidés ci-dessous qualifient un composant ou un contrat. Après gel/intégration d'un changement fonctionnel, appliquer [la validation production](../skills/proposition-quality/references/production-validation.md) : nouveau contexte, installation isolée et entrée utilisateur limitée à **URL REPO + URL SITEWEB**. Aucun rappel créatif ou paquet client préparé par le mainteneur. Un test accompagné ne devient pas un E2E autonome parce que ses sorties sont belles. Les revues portent sur les fichiers exacts, avec version et limites ; cette nouvelle exigence n'est pas déclarée satisfaite par les essais guidés historiques.
+
 ## Contrat créatif
 
 `cases/creative-contract.json` décrit six situations : mondes réellement distincts en PDF, prolongement d'une direction déjà choisie, précision « immersif » sous pression de remise, analyse avant création, livraison éditable avec contexte compilé et dispatch explicite du contrat. Transmettre seulement `id`/`task` au créatif avec son paquet public ; les champs `observe` et `judge` servent à la revue indépendante. Le [contrat](../skills/proposition-creative/references/creative-contract.md) est la guidance de la variante guidée, pas un résultat de test.

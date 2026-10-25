@@ -167,7 +167,7 @@ def _validate_structure(state):
         raise ValueError("Review lies outside the named stage registry")
 
 
-def init_run(url, run_root, profile=None):
+def init_run(url, run_root, profile=None, *, creative_mandate=None):
     """Create a new run under run_root, which must be outside the checkout."""
     parsed = urlsplit(url)
     if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.password:
@@ -181,14 +181,18 @@ def init_run(url, run_root, profile=None):
     selected['parameters'].setdefault('proposal_contract',2)
     _schema("profile", selected)
     run_id = f"run-{uuid4().hex}"
+    stamp = _now()
+    from .experience import initial_exploration_contract
+    contract,instruction=initial_exploration_contract(url,creative_mandate,stamp)
     root = base / run_id
     root.mkdir(parents=True, exist_ok=False)
-    stamp = _now()
+    if instruction is not None:(root/'creative-mandate-input.txt').write_bytes(instruction)
     state = {"schema_version": "1.0", "id": run_id, "root": str(root), "url": url,
              "created_at": stamp, "updated_at": stamp, "profile": selected,
              "requirement_ids": [row["id"] for row in _requirements()],
              "sources": {}, "facts": {}, "artifacts": {}, "evaluations": {},
-             "reviews": {}, "stage_reviews": {}, "checkpoints": {}}
+             "reviews": {}, "stage_reviews": {}, "checkpoints": {},
+             "metadata": {"creative_exploration_contract":contract}}
     save_run(root, state)
     return state
 
@@ -218,6 +222,9 @@ def save_run(run_dir, state):
         previous = json.loads(target.read_text(encoding="utf-8"))
         if previous.get("id") != state["id"]:
             raise ValueError("Cannot replace a different run")
+        contract=previous.get('metadata',{}).get('creative_exploration_contract')
+        if contract is not None and state.get('metadata',{}).get('creative_exploration_contract')!=contract:
+            raise ValueError('Initialized creative exploration contract cannot be changed or removed')
     payload = deepcopy(state)
     payload["updated_at"] = _now()
     descriptor, temporary = tempfile.mkstemp(prefix=".state-", suffix=".json", dir=root)
@@ -577,7 +584,9 @@ def _stage_report(state, stage_id):
         if score < stage["gate"]["minimum_score"]:
             issue("stage_review_score", stage_id, "The stage score must be at least 9/10")
         for index, criterion in enumerate(stage["criteria"]):
-            if criterion["id"] in stage["gate"].get("required_full_scores", []) and review["scores"][index] != 2:
+            exploration_required=(stage_id=='creative.direction' and criterion['id']=='options'
+                                  and state.get('metadata',{}).get('creative_exploration_contract') is not None)
+            if (criterion["id"] in stage["gate"].get("required_full_scores", []) or exploration_required) and review["scores"][index] != 2:
                 issue("stage_critical_score", stage_id, "Critical criterion requires 2/2: " + criterion["id"])
         for message in _review_receipt_issues(state, Path(state["root"]), review, stage_id):
             issue("review_independence", stage_id, message)
