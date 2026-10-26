@@ -222,7 +222,84 @@ def _inputs(run):
     return data,row
 
 
-def _check_exploration(run, inputs, input_row, plan_row):
+def _read_segments(segments, path, earliest, latest, *, complete):
+    """Check declared coverage and time bounds, never infer actual comprehension."""
+    count=len(path.read_text(encoding='utf-8').splitlines())
+    if not isinstance(segments,list) or not segments:
+        raise ValueError('Method reading needs explicit completed line segments')
+    covered=[]
+    for segment in segments:
+        start,end=segment['start_line'],segment['end_line']
+        if type(start) is not int or type(end) is not int or not 1<=start<=end<=count:
+            raise ValueError('Method reading segment is outside the actual reference')
+        if not earliest<=_time(segment['read_at'])<=latest:
+            raise ValueError('Method reading must follow current inputs and precede receipt registration')
+        covered.append((start,end))
+    if complete:
+        cursor=1
+        for start,end in sorted(covered):
+            if start>cursor:raise ValueError('Method reading has an unread reference gap')
+            cursor=max(cursor,end+1)
+        if cursor<=count:raise ValueError('Method reading does not cover the complete entrypoint')
+
+
+def _method_reading(run, inputs, input_row):
+    contract=run.get('metadata',{}).get('creative_reading_contract')
+    if contract is None:return None  # Do not retrofit historical evidence.
+    if type(contract) is not int or contract!=1:
+        raise ValueError('Invalid initialized creative reading contract')
+    data,row=_json(run,'creative-reading')
+    if type(data['version']) is not int or data['version']!=1 or data['inputs_sha256']!=input_row['sha256']:
+        raise ValueError('Method reading belongs to a different creative input version')
+    _text(data['reader_id'],'creative reader identity')
+    methods={m['family']:m for m in inputs['methods']}; reads=data['methods']
+    if len(reads)!=len(methods) or {r['family'] for r in reads}!=set(methods):
+        raise ValueError('Method reading must cover the four named families exactly once')
+    earliest=_time(input_row['recorded_at']); latest=_time(row['recorded_at'])
+    for item in reads:
+        reference,path=_artifact(run,methods[item['family']]['reference_ref'])
+        if item['read_sha256']!=reference['sha256']:
+            raise ValueError('Method reading hash differs from the transmitted reference')
+        _read_segments(item['segments'],path,max(earliest,_time(reference['recorded_at'])),latest,complete=True)
+    for item in data.get('supporting_reads',[]):
+        method=methods[item['family']]; _text(item['purpose'],'linked reference purpose')
+        relative=Path(item['path'])
+        if relative.is_absolute() or '..' in relative.parts:
+            raise ValueError('Linked method references must stay inside the public method tree')
+        root=Path(method['reference_root'])
+        if not root.is_absolute():root=Path(run['root'])/root
+        path=root/relative
+        from .upstream import _checked
+        _checked(path)
+        if not path.is_file() or sha256(path)!=item['sha256']:
+            raise ValueError('Linked method reading hash differs from its pinned reference')
+        _read_segments(item['segments'],path,earliest,latest,complete=False)
+    return row
+
+
+def inspect_creative_inputs(run):
+    """Cheap preflight of inputs and declared reading, before any candidate render."""
+    try:
+        inputs,row=_inputs(run)
+        reading=_method_reading(run,inputs,row)
+        return {'status':'PASS','scope':'creative_input_reading_consistency_only',
+                'reading_contract':'checked' if reading else 'historical_not_required',
+                'actual_reading':'REQUIRES_TOOL_RECEIPT_REVIEW','issues':[]}
+    except (ValueError,OSError,KeyError,TypeError,IndexError,AttributeError) as error:
+        return {'status':'BLOCKED','scope':'creative_input_reading_consistency_only','issues':[str(error)]}
+
+
+def _reading_before(reading, render, rendered_at=None):
+    cutoff=_time(render['recorded_at'])
+    if rendered_at is not None:
+        cutoff=_time(rendered_at)
+        if cutoff>_time(render['recorded_at']):
+            raise ValueError('Declared central render cannot follow its artifact registration')
+    if reading and _time(reading['recorded_at'])>=cutoff:
+        raise ValueError('Method reading receipt must be registered before creative renders; late recovery cannot backdate it')
+
+
+def _check_exploration(run, inputs, input_row, plan_row, reading=None):
     """Check declared comparison and local registration order, not artistic truth."""
     contract=exploration_contract(run)
     if contract is None:return set(inputs['direction_ids']),None
@@ -235,6 +312,7 @@ def _check_exploration(run, inputs, input_row, plan_row):
     structures=[];fingerprints=set();central_hashes={};inspected=[]
     for candidate in candidates:
         image,fingerprint,_=_render(run,candidate['central_scene_ref'])
+        _reading_before(reading,image,_text(candidate['rendered_at'],'central render timestamp') if reading else None)
         if candidate['central_scene_sha256']!=image['sha256']:
             raise ValueError('Candidate central scene hash is stale')
         if fingerprint in fingerprints:
@@ -313,10 +391,11 @@ def inspect_experience(run, stage='creative.direction', *, proposed_selection=No
     checks=[]
     try:
         inputs,input_row=_inputs(run)
+        reading=_method_reading(run,inputs,input_row)
         plan,plan_row=_json(run,'creative-experience')
         if plan['inputs_sha256']!=input_row['sha256'] or plan['revision']!=inputs['revision']:
             raise ValueError('Creative plan is based on a different input revision')
-        retained_ids,exploration=_check_exploration(run,inputs,input_row,plan_row)
+        retained_ids,exploration=_check_exploration(run,inputs,input_row,plan_row,reading)
         directions=plan['directions']
         if len(directions)!=len(retained_ids) or {d['id'] for d in directions}!=retained_ids:
             raise ValueError('A retained direction was dropped or an unbriefed direction added')
@@ -341,6 +420,7 @@ def inspect_experience(run, stage='creative.direction', *, proposed_selection=No
             for moment in moments:
                 _proof(run,moment['proof']);meanings.add(_text(moment['meaning'],'meaning of this moment'))
                 row,fingerprint,_=_render(run,moment['render_ref'])
+                _reading_before(reading,row)
                 if exploration and row['sha256']!=exploration['central_hashes'][direction['id']] and _time(row['recorded_at'])<exploration['selected_at']:
                     raise ValueError('Developed beats must be registered after candidate comparison and selection')
                 creative_id=moment['creative_id'];state._identifier(creative_id)
@@ -357,6 +437,7 @@ def inspect_experience(run, stage='creative.direction', *, proposed_selection=No
                 raise ValueError('The signature moment must be a rendered reveal beyond the opening')
             _proof(run,signature['client_anchor']);_text(signature['visible_change'],'visible client-specific signature')
             mobile=direction['mobile'];row,fingerprint,size=_render(run,mobile['render_ref'])
+            _reading_before(reading,row)
             if exploration and _time(row['recorded_at'])<exploration['selected_at']:
                 raise ValueError('Developed mobile view must follow candidate comparison and selection')
             if run['profile']['parameters'].get('proposal_contract')==2:

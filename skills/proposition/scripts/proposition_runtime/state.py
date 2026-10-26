@@ -192,7 +192,7 @@ def init_run(url, run_root, profile=None, *, creative_mandate=None):
              "requirement_ids": [row["id"] for row in _requirements()],
              "sources": {}, "facts": {}, "artifacts": {}, "evaluations": {},
              "reviews": {}, "stage_reviews": {}, "checkpoints": {},
-             "metadata": {"creative_exploration_contract":contract}}
+             "metadata": {"creative_exploration_contract":contract,"creative_reading_contract":1}}
     save_run(root, state)
     return state
 
@@ -225,6 +225,9 @@ def save_run(run_dir, state):
         contract=previous.get('metadata',{}).get('creative_exploration_contract')
         if contract is not None and state.get('metadata',{}).get('creative_exploration_contract')!=contract:
             raise ValueError('Initialized creative exploration contract cannot be changed or removed')
+        reading=previous.get('metadata',{}).get('creative_reading_contract')
+        if reading is not None and state.get('metadata',{}).get('creative_reading_contract')!=reading:
+            raise ValueError('Initialized creative reading contract cannot be changed or removed')
     payload = deepcopy(state)
     payload["updated_at"] = _now()
     descriptor, temporary = tempfile.mkstemp(prefix=".state-", suffix=".json", dir=root)

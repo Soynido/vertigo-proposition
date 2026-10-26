@@ -23,7 +23,8 @@ def prepare_inputs(run, candidate_ids=None):
     specs=json.loads((state.DATA_ROOT/'upstream-lock.json').read_text())['families']
     for spec in specs:
         identifier='method-'+spec['id']
-        reference=write_artifact(run,identifier,'methods/'+spec['id']+'.md','Synthetic test reference, not an upstream source authenticity test: '+spec['id'])
+        reference=write_artifact(run,identifier,'methods/'+spec['id']+'.md',
+            'Synthetic test reference: '+spec['id']+'\nSecond reference line.\nFinal reference line.\n')
         state.add_source(root,identifier,'methods/'+spec['id']+'.md',kind='public',audience='public',locator='https://github.com/'+spec['repository']+'/blob/'+spec['commit']+'/'+spec['entrypoints'][0])
         reference=state.add_artifact(root,identifier,'methods/'+spec['id']+'.md','public',['source:'+identifier])
         tree=root/'fixture-methods'/spec['id']/spec['commit']/'source'
@@ -58,7 +59,23 @@ def prepare_inputs(run, candidate_ids=None):
             'actions':[{'id':'quote','proof':proof,'target':'https://fixture.example/quote','label':'Request a quote'}]}
     source=write_artifact(run,'creative-inputs','creative-inputs.json',inputs)
     source=state.add_artifact(root,'creative-inputs','creative-inputs.json','public',[proof]+[m['reference_ref'] for m in families])
+    prepare_reading(run, source, families)
     return inputs,source,applications
+
+
+def prepare_reading(run, source, methods):
+    """Declared test reading receipt, not an assertion that an agent read a skill."""
+    current=state.load_run(run['root']); root=Path(run['root'])
+    reads=[]
+    for method in methods:
+        row=current['artifacts'][method['reference_ref'].removeprefix('artifact:')]
+        count=len((root/row['path']).read_text().splitlines())
+        reads.append({'family':method['family'],'read_sha256':row['sha256'],
+            'segments':[{'start_line':1,'end_line':1,'read_at':datetime.now(timezone.utc).isoformat()},
+                        {'start_line':2,'end_line':count,'read_at':datetime.now(timezone.utc).isoformat()}]})
+    data={'version':1,'inputs_sha256':source['sha256'],'reader_id':'fixture-creator',
+          'methods':reads,'supporting_reads':[]}
+    write_artifact(run,'creative-reading','creative-reading.json',data)
 
 
 def prepare_exploration(run, source, candidate_ids):
@@ -72,8 +89,10 @@ def prepare_exploration(run, source, candidate_ids):
             with Image.open(root/name) as im:
                 ImageDraw.Draw(im).rectangle((140,0,230,120),fill='black');im.save(root/name)
         ref='scene-opening' if identifier=='a' else 'candidate-'+identifier
+        rendered_at=datetime.now(timezone.utc).isoformat()
         row=state.add_artifact(root,ref,name,'public')
         candidates.append({'id':identifier,'central_scene_ref':'artifact:'+ref,
+            'rendered_at':rendered_at,
             'central_scene_sha256':row['sha256'],'client_anchor':'source:experience-source',
             'structure':{'composition':'full room panorama' if index==0 else 'vertical material assembly '+identifier,
                          'visual_mechanism':'transmitted light' if index==0 else 'exploded product layers '+identifier,
