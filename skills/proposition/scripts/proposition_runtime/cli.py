@@ -58,14 +58,13 @@ def doctor():
     try:
         from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
-            for channel in (os.environ.get('PROPOSITION_BROWSER_CHANNEL', 'chrome'), None):
-                try:
-                    instance = p.chromium.launch(headless=True, **({'channel': channel} if channel and channel != 'chromium' else {}))
-                    browser = {'status': 'AVAILABLE', 'version': instance.version, 'channel': channel or 'chromium'}
-                    instance.close()
-                    break
-                except Exception:
-                    continue
+            from .browser import launch_browser
+            try:
+                instance, channel = launch_browser(p)
+                browser = {'status': 'AVAILABLE', 'version': instance.version, 'channel': channel}
+                instance.close()
+            except Exception:
+                pass
     except ImportError:
         pass
     return {'status': 'PASS' if all(dependencies.values()) and browser['status'] == 'AVAILABLE' else 'BLOCKED',
@@ -107,6 +106,7 @@ def parser():
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
     s = sub.add_parser('prepare-inputs'); s.add_argument('run_dir', type=Path); s.add_argument('manifest', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--timeout-seconds', type=float, default=5)
     s = sub.add_parser('history'); s.add_argument('operation', choices=['collect','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--urls', nargs='*', default=[]); s.add_argument('--report', type=Path)
+    s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','check','reconcile','channels']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
     for command in ('validate', 'receipt', 'workbench', 'next-stage', 'check-experience'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path)
         if command == 'check-experience':
@@ -134,6 +134,14 @@ def parser():
 
 def execute(a):
     c = a.command
+    if c == 'discovery':
+        from . import discovery_evidence
+        if a.operation in ('register','reconcile'):
+            if not a.report: raise ValueError('discovery register/reconcile requires --report')
+            return getattr(discovery_evidence,a.operation)(a.run_dir, a.report)
+        state.invalidate_changed(a.run_dir)
+        inspect=discovery_evidence.inspect_channels if a.operation=='channels' else discovery_evidence.inspect_discovery
+        return inspect(state.load_run(a.run_dir))
     if c in ('freeze-creatives', 'check-creatives'):
         from .preservation import freeze_creatives, inspect_preservation
         return freeze_creatives(a.run_dir, read_json(a.selection)) if c == 'freeze-creatives' else inspect_preservation(state.load_run(a.run_dir))
@@ -212,7 +220,7 @@ def main(argv=None):
         print(json.dumps({'status':'ERROR','message':str(error)},ensure_ascii=False))
         return 1
     print(json.dumps(result,ensure_ascii=False,indent=2,default=str))
-    return 2 if result.get('status') in ('FAIL','BLOCKED','STALE','PARTIAL') else 0
+    return 2 if str(result.get('status', '')).upper() in ('FAIL','BLOCKED','STALE','PARTIAL','UNAVAILABLE') else 0
 
 
 if __name__ == '__main__':

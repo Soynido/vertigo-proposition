@@ -16,12 +16,14 @@ from pathlib import Path, PurePosixPath
 import re
 import socket
 import uuid
+
+from .browser import launch_browser
 from urllib.parse import parse_qsl, unquote, urljoin, urlsplit, urlunsplit
 
 DEFAULT_MAX_PAGES = 10
 HARD_MAX_PAGES = 30
 MAX_MENU_ACTIONS = 8
-MAX_SCROLL_STEPS = 6
+MAX_SCROLL_STEPS = 40
 NAVIGATION_TIMEOUT_MS = 12000
 SOCIAL_HOSTS = {
     "instagram.com", "facebook.com", "linkedin.com", "twitter.com", "x.com",
@@ -142,7 +144,7 @@ SNAPSHOT_JS = r"""() => {
   const assets = [...document.querySelectorAll('img,video,source,link[rel~="icon"],meta[property="og:image"]')].map(e => ({url:e.currentSrc || e.src || e.href || e.content || '',kind:e.tagName.toLowerCase(),alt:e.alt || ''}));
   const backgrounds = [...document.querySelectorAll('body *')].filter(visible).slice(0,2000).flatMap(e => [...getComputedStyle(e).backgroundImage.matchAll(/url\(["']?([^"')]+)["']?\)/g)].map(m => ({url:new URL(m[1],location.href).href,kind:'css_background',alt:''})));
   const jsonld = [...document.querySelectorAll('script[type="application/ld+json"]')].map(e => e.textContent);
-  return {title:document.title,text:document.body?.innerText || '',links,assets:assets.concat(backgrounds),jsonld,scroll_y:scrollY,height:document.documentElement.scrollHeight};
+  return {title:document.title,text:document.body?.innerText || '',links,assets:assets.concat(backgrounds),jsonld,scroll_y:scrollY,height:document.documentElement.scrollHeight,viewport_height:innerHeight,visible_images:[...document.images].filter(e=>{let r=e.getBoundingClientRect();return r.width&&r.height&&r.bottom>0&&r.top<innerHeight&&r.left<innerWidth&&r.right>0}).map(e=>({alt:e.alt||'',loaded:e.complete&&e.naturalWidth>0}))};
 }"""
 
 
@@ -178,7 +180,7 @@ def continue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_
     raw = path.read_bytes()
     try:
         prior = json.loads(raw)
-        if prior.get("schema_version") != "1.0":
+        if prior.get("schema_version") not in {"1.0", "2.0"}:
             raise ValueError("Unsupported discovery report")
         source_hashes = []
         for source in prior["sources"]:
@@ -211,6 +213,14 @@ def continue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_
             for value in values:
                 if _url(value, allow_local=allow_local, resolve=False) != value or _origin(value) != _origin(initial):
                     raise ValueError("Continuation URLs must be normalized and share the original origin")
+        pending = coverage.get("pending_states", [])
+        for item in pending:
+            if (not isinstance(item, dict) or item.get("viewport") not in {"desktop", "mobile"}
+                    or _url(item.get("url", ""), allow_local=allow_local, resolve=False) != item["url"]
+                    or _origin(item["url"]) != _origin(initial)):
+                raise ValueError("Invalid pending navigation obligation")
+            if item.get("attempts", 1) >= 2:
+                raise ValueError("Pending state retry budget exhausted; use an evidenced host supplement or checkpoint")
         ancestors = prior.get("continuation", {}).get("ancestor_report_hashes", [])
         if not isinstance(ancestors, list) or any(not isinstance(h, str) or not re.fullmatch(r"[0-9a-f]{64}", h) for h in ancestors):
             raise ValueError("Invalid continuation hash lineage")
@@ -221,13 +231,13 @@ def continue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_
         raise ValueError("Invalid or incomplete previous discovery proof") from exc
     return _collect(initial, output_dir, allow_local=allow_local, max_pages=max_pages,
                     seeds=frontier, seen_urls=seen, known_urls=known, continuation=context,
-                    previous_captured=previous_captured)
+                    previous_captured=previous_captured, pending_states=pending)
 
 
 def _collect(url: str, output_dir: str | Path, *, allow_local: bool, max_pages: int | None,
              seeds: list[str] | None = None, seen_urls: list[str] | None = None,
              known_urls: list[str] | None = None, continuation: dict | None = None,
-             previous_captured: list[str] | None = None) -> dict:
+             previous_captured: list[str] | None = None, pending_states: list[dict] | None = None) -> dict:
     initial = _url(url, allow_local=allow_local)
     budget = DEFAULT_MAX_PAGES if max_pages is None else max_pages
     if isinstance(budget, bool) or not isinstance(budget, int) or not 1 <= budget <= HARD_MAX_PAGES:
@@ -238,7 +248,7 @@ def _collect(url: str, output_dir: str | Path, *, allow_local: bool, max_pages: 
         raise ValueError("Use a fresh evidence directory")
     evidence_root.mkdir(exist_ok=True)
     report = {
-        "schema_version": "1.0", "status": "partial", "input_url": initial,
+        "schema_version": "2.0", "status": "partial", "input_url": initial,
         "batch_id": uuid.uuid4().hex[:16], "semantic_analysis": "NOT_RUN",
         "started_at": _now(), "pages": [], "sources": [], "link_entries": [],
         "social_candidates": [], "asset_candidates": [], "blocked_requests": [],
@@ -261,7 +271,9 @@ def _collect(url: str, output_dir: str | Path, *, allow_local: bool, max_pages: 
         report["continuation"] = continuation
     seen = set(seen_urls or [])
     seed_urls = list(dict.fromkeys(seeds if seeds is not None else [initial]))
-    queue = deque(value for value in seed_urls if value not in seen)
+    retries = {(item['url'], item['viewport']): item.get('attempts', 1)+1 for item in (pending_states or [])}
+    retry_urls = list(dict.fromkeys(item['url'] for item in (pending_states or [])))
+    queue = deque(retry_urls + [value for value in seed_urls if value not in seen and value not in retry_urls])
     queued = set(known_urls or []) | seen | set(seed_urls)
     socials: dict[str, dict] = {}
     assets: dict[str, dict] = {}
@@ -342,7 +354,7 @@ def _collect(url: str, output_dir: str | Path, *, allow_local: bool, max_pages: 
         text_path.write_text(snapshot["text"][:500000], encoding="utf-8")
         html_path.write_text(page.content()[:2000000], encoding="utf-8")
         artifacts = [_artifact(root, text_path), _artifact(root, html_path)]
-        item = {"source_id": source_id, "kind": kind, "text_path": text_path.relative_to(root).as_posix(), "html_path": html_path.relative_to(root).as_posix(), "scroll_y": snapshot["scroll_y"]}
+        item = {"source_id": source_id, "kind": kind, "text_path": text_path.relative_to(root).as_posix(), "html_path": html_path.relative_to(root).as_posix(), "scroll_y": snapshot["scroll_y"], "height": snapshot["height"], "viewport_height": snapshot["viewport_height"], "visible_images": snapshot["visible_images"]}
         try:
             # Viewport captures bound memory on pages with unbounded document height.
             page.screenshot(path=str(image_path), full_page=False, timeout=4000)
@@ -357,71 +369,30 @@ def _collect(url: str, output_dir: str | Path, *, allow_local: bool, max_pages: 
         observed(snapshot, source_id, page.url)
 
     def explore(page, record: dict) -> None:
-        capture(page, record, "initial")
-        handled = set()
-        for _ in range(MAX_MENU_ACTIONS):
-            controls = page.locator('button[aria-expanded="false"], [role="button"][aria-expanded="false"], button[aria-haspopup], details:not([open]) > summary, button[aria-label*="menu" i]')
-            selected = None
-            for i in range(min(controls.count(), 40)):
-                control = controls.nth(i)
-                if not control.is_visible():
-                    continue
-                info = control.evaluate("e => ({label:e.getAttribute('aria-label') || e.innerText, form:!!e.closest('form'), expanded:e.getAttribute('aria-expanded'), path:e.outerHTML.slice(0,500)})")
-                if info["form"] or info["path"] in handled or info["expanded"] == "true":
-                    continue
-                selected = (control, info)
-                break
-            if not selected:
-                break
-            control, info = selected
-            handled.add(info["path"])
-            before = page.url
-            try:
-                control.click(timeout=1500, no_wait_after=True)
-                page.wait_for_timeout(100)
-                if page.url != before:
-                    record["warnings"].append("Menu control navigated; remaining interactions stopped")
-                    break
-                capture(page, record, "menu", info["label"][:200])
-            except Exception:
-                record["warnings"].append("Menu control could not be safely inspected")
-        # Hover-only desktop menus require observation too; never click anchors.
-        for control in page.locator('nav [aria-haspopup], nav li').all()[:MAX_MENU_ACTIONS]:
-            try:
-                if control.is_visible():
-                    control.hover(timeout=1000)
-                    page.wait_for_timeout(60)
-                    capture(page, record, "menu", "hover")
-            except Exception:
-                record["warnings"].append("Hover menu unavailable")
-        previous = -1
-        for _ in range(MAX_SCROLL_STEPS):
-            position = page.evaluate("() => {scrollBy(0, Math.max(400,innerHeight*0.8)); return scrollY}")
-            page.wait_for_timeout(100)
-            if position == previous:
-                break
-            previous = position
-            capture(page, record, "scroll")
+        from .navigation import explore as observe_navigation
+        observe_navigation(page, record, lambda kind, control=None: capture(page, record, kind, control),
+                           max_menu_actions=MAX_MENU_ACTIONS, max_scroll_steps=MAX_SCROLL_STEPS)
 
     if queue:
         try:
             from playwright.sync_api import sync_playwright
             with sync_playwright() as playwright:
-                channel = os.environ.get("PROPOSITION_BROWSER_CHANNEL", "chrome")
-                launch = {"headless": True}
+                launch = {}
                 resolver_rule = _host_rule(initial, allow_local)
                 if resolver_rule:
                     launch["args"] = ["--host-resolver-rules=" + resolver_rule, "--dns-prefetch-disable"]
-                if channel != "chromium":
-                    launch["channel"] = channel
-                browser = playwright.chromium.launch(**launch)
+                browser, selected_channel = launch_browser(playwright, **launch)
+                report['browser'] = {'channel': selected_channel, 'version': browser.version}
                 try:
                     while queue and len(report["coverage"]["attempted_urls"]) < budget:
                         requested = queue.popleft()
                         report["coverage"]["attempted_urls"].append(requested)
                         seen.add(requested)
                         for viewport_name, viewport in [("desktop", {"width": 1440, "height": 1000}), ("mobile", {"width": 390, "height": 844})]:
+                            if requested in retry_urls and (requested, viewport_name) not in retries:
+                                continue
                             record = {"id": f"page:{report['batch_id']}:{len(report['pages']) + 1:04d}", "requested_url": requested, "final_url": requested, "viewport": viewport_name, "status": "unavailable", "semantic_analysis": "NOT_RUN", "http_status": None, "evidence": [], "warnings": []}
+                            record['attempt'] = retries.get((requested, viewport_name), 1)
                             report["pages"].append(record)
                             context = browser.new_context(viewport=viewport, is_mobile=viewport_name == "mobile", has_touch=viewport_name == "mobile", accept_downloads=False, service_workers="block")
                             context.add_init_script("""(() => {
@@ -490,7 +461,7 @@ def _collect(url: str, output_dir: str | Path, *, allow_local: bool, max_pages: 
                                 else:
                                     page.wait_for_timeout(100)
                                     explore(page, record)
-                                    record["status"] = "captured"
+                                    record["status"] = "captured" if record['exploration']['status']=='complete' else "partial"
                                     if page.url not in report["coverage"]["captured_urls"]:
                                         report["coverage"]["captured_urls"].append(page.url)
                             except Exception as exc:
@@ -511,12 +482,20 @@ def _collect(url: str, output_dir: str | Path, *, allow_local: bool, max_pages: 
     report["coverage"]["omitted_urls"] = list(queue)
     report["coverage"]["frontier"] = list(queue)
     report["coverage"]["seen_urls"] = sorted(seen)
+    report["coverage"]["pending_states"] = [
+        {'url':p['requested_url'],'viewport':p['viewport'],'attempts':p['attempt'],
+         'unresolved':p.get('exploration',{}).get('unresolved',['navigation_unavailable'])}
+        for p in report['pages'] if p['status'] in {'partial','error','unavailable'}]
+    report['coverage']['pending_states'].extend(item for item in (pending_states or [])
+        if item['url'] not in report['coverage']['attempted_urls'])
     report["coverage"]["known_frontier_exhausted"] = not queue
+    report['coverage']['rendered_scope_complete'] = not queue and not report['coverage']['pending_states']
     report["coverage"]["cumulative_captured_urls"] = sorted(set(previous_captured or []) | set(report["coverage"]["captured_urls"]))
     report["coverage"]["unique_attempts"] = len(report["coverage"]["attempted_urls"])
     report["coverage"]["captured_viewports"] = sum(p["status"] == "captured" for p in report["pages"])
     if report["status"] != "unavailable":
-        report["status"] = ("collected" if report["coverage"]["captured_urls"] else
+        report["status"] = ("partial" if report['coverage']['pending_states'] else
+                            "collected" if report["coverage"]["captured_urls"] else
                             "frontier_exhausted" if not report["coverage"]["attempted_urls"] and not queue else "unavailable")
     report["finished_at"] = _now()
     (root / "discovery.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

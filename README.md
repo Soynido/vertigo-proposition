@@ -33,7 +33,7 @@ python3 scripts/setup.py --browser --with-upstream
 
 Le script crée un environnement local, installe les dépendances verrouillées, copie **tous les skills et leurs ressources** dans `~/.codex/skills`, puis télécharge les quatre distributions open source à leurs révisions verrouillées. Aucun installateur upstream n'est exécuté. Garder ce checkout : son environnement Python est référencé par les skills installés. Un emplacement différent se choisit par `--dest CHEMIN`. Une mise à jour gérée utilise `--update` et refuse d'écraser des modifications locales.
 
-Sur Linux, installer les bibliothèques système requises par Playwright selon sa documentation, puis choisir Chromium avec `PROPOSITION_BROWSER_CHANNEL=chromium`. Chrome déjà installé peut aussi être utilisé. L'installateur n'élève pas les permissions.
+Sur Linux, installer les bibliothèques système requises par Playwright selon sa documentation. Le diagnostic, la collecte et l'export essaient Chrome puis Chromium installé ; `PROPOSITION_BROWSER_CHANNEL=chromium` permet un choix explicite. Un canal explicitement indisponible n'est pas substitué silencieusement. L'installateur n'élève pas les permissions.
 
 Recharger les skills dans Codex. Si l'hôte reconnaît les invocations `$skill` :
 
@@ -58,6 +58,8 @@ URL → site rendu + tous menus recensés → canaux officiels + médias
 Les [13 étapes nommées](skills/proposition/references/workflow.md) ont des sorties, preuves et contrôles. Les [81 obligations](skills/proposition/references/acceptance.md) restent distinctes de la qualité. Chaque étape exige une note étayée ; chaque revue requise doit atteindre **9/10**, sans compenser une obligation manquante par une bonne moyenne. Les barèmes sont candidats, en attente de calibration humaine.
 
 La collecte automatique travaille par lots bornés, conserve les omissions et les erreurs, et ne revendique pas une analyse exhaustive. L'agent doit compléter les destinations restantes et documenter les pages inaccessibles avant ses recommandations définitives. Collecter une page ne signifie pas l'avoir analysée.
+
+Le [reçu de navigation](skills/proposition-discovery/references/navigation-evidence.md) relie désormais les captures et états réels aux gates Discovery : bandeau non résolu, menu obligatoire manquant, scroll partiel ou preuve altérée empêchent le PASS. Le statut et les codes CLI distinguent les limites d'une réussite. Le navigateur hôte peut compléter le même registre avec ses propres preuves ; les restrictions du collecteur ne sont pas imputées au site du prospect. La qualification autonome de cette version reste à faire sur les deux URL seules.
 
 ## Ce qui sort
 

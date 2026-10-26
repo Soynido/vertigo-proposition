@@ -2,6 +2,22 @@
 
 Lire lors de l'ajout, du gel, de l'intégration ou de la modification d'une capacité, d'un contrat, d'un skill, d'une procédure ou d'un contrôle affectant le résultat de `proposition`. L'intégration technique précède cette qualification ; elle ne vaut pas acceptation autonome ni disponibilité prouvée pour les collaborateurs.
 
+## Fiche préalable à un nouvel essai
+
+Remplir cette fiche **avant le POC**, dans le dossier de qualification hors du repo public. Elle complète la procédure existante, sans créer un autre pipeline.
+
+| Champ obligatoire | Contenu vérifiable |
+|---|---|
+| Besoin | Défaut observé ou information manquante ; conséquence pour le résultat client |
+| Responsable existant | Étape, skill, fonction/commande et chemin du point actuellement responsable |
+| Delta candidat | Complément, remplacement ou adaptation proposés ; entrées/sorties et consommateurs concernés |
+| Acquis protégés | Contrats et preuves à conserver, notamment sources, navigation, exploration avant sélection, scènes et édition |
+| Preuves disponibles | Témoin, version, fichiers/hashes, périmètre et limites ; ce qui est déjà démontré |
+| Comparaison prévue | Même travail/entrées et conditions ; critère de gain, non-régression, budgets et arrêt |
+| Décision par sous-capacité | Conserver/admettre, adapter, écarter ou non qualifiée ; justification, manque et essai restant |
+
+Un champ inconnu reste explicite ; résoudre avant l'essai ceux qui empêchent une comparaison interprétable. Le composant qualifié s'intègre au point responsable avec ses preuves et consommateurs ; un prototype parallèle ne prouve pas ce raccordement. Un apport déjà présent dans le témoin n'est pas une découverte du candidat. Le dossier préalable n'est ni une admission ni un PASS autonome.
+
 ## Deux preuves nécessaires
 
 1. **Qualification ciblée** : tester la capacité sur des sources figées, comparer son apport aux résultats antérieurs, améliorer puis figer le contrat qui fonctionne. Conserver entrées, versions, rendus, défauts et limites. Le test guidé ou l'assemblage manuel reste une preuve de ce périmètre.

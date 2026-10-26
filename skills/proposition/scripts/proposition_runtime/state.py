@@ -531,6 +531,23 @@ def _stage_report(state, stage_id):
                 "issues": [], "reason": "Internal deliverables excluded by explicit client scope"}
     requirements = [row for row in _requirements() if row["stage_id"] == stage_id]
     issues = []
+    if stage_id == 'discovery.site':
+        from .discovery_evidence import inspect_discovery
+        for message in inspect_discovery(state)['issues']:
+            issues.append({'code':'discovery_evidence','id':stage_id,'message':message})
+        for identifier in ('R08','R09','R10'):
+            assessment=state['evaluations'].get(identifier)
+            if assessment and 'artifact:site-discovery' not in _dependency_closure(state,assessment['evidence']):
+                issues.append({'code':'discovery_evidence','id':identifier,'message':'Navigation assessment must depend on the registered Discovery receipt'})
+    if stage_id == 'discovery.channels':
+        from .discovery_evidence import inspect_channels
+        for message in inspect_channels(state)['issues']:
+            issues.append({'code':'discovery_channels','id':stage_id,'message':message})
+        if 'discovery-channels' in state['artifacts']:
+            for requirement in requirements:
+                assessment=state['evaluations'].get(requirement['id'])
+                if assessment and 'artifact:discovery-channels' not in _dependency_closure(state,assessment['evidence']):
+                    issues.append({'code':'discovery_channels','id':requirement['id'],'message':'Channel assessment must depend on the current external evidence bundle'})
     if stage_id in {'discovery.channels','company.v1','company.v2','analysis.specialists','brief.public','creative.direction','client.composition','verify.final'}:
         from .history import inspect_history
         for message in inspect_history(state)['issues']:
@@ -569,6 +586,10 @@ def _stage_report(state, stage_id):
         issue("missing_stage_review", stage_id, "A scored isolated stage review is required")
     else:
         score = sum(review["scores"])
+        if stage_id=='discovery.site' and 'artifact:site-discovery' not in _dependency_closure(state,review['evidence']):
+            issue('discovery_evidence',stage_id,'Stage review must cover the current Discovery receipt')
+        if stage_id=='discovery.channels' and 'discovery-channels' in state['artifacts'] and 'artifact:discovery-channels' not in _dependency_closure(state,review['evidence']):
+            issue('discovery_channels',stage_id,'Stage review must cover the current external evidence bundle')
         criterion_evidence = review.get("criterion_evidence", {})
         if set(criterion_evidence) != {row["id"] for row in stage["criteria"]}:
             issue("missing_criterion_evidence", stage_id, "Every stage criterion needs its own evidence references")
