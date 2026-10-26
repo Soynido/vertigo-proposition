@@ -21,6 +21,8 @@ Le profil local ou le connecteur autorisé fournit les actifs officiels de l'age
 
 Sites est un atelier optionnel dont l'usage reste tracé ; la source HTML/CSS locale est canonique. Sans génération d'image, sélectionner des médias authentiques : aucune image, scène ou génération fictive. Sans connecteur métier, préparer la livraison locale et laisser publication non exécutée.
 
+Le [prétraitement textuel optionnel](preprocessing.md) utilise le même paquet public dans Codex et, sur un poste Free déjà configuré, Cloudflare Clef. L'absence de Cloudflare ne bloque pas le parcours ; les suggestions ne remplacent aucune analyse ou revue créative.
+
 Création et revue reçoivent seulement les fichiers explicitement autorisés, leurs empreintes et la tâche utile. Nouveau contexte, sans historique privé : consigner le mécanisme de lancement. Un test canari détecte certaines fuites, sans prouver leur absence universelle. Une auto-revue ou un autre rôle dans le même contexte ne remplit pas l'indépendance. Si cette isolation n'est pas disponible, conserver `BLOCKED` pour le gate concerné.
 
 Mesurer durée et ressources connues avec provenance ; une métrique inaccessible reste inconnue. Une limite de ressources n'est pas un délai arbitraire de production.

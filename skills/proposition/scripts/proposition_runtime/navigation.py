@@ -45,8 +45,9 @@ def explore(page, record, capture, *, max_menu_actions, max_scroll_steps):
             dismissed = False
             for overlay in visible:
                 for button in overlay.locator('button, [role="button"], a').all()[:30]:
-                    label = (button.get_attribute('aria-label') or button.inner_text()).strip()
-                    if not button.is_visible() or not CLOSE.fullmatch(label): continue
+                    labels = [value.strip() for value in (button.get_attribute('aria-label') or '', button.inner_text())]
+                    label = next((value for value in labels if CLOSE.fullmatch(value)), '')
+                    if not button.is_visible() or not label: continue
                     try:
                         button.click(timeout=1000, no_wait_after=True)
                         page.wait_for_timeout(100)
@@ -110,6 +111,11 @@ def explore(page, record, capture, *, max_menu_actions, max_scroll_steps):
             actions.append(action)
             try:
                 if not clear_overlays(): return
+                hover_menu=control.evaluate("e=>!!e.closest('.w-dropdown[data-hover=\"true\"]')")
+                delay=control.evaluate("e=>Math.min(750,Math.max(0,Number(e.closest('.w-dropdown')?.getAttribute('data-delay'))||100))")
+                if hover_menu:
+                    control.hover(timeout=1500)
+                    page.wait_for_timeout(delay+100)
                 if not control.evaluate(OPEN): control.click(timeout=1500, no_wait_after=True)
                 page.wait_for_timeout(100)
                 if page.url != start_url:
@@ -126,8 +132,12 @@ def explore(page, record, capture, *, max_menu_actions, max_scroll_steps):
                         scroll_panels(control.locator('..'))
                     else:
                         unresolved.append('menu_target_not_identified')
-                    control.click(timeout=1000, no_wait_after=True)
-                    page.wait_for_timeout(80)
+                    if hover_menu:
+                        page.mouse.move(0,page.viewport_size['height']-1)
+                        page.wait_for_timeout(delay+100)
+                    else:
+                        control.click(timeout=1000, no_wait_after=True)
+                        page.wait_for_timeout(80)
                     action['closed'] = not control.evaluate(OPEN)
                     shot('menu_closed', info['label'][:200])
                 if action['opened'] and action['closed']: action['status']='resolved'
@@ -156,6 +166,13 @@ def explore(page, record, capture, *, max_menu_actions, max_scroll_steps):
         except Exception:
             unresolved.append('hover_menu_unavailable')
     if not clear_overlays(): return
+
+    # A small unlabelled interaction can be the only mobile navigation entry.
+    # Do not click arbitrary containers or certify that an unseen menu is covered.
+    for candidate in page.locator('[data-w-id][class*="menu" i], [data-w-id][class*="hamburger" i]').all()[:80]:
+        if not candidate.is_visible(): continue
+        if candidate.evaluate("e=>{const r=e.getBoundingClientRect();return r.width>10&&r.width<130&&r.height>10&&r.height<130&&!e.matches('button,a,[role=button],[aria-expanded]')}"):
+            unresolved.append('unsemantic_menu_requires_host_observation')
 
     scroll_panels(page)
 

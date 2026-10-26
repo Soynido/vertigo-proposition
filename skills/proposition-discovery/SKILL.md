@@ -20,6 +20,8 @@ Une URL recensée reçoit une issue de tentative. L'inaccessible n'est pas analy
 
 Rapprocher les tentatives externes dans le même run avec `discovery reconcile RUN_DIR --report JOURNAL`, puis `discovery channels RUN_DIR`. Relier évaluations et revue canaux au bundle courant `artifact:discovery-channels` ; sa modification invalide les anciens jugements. Les entrées partageant une destination restent distinctes ; un accès refusé est une issue, pas une analyse ni une preuve d'officialité. Ces contrôles alimentent les gates existants, sans autre workflow.
 
+Avant le modèle entreprise, enregistrer les copies textuelles de provenance publique vérifiée avec `kind=public` et `audience=public`, puis exécuter `preprocess RUN_DIR`. Consommer le `native_task_path` retourné, le paquet et ses localisateurs ; vérifier les sources primaires utiles et traiter les exclusions localement. Le tri optionnel Cloudflare ne retire aucune source et ne valide aucune étape. Sans configuration il prépare le même travail pour Codex, sans login ni nouvel accès. Lire [les modes et reçus](../proposition/references/preprocessing.md) pour configuration, cache et limites.
+
 ## Sortie contrôlable
 
 - Registre d'entrées/destinations, variante desktop/mobile, tentative, issue, source/capture et limite.

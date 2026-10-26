@@ -78,6 +78,25 @@ class NavigationTests(unittest.TestCase):
         self.assertTrue(report['sources'])
         self.assertTrue(all(p.get('exploration',{}).get('status')=='partial' for p in report['pages']))
 
+    def test_banner_visible_label_can_differ_from_accessible_name(self):
+        report=discovery.collect(self.base+'/aria-banner.html',self.out,allow_local=True,max_pages=1)
+        for page in report['pages']:
+            self.assertEqual('complete',page['exploration']['status'],page['exploration'])
+            self.assertTrue(any(a['kind']=='overlay' and a['status']=='resolved' for a in page['interactions']))
+
+    def test_webflow_hover_menu_is_not_closed_by_its_opening_click(self):
+        report=discovery.collect(self.base+'/hover-toggle.html',self.out,allow_local=True,max_pages=1)
+        for page in report['pages']:
+            menus=[a for a in page['interactions'] if a['kind']=='menu']
+            self.assertTrue(menus)
+            self.assertTrue(all(a['opened'] and a['closed'] for a in menus),menus)
+
+    def test_unlabelled_mobile_menu_requires_host_observation(self):
+        report=discovery.collect(self.base+'/unlabelled-menu.html',self.out,allow_local=True,max_pages=1)
+        for page in report['pages']:
+            self.assertIn('unsemantic_menu_requires_host_observation',page['exploration']['unresolved'])
+            self.assertEqual('partial',page['exploration']['status'])
+
     def test_scrollable_menu_is_observed_before_being_closed(self):
         report=discovery.collect(self.base+'/menu-scroll.html',self.out,allow_local=True,max_pages=1)
         for page in report['pages']:

@@ -38,6 +38,14 @@ class CliTests(unittest.TestCase):
         self.assertEqual(checked['status'], 'BLOCKED')
         self.assertIn('scope', checked)
 
+    def test_native_preprocessing_does_not_require_cloudflare_configuration(self):
+        created=self.command('init','https://example.com','--runs-root',self.base/'native-runs')
+        result=self.command('preprocess',created['root'],'--mode','codex')
+        self.assertEqual('CODEX_REQUIRED',result['status'])
+        self.assertEqual(0,result['requests'])
+        self.assertTrue(Path(result['native_task_path']).is_file())
+        self.assertNotIn('batches',result)
+
     def test_initial_explicit_mandate_reaches_the_chosen_direction_contract(self):
         instruction=(self.base/'current-user-input.txt').resolve()
         text='Continue the already chosen direction a only.';instruction.write_text(text)
