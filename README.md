@@ -10,7 +10,7 @@ Un ensemble de skills pour Codex, avec collecte rendue, preuves versionnées, m�
 
 Quand le message contient l'URL de ce dépôt et celle d'un site prospect, exécuter la proposition complète. Le dépôt fournit la méthode ; le second lien fournit le point de départ de la recherche. Aucun autre prompt créatif n'est nécessaire.
 
-1. Lire ce README, `AGENTS.md` et les scripts d'installation. Cloner la révision distribuée dans un dossier neuf ; relever commit et arbre. Installer les dépendances, les neuf skills et les quatre distributions verrouillées dans une destination isolée avec `python3 scripts/setup.py --dest CHEMIN --browser --with-upstream`, sans remplacer les skills globaux.
+1. Lire ce README, `AGENTS.md` et le [starter pack](skills/proposition/references/installation.md). Cloner la révision distribuée dans un dossier neuf ; relever commit et arbre. Installer dans son propre workspace avec `python3 scripts/setup.py --workspace CHEMIN --browser --with-upstream --with-presentations`, sans remplacer les skills globaux. Les prérequis système et capacités de l'hôte sont contrôlés séparément dans le starter.
 2. Lire le `proposition/SKILL.md` effectivement installé et suivre ses références. Commencer la recherche depuis l'URL prospect ; aucun ancien dossier client n'est une entrée implicite.
 3. Suivre le parcours complet : sources et analyses, brief, **au moins deux mondes créatifs matérialisés et comparés avant sélection**, développement des directions retenues, récit, trois PDF, PowerPoint client, contexte compilé, sources et contrôles.
 4. Produire et inspecter les fichiers locaux avec les capacités disponibles. Les coordonnées, profils privés ou droits absents restent inconnus ; poursuivre les travaux indépendants et déclarer les blocages réels. Aucun nom, actif d'agence ou PASS n'est inventé.
@@ -19,21 +19,27 @@ Une instruction explicite de l'utilisateur peut préciser un autre périmètre o
 
 ## Installation pour un collaborateur
 
-Donner ce dépôt à Codex avec cette demande :
+**Le collaborateur utilise ce dépôt comme source de skills. Aucun droit d'écriture, ajout de collaborateur ou fork de ce dépôt n'est nécessaire.** Les présentations et données client sont produites dans son propre espace, hors du checkout du kit.
 
-> Lis le README de https://github.com/Soynido/vertigo-proposition. Vérifie les scripts, installe ses skills et dépendances dans mon environnement Codex, puis vérifie le doctor. Ne modifie aucun système métier. Indique les capacités disponibles et celles qui manquent.
+Dans **Codex Cloud**, créer sur son propre compte un dépôt **privé** (par exemple `vertigo-presentations`, initialisé avec un README), autoriser la connexion GitHub de Codex sur ce seul dépôt, puis le sélectionner pour créer l'environnement. Une liste vide se résout dans l'autorisation de cette connexion ; ne pas créer un dépôt dont le nom serait l'URL du kit. Activer le réseau nécessaire aux sites prospect et aux dépendances. Suivre ensuite [la procédure Cloud exacte et l'inventaire des paquets/MCP](skills/proposition/references/installation.md) : téléchargement public, installation dans `.agents/skills`, contrôle, publication de l'environnement, nouvelle tâche avec les deux URL seules. Aucun modèle particulier n'est imposé.
+
+Pour préparer l'environnement avec son agent, donner cette demande technique :
+
+> Lis le README et le starter pack de https://github.com/Soynido/vertigo-proposition. Inspecte les scripts puis installe le kit dans mon propre workspace, sans droits d'écriture ni push sur le dépôt source. Vérifie les outils et capacités réellement disponibles ; ne prépare aucun dossier client. Signale les blocages avant de publier l'environnement.
 
 Ou installer depuis un terminal avec Python 3.11+ et Git :
 
 ```bash
 git clone https://github.com/Soynido/vertigo-proposition.git
 cd vertigo-proposition
-python3 scripts/setup.py --browser --with-upstream
+python3 scripts/setup.py --workspace /chemin/vers/mon-workspace --browser --with-upstream --with-presentations
 ```
 
-Le script crée un environnement local, installe les dépendances verrouillées, copie **tous les skills et leurs ressources** dans `~/.codex/skills`, puis télécharge les quatre distributions open source à leurs révisions verrouillées. Aucun installateur upstream n'est exécuté. Garder ce checkout : son environnement Python est référencé par les skills installés. Un emplacement différent se choisit par `--dest CHEMIN`. Une mise à jour gérée utilise `--update` et refuse d'écraser des modifications locales.
+Le workspace doit exister et être distinct du checkout du kit. Le script crée le venv de ce checkout, installe les dépendances verrouillées, copie **tous les skills et leurs ressources** dans `WORKSPACE/.agents/skills`, puis télécharge les quatre distributions open source à leurs révisions verrouillées. Le profil PowerPoint local ajoute python-pptx et teste création, édition et rendu avec LibreOffice/soffice disponible. Sans renderer, ce profil reste bloqué ; sa simple installation ne valide pas le PPTX. Le reçu se trouve dans `WORKSPACE/.vertigo/setup.json`.
 
-Sur Linux, installer les bibliothèques système requises par Playwright selon sa documentation. Le diagnostic, la collecte et l'export essaient Chrome puis Chromium installé ; `PROPOSITION_BROWSER_CHANNEL=chromium` permet un choix explicite. Un canal explicitement indisponible n'est pas substitué silencieusement. L'installateur n'élève pas les permissions.
+Aucun installateur upstream n'est exécuté. Garder le checkout : son Python est référencé par les skills installés. Le mode explicite `--dest CHEMIN` et sa destination historique `~/.codex/skills` restent disponibles. Une mise à jour gérée utilise `--update` et refuse d'écraser des modifications locales.
+
+Sur Linux, `--with-system-deps` demande explicitement les bibliothèques Chromium et, avec le profil présentations, LibreOffice Impress et les polices de base. Ce mode exige un processus root autorisé ; l'installateur ne lance jamais `sudo`. Sans ces droits, faire préparer les paquets système ou conserver le blocage. Le diagnostic, la collecte et l'export essaient Chrome puis Chromium installé ; `PROPOSITION_BROWSER_CHANNEL=chromium` permet un choix explicite. Un canal explicitement indisponible n'est pas substitué silencieusement.
 
 Recharger les skills dans Codex. Si l'hôte reconnaît les invocations `$skill` :
 

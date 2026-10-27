@@ -31,6 +31,8 @@ def install_repo(source: Path, destination: Path, *, update: bool = False) -> di
                     and not path.name.endswith((".pyc", ".pyo"))):
                 inventory[f"{skill.name}/{path.relative_to(skill).as_posix()}"] = digest(path)
     manifest_path = destination / ".proposition-install.json"
+    if manifest_path.is_symlink():
+        raise ValueError("Refusing a symlink installation manifest")
     previous = json.loads(manifest_path.read_text()) if manifest_path.exists() else None
     if previous:
         for relative in previous.get('files', {}):

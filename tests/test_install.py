@@ -71,6 +71,15 @@ class InstallTests(unittest.TestCase):
         after = {str(p.relative_to(self.dest)): p.read_bytes() for p in self.dest.rglob('*') if p.is_file()}
         self.assertEqual(before, after)
 
+    def test_install_manifest_symlink_cannot_overwrite_an_unrelated_file(self):
+        outside = self.base / 'other-settings.json'
+        outside.write_text('{}')
+        self.dest.mkdir()
+        (self.dest / '.proposition-install.json').symlink_to(outside)
+        with self.assertRaisesRegex(ValueError, 'symlink'):
+            self.install()
+        self.assertEqual(outside.read_text(), '{}')
+
 
 if __name__ == "__main__":
     unittest.main()

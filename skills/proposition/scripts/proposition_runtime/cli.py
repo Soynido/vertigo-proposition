@@ -47,7 +47,7 @@ def measure(run_dir, *, quota=None, source=None):
     return result
 
 
-def doctor():
+def doctor(*, check_presentations=False):
     dependencies = {}
     for name in ('jsonschema', 'playwright', 'pypdf', 'pypdfium2', 'Pillow'):
         try:
@@ -67,12 +67,18 @@ def doctor():
                 pass
     except ImportError:
         pass
-    return {'status': 'PASS' if all(dependencies.values()) and browser['status'] == 'AVAILABLE' else 'BLOCKED',
+    from . import presentation_probe
+    presentation = presentation_probe.probe() if check_presentations else {
+        'status': 'NOT_TESTED', 'tools': presentation_probe.inventory(), 'client_fidelity': 'NOT_RUN'}
+    ready = all(dependencies.values()) and browser['status'] == 'AVAILABLE'
+    if check_presentations: ready = ready and presentation['status'] == 'PASS'
+    return {'status': 'PASS' if ready else 'BLOCKED',
             'scope': 'local_runtime_only', 'python': platform.python_version(), 'dependencies': dependencies,
             'browser': browser, 'contracts': state.CONTRACT_ROOT.is_dir(), 'registry': state.DATA_ROOT.is_dir(),
             'creative_quality': 'NOT_RUN', 'fresh_agent_contexts': 'HOST_REQUIRED', 'image_editing': 'HOST_REQUIRED',
             'sites': 'ADAPTER_NOT_CONFIGURED', 'private_connector': 'ADAPTER_NOT_CONFIGURED',
-            'live_publication': 'NOT_RUN', 'slash_command': 'HOST_DEPENDENT'}
+            'live_publication': 'NOT_RUN', 'slash_command': 'HOST_DEPENDENT',
+            'presentations': presentation, 'required_mcp': [], 'host_capabilities': 'NOT_VERIFIED_BY_RUNTIME'}
 
 
 def workbench(run_dir):
@@ -101,7 +107,8 @@ def workbench(run_dir):
 def parser():
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest='command', required=True)
-    sub.add_parser('doctor')
+    doctor_parser = sub.add_parser('doctor')
+    doctor_parser.add_argument('--presentations', action='store_true', help='Test a real local editable/rendered PPTX fixture')
     s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path); s.add_argument('--creative-mandate', type=Path)
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
     s = sub.add_parser('prepare-inputs'); s.add_argument('run_dir', type=Path); s.add_argument('manifest', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--timeout-seconds', type=float, default=5)
@@ -151,7 +158,7 @@ def execute(a):
     if c in ('freeze-creatives', 'check-creatives'):
         from .preservation import freeze_creatives, inspect_preservation
         return freeze_creatives(a.run_dir, read_json(a.selection)) if c == 'freeze-creatives' else inspect_preservation(state.load_run(a.run_dir))
-    if c == 'doctor': return doctor()
+    if c == 'doctor': return doctor(check_presentations=a.presentations)
     if c == 'history':
         from . import history
         if a.operation == 'collect': return history.collect(a.run_dir,a.urls)
