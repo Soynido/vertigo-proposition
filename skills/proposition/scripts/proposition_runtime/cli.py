@@ -112,7 +112,9 @@ def parser():
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path)
         if command == 'check-experience':
             s.add_argument('--stage', choices=['creative.direction','client.composition','export.documents','verify.final'], default='creative.direction')
-            s.add_argument('--inputs-only', action='store_true', help='Check current inputs and reading receipt before rendering candidates')
+            modes=s.add_mutually_exclusive_group()
+            modes.add_argument('--inputs-only', action='store_true', help='Check current inputs and reading receipt before rendering candidates')
+            modes.add_argument('--composition-plan-only', action='store_true', help='Check and register the deck plan/pilot before complete outputs exist')
     s = sub.add_parser('measure'); s.add_argument('run_dir', type=Path); s.add_argument('--quota-remaining-percent', type=float); s.add_argument('--quota-source')
     for command in ('source', 'fact', 'plan'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path); s.add_argument('json_file', type=Path)
@@ -175,6 +177,9 @@ def execute(a):
         from .experience import inspect_experience, inspect_creative_inputs
         state.invalidate_changed(a.run_dir)
         if a.inputs_only:return inspect_creative_inputs(state.load_run(a.run_dir))
+        if a.composition_plan_only:
+            from .composition import review_plan
+            return review_plan(a.run_dir)
         return inspect_experience(state.load_run(a.run_dir), a.stage)
     if c == 'measure': return measure(a.run_dir, quota=a.quota_remaining_percent, source=a.quota_source)
     if c == 'workbench': return workbench(a.run_dir)

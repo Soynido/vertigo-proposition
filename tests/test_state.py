@@ -45,7 +45,7 @@ class StateTests(unittest.TestCase):
         state.add_source(run["root"], "page", "sources/page.txt", kind="public")
         state.add_fact(run["root"], "offer", "A public fixture offer", ["page"],
                        audience="client", public_allowed=True)
-        for audience in ("client", "sales", "technical"):
+        for audience in ("sales", "technical"):
             self.write(run, f"exports/{audience}.pdf", f"Fixture {audience} file")
             state.add_artifact(run["root"], f"{audience}-pdf", f"exports/{audience}.pdf",
                                audience, ["fact:offer"])
@@ -53,7 +53,7 @@ class StateTests(unittest.TestCase):
         if discovery_receipt:
             from discovery_fixture import install_discovery
             install_discovery(run)
-        install_preservation(state.load_run(run['root']))
+        install_preservation(state.load_run(run['root']),pdf_path='exports/client.pdf')
         for number in range(1, 82):
             state.record_evaluation(run["root"], f"R{number:02}", {
                 "status": "PASS", "applicable": True,

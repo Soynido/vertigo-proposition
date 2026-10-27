@@ -369,6 +369,8 @@ def _check_story(run, inputs):
     _,pdf=_artifact(run,'artifact:client-pdf')
     from pypdf import PdfReader
     count=len(PdfReader(pdf).pages)
+    from .composition import inspect_final
+    inspect_final(run,count)
     for row in rows:
         if type(row['page']) is not int or not 1<=row['page']<=count:
             raise ValueError('Story references a page absent from the final PDF')

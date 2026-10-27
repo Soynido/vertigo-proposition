@@ -107,7 +107,7 @@
     },
     {
       "id": "R13",
-      "label": "Connect the observation, proposed idea and intended benefit",
+      "label": "Demonstrate K01-K08: sourced opportunity, shown mechanism, intended benefit and measurement limits, scoped agency mission and decision",
       "mandatory": true,
       "stage_id": "client.composition",
       "applicability": "always"
@@ -172,7 +172,7 @@
     },
     {
       "id": "R22",
-      "label": "Prepare a client-specific commercial conversation and follow-up playbook",
+      "label": "Bind the client-specific commercial conversation and follow-up playbook to the current client revision",
       "mandatory": true,
       "stage_id": "internal.handoffs",
       "applicability": "always"
@@ -200,7 +200,7 @@
     },
     {
       "id": "R26",
-      "label": "Describe the existing system, scope, dependencies and handoff decisions",
+      "label": "Bind the technical scope, dependencies and handoff decisions to the current client revision",
       "mandatory": true,
       "stage_id": "internal.handoffs",
       "applicability": "always"
