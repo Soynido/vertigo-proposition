@@ -58,7 +58,8 @@ class EndToEndTests(unittest.TestCase):
             invalidated = state.invalidate_changed(run_dir)
             self.assertIn('artifact:client-source',invalidated['invalidated'])
             self.assertIn('artifact:client-pdf',invalidated['invalidated'])
-            self.assertEqual(state.load_run(run_dir)['artifacts']['sales-pdf']['status'],'CURRENT')
+            # New-kit handoffs consume the client revision, even when their bytes are unchanged.
+            self.assertEqual(state.load_run(run_dir)['artifacts']['sales-pdf']['status'],'STALE')
             self.assertFalse((run_dir/'publication-receipt.json').exists())
 
 

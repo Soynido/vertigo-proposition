@@ -49,20 +49,40 @@ def selection(root):
             'retained':[{'id':'scene','path':'scene.png','role':'desktop','crop':[0,0,1,1],'min_page_fraction':.15}]}
 
 
-def install_preservation(run):
+def install_preservation(run, pdf_path='client.pdf'):
     from proposition_runtime import preservation, state
     root=Path(run['root'])
     from experience_fixture import prepare_experience, install_story
     retained=prepare_experience(run)
     data={'revision':'r1','actor':'operator','decision':'Retain the complete fictional experience.','retained':retained}
-    make_outputs(root,images=[r['path'] for r in retained],creative_ids=[r['id'] for r in retained])
     preservation.freeze_creatives(root,data)
+    from composition_fixture import prepare_plan, register_client
+    from proposition_runtime.composition import review_plan
+    plan=prepare_plan(run)
+    plan['outputs']['client-pdf']=pdf_path
+    from experience_fixture import write_artifact
+    write_artifact(run,'client-story-map','client-story-map.json',plan)
+    result=review_plan(root)
+    if result['status']!='PASS': raise AssertionError(result)
+    make_outputs(root,images=[r['path'] for r in retained],creative_ids=[r['id'] for r in retained])
     install_story(run)
-    pdf_path = run['artifacts'].get('client-pdf',{}).get('path','client.pdf')
     if pdf_path != 'client.pdf':
         (root/'client.pdf').replace(root/pdf_path)
         manifest=json.loads((root/'placements.json').read_text()); manifest['pdf']=pdf_path
         (root/'placements.json').write_text(json.dumps(manifest))
+    register_client(run)
+    story=json.loads((root/'client-story.json').read_text())
+    story['kit_coverage']=[{'id':row['id'],'page':1,'anchor':row['anchor']} for row in plan['coverage']]
+    write_artifact(run,'client-story','client-story.json',story)
     state.add_artifact(root,'client-pdf',pdf_path,'client', ['fact:offer'] if 'offer' in run['facts'] else [])
     state.add_artifact(root,'client-pptx','client.pptx','client')
+    # Re-register the story after the final export registrations, then derive handoffs.
+    write_artifact(run,'client-story','client-story.json',story)
+    if state.delivery_scope(state.load_run(root))=='full':
+        for identifier in ('sales-playbook','follow-up-register','technical-handoff'):
+            (root/(identifier+'.md')).write_text('Fictional scoped handoff and current client anchors.')
+            state.add_artifact(root,identifier,identifier+'.md','internal')
+        for audience in ('sales','technical'):
+            if (root/f'exports/{audience}.pdf').exists():
+                state.add_artifact(root,audience+'-pdf',f'exports/{audience}.pdf',audience)
     state.add_artifact(root,'creative-placements','placements.json','internal')

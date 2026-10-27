@@ -609,14 +609,15 @@
       "criteria": [
         {
           "id": "story",
-          "observable": "The client can follow a sourced opportunity through a visible change, concrete visitor value, the proposed agency mission and the next decision; page count follows the argument",
+          "observable": "K01-K08 connect client understanding, a shown approach and scenario, sourced change, measurable objective or unknown, scoped agency mission and decision; prior visual planning precedes full manufacturing",
           "evidence": [
-            "client-story-map"
+            "client-story-map",
+            "composition-plan-review"
           ],
           "anchors": {
             "0": "Catalogue, unsupported problem, absent agency mission or no next decision; the reader cannot explain the proposed change",
-            "1": "The functions exist, but the proof-to-change-to-value chain is implicit, repeated scene states drive the deck, or the mission is reduced to mockups without a scoped reason",
-            "2": "Exact pages connect a dated observation, proposed scene, credible visitor benefit, scoped agency realization and concrete next decision; titles alone form the story and secondary retained scenes remain preserved"
+            "1": "Functions are named but the shown mechanism, business/measurement limit, scoped mission, decisive transitions or prior visual design remain implicit; a scene catalogue or late plan is insufficient",
+            "2": "Exact pages demonstrate K01-K08 from dated observation through shown change, credible benefit/measurement limits, scoped realization and decision; prior visual plan and inspected pilot match the final story, with retained scenes preserved"
           }
         },
         {
@@ -673,7 +674,8 @@
         "client-copy-review",
         "client-story-map",
         "composition-surface-ledger",
-        "desktop-mobile-compositions"
+        "desktop-mobile-compositions",
+        "composition-plan-review"
       ],
       "gate": {
         "minimum_score": 9,
