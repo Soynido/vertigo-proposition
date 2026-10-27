@@ -16,6 +16,9 @@ dependencies = [
   "Pillow==13.0.0",
 ]
 
+[project.optional-dependencies]
+presentations = ["python-pptx==1.0.2"]
+
 [project.scripts]
 proposition = "proposition_runtime.cli:main"
 

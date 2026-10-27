@@ -1,5 +1,7 @@
 # Capacités et contextes
 
+Pour un premier usage local ou Cloud, suivre [l'installation dans son propre espace](installation.md). Le kit ne demande aucun droit d'écriture sur son dépôt public ni changement de modèle. Le reçu d'installation sépare les outils réellement essayés des capacités d'hôte encore inconnues ; il ne valide pas la proposition complète.
+
 Lire le doctor avant de déclarer une capacité disponible. `upstream status` inspecte les distributions ; `upstream fetch` les récupère seulement quand leur téléchargement est autorisé. Lire leur licence et leurs dépendances, sans exécuter un installateur upstream implicitement. Une compétence présente mais non invoquée n'est pas une compétence exécutée.
 
 Pour chaque famille attendue sur sa surface pertinente, conserver un reçu :
@@ -20,6 +22,8 @@ Pour les charger, lire `source_path` et `entrypoints` du reçu `upstream status`
 Le profil local ou le connecteur autorisé fournit les actifs officiels de l'agence, le responsable, les règles et valeurs internes. Vérifier les fichiers de logo et les droits avant usage ; aucune marque d'un exemple précédent ne remplace un actif absent. Les détails privés servent aux dossiers internes ; le document client reçoit seulement les éléments autorisés, dans une DA issue de son propre contexte.
 
 Sites est un atelier optionnel dont l'usage reste tracé ; la source HTML/CSS locale est canonique. Sans génération d'image, sélectionner des médias authentiques : aucune image, scène ou génération fictive. Sans connecteur métier, préparer la livraison locale et laisser publication non exécutée.
+
+Le profil local `--with-presentations` installe les dépendances verrouillées de python-pptx. `doctor --presentations` vérifie création, réouverture, édition, rendu LibreOffice et rasterisation d'une seule fixture. Sans renderer, ce contrôle est bloqué ; une capacité native de l'hôte doit alors être qualifiée séparément. Ce profil n'ajoute ni exporteur de proposition ni gabarit et ne remplace pas l'inspection du PPTX client exact. Aucun MCP n'est obligatoire pour le runtime local ; les nouveaux contextes indépendants et la lecture des pixels restent à vérifier chez l'hôte.
 
 Le [prétraitement textuel optionnel](preprocessing.md) utilise le même paquet public dans Codex et, sur un poste Free déjà configuré, Cloudflare Clef. L'absence de Cloudflare ne bloque pas le parcours ; les suggestions ne remplacent aucune analyse ou revue créative.
 
