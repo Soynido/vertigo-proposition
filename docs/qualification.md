@@ -37,3 +37,9 @@ Le contrat créatif v3 restaure plusieurs mondes centraux inspectés et comparé
 Le défaut observé était une direction unique avec plusieurs vues acceptées comme options, puis un gel possible sans exploration. Les tests ciblés de cohérence reproduisent et protègent ce défaut ; la revue juge les images et le sens, y compris les différences entre candidats. Aucun résultat esthétique n'est déduit du nouveau JSON.
 
 La recette après intégration suit [la validation production](../skills/proposition-quality/references/production-validation.md) : installation neuve, contexte neuf, entrée complète limitée aux deux URL, aucune aide du mainteneur pendant le run. Publier la correction technique ne vaut pas PASS de cette recette. Son verdict reste en attente jusqu'à la lecture des fichiers et traces exacts de la version distribuée.
+
+## Lecture préalable : portée de la correction
+
+Un reçu nommant les méthodes et leurs empreintes pouvait rester cohérent alors que la lecture était tronquée ou complétée après le rendu. Le contrat de lecture version 1 lie désormais couverture déclarée, inputs courants et ordre avant les scènes centrales. Le précontrôle `check-experience --inputs-only` s'exécute avant les rendus ; le gate complet et le gel vérifient ensuite les dates centrales obligatoires, y compris pour les candidats écartés. Les reprises historiques sans ce contrat gardent leur portée.
+
+Les tests de cohérence et la revue du delta ciblent ce défaut ; ils ne certifient ni lecture sémantique, ni vérité d'une date déclarée, ni gain créatif de nouveaux audits. Une consommation fictive des consignes reste un essai documentaire assisté. La qualification autonome de cette correction demeure en attente du test neuf à deux URL sur sa révision distribuée.

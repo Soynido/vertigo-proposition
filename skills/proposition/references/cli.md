@@ -8,15 +8,19 @@ python3 <MAIN_SKILL_DIR>/scripts/proposition.py --help
 
 La commande peut aussi être installée par le paquet. Vérifier `--help` sur la version présente avant un appel ; aucune syntaxe `/proposition` n'est garantie par ce document. Les runs vivent hors checkout par défaut. Tous chemins d'artefacts d'un run doivent être relatifs au run.
 
+Dans le checkout de développement, utiliser `.venv/bin/python` (`.venv\Scripts\python.exe` sous Windows). Dans un skill installé, le lanceur lit `proposition/installation.json` et réexécute l'interpréteur de l'installation : ne pas résoudre le lien symbolique du Python de la venv vers un Python système sans ses dépendances.
+
 | Besoin | Sous-commande après le lanceur Python |
 |---|---|
 | Capacités | `doctor` |
 | Distributions upstream | `upstream status` ; `upstream fetch [--family NAME] [--cache DIR]` |
 | Run | `init URL [--runs-root DIR] [--profile FILE] [--creative-mandate FILE]` ; `validate RUN_DIR` |
 | Collecte | `collect URL --output DIR [--allow-local-fixture] [--max-pages N]` |
+| Preuves Discovery | `discovery register RUN_DIR --report FILE` ; `discovery check RUN_DIR` — fichier 2.0 et preuves déjà dans le run, intégrité/complétude rendue, pas note de qualité |
+| Issues externes | `discovery reconcile RUN_DIR --report JOURNAL` ; `discovery channels RUN_DIR` — jointure des tentatives sans officialité/analyse/droits implicites |
 | Historique optionnel | `history collect RUN_DIR [--urls URL]` ; `history register RUN_DIR --report FILE` ; `history check RUN_DIR` — récupération, pas analyse visuelle implicite |
 | Reprise locale bornée | `prepare-inputs RUN_DIR MANIFEST --output NEW_LOCAL_DIR [--timeout-seconds 5]` — manifeste `{inputs:[{id,path,sha256}]}`, seules entrées nécessaires, chemins relatifs au run |
-| Continuer la couverture | `collect --frontier PREVIOUS_DISCOVERY_JSON --output NEW_DIR [--max-pages N]` — vérifie les preuves précédentes, reprend les destinations restantes dans un lot neuf |
+| Continuer la couverture | `collect --frontier PREVIOUS_DISCOVERY_JSON --output NEW_DIR [--max-pages N]` — vérifie les preuves précédentes, reprend les destinations et états manquants dans un lot neuf ; une reprise au plus du même état échoué |
 | Source / fait | `source RUN_DIR JSON_FILE` ; `fact RUN_DIR JSON_FILE` |
 | Artefact | `artifact RUN_DIR ID FILE --audience public|client|sales|technical|internal [--depends REF...]` |
 | Évaluation | `evaluate RUN_DIR REQUIREMENT_ID JSON_FILE` |
@@ -41,4 +45,6 @@ La revue d'étape fournit cinq notes explicites, un rôle de réviseur, ses preu
 
 ## Progression et portée
 
-`next-stage RUN_DIR` indique le premier passage applicable non validé. `check-experience RUN_DIR` vérifie exploration, sélection et développement ; `--stage client.composition` inclut la carte de récit et les pages du PDF. Le défaut d'un nouveau run demande au moins deux mondes centraux avant sélection. `--creative-mandate` s'emploie seulement avec une instruction externe de nombre ou de direction déjà choisie, vérifiée et liée dès l'initialisation. Lire [les champs attendus](experience-evidence.md) avant de créer les artefacts. `freeze-creatives` refuse le gel sans ces preuves. `inspect --help` expose `--max-pages` pour une limite explicitement demandée ; aucune limite par défaut. Ces contrôles ne produisent pas une note esthétique.
+Avant la fabrication complète du deck, `check-experience RUN_DIR --composition-plan-only` vérifie la carte K01–K08, le plan visuel et le pilote inspecté, puis enregistre `composition-plan-review` lié aux entrées courantes. Ce mode ne demande aucun PDF final ; les sorties complètes déclarées doivent encore être inexistantes. Lire [le format préalable](experience-evidence.md#plan-de-composition-préalable). Les flags `--inputs-only` et `--composition-plan-only` sont exclusifs : le premier précède la création du site, le second précède la déclinaison du deck. Leur PASS est mécanique, sans note esthétique.
+
+`next-stage RUN_DIR` indique le premier passage applicable non validé. `check-experience RUN_DIR --inputs-only` vérifie les inputs et le reçu de lecture avant les rendus, sans qualifier la création. `check-experience RUN_DIR` vérifie ensuite lecture préalable, exploration, sélection et développement ; `--stage client.composition` inclut la carte de récit et les pages du PDF. Le défaut d'un nouveau run demande au moins deux mondes centraux avant sélection. `--creative-mandate` s'emploie seulement avec une instruction externe de nombre ou de direction déjà choisie, vérifiée et liée dès l'initialisation. Lire [les champs attendus](experience-evidence.md) avant de créer les artefacts. `freeze-creatives` refuse le gel sans ces preuves. `inspect --help` expose `--max-pages` pour une limite explicitement demandée ; aucune limite par défaut. Ces contrôles ne produisent pas une note esthétique.

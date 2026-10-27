@@ -16,6 +16,8 @@ Les scènes fortes servent la démonstration principale ; les compléments reten
 
 Rendre une page centrale à taille finale. Comparer l'intention au rendu : identité, hiérarchie, preuve, lisibilité, conséquence pour le visiteur et valeur de Vertigo. Corriger puis décliner ce niveau de composition. Le document lui-même doit porter le monde du client ; ne pas imposer palette, police ou gabarit d'une autre réussite.
 
+Avant cette déclinaison, appliquer [le préalable de composition](../proposition/references/experience-evidence.md#plan-de-composition-préalable) : carte K01–K08, plan visuel couvrant ouverture et raccords preuve/proposition/mission/décision, pilote inspecté et chemins de sortie neufs. Appeler `check-experience RUN_DIR --composition-plan-only` **avant** de fabriquer source complète, catalogue et exports. Le contrôle enregistre le reçu courant sans exiger le PDF final. Le pilote remplit le contrôle de page centrale existant ; réutiliser les médias figés, sans seconde exploration ni double reconstruction. Un plan tardif ne régularise pas un export déjà produit.
+
 Enregistrer `client-story` selon [les preuves de progression](../proposition/references/experience-evidence.md). Les huit fonctions éditoriales ne sont pas huit pages. Contrôler `check-experience RUN_DIR --stage client.composition` et `check-creatives RUN_DIR`. Une maquette statique montre une intention, pas une animation exécutée.
 
 ## Livrer à la portée demandée

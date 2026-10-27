@@ -57,4 +57,6 @@ Les chemins sont relatifs au paquet ; les médias nécessaires sont joints, pas 
 
 La composition source et ses projections restent d'une même révision. Toute édition externe utile crée une nouvelle révision à réconcilier avec les sources et le contexte ; les anciennes revues ne se reportent pas automatiquement. La qualité esthétique et le droit de diffusion restent des décisions distinctes de l'édition.
 
+Pour le contrat KIT courant, enregistrer le catalogue sous `presentation-catalog` et le contexte autonome sous `client-context`. Source, catalogue, PDF/PPTX et `client-story` se rattachent au préalable de composition. Les dérivés Sales/technique et le contexte se rattachent aux mêmes entrées client courantes ; une modification les périme à leur portée. Le manifeste final les inventorie, sans devenir leur entrée et former un cycle. Conserver les références et consignes utiles dans le contexte, aucune note privée dans les fichiers client.
+
 L’historique éventuel dans `Contexte client.md` distingue capture, publication, consultation et limites ; il ne date pas une dernière MAJ supposée. N’y inclure que les observations autorisées issues du corpus interne, selon le contrat de découverte.

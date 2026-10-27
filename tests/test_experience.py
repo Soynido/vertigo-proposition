@@ -71,10 +71,15 @@ class ExperienceTests(unittest.TestCase):
 
     def test_composition_requires_story_evidence_and_an_agency_next_step(self):
         self.assertEqual(self.check('client.composition')['status'],'BLOCKED')
-        install_story(self.run);make_outputs(self.root)
-        state.add_artifact(self.root,'client-pdf','client.pdf','client')
+        from composition_fixture import prepare_plan,register_client
+        from proposition_runtime.composition import review_plan
+        plan=prepare_plan(self.run)
+        self.assertEqual(review_plan(self.root)['status'],'PASS')
+        install_story(self.run);make_outputs(self.root);register_client(self.run)
         # Correct page count of fixture story so this case isolates missing mission.
-        self.mutate('client-story',lambda d:([row.update(page=1) for row in d['pages']],d['observation_decisions'][0].update(page=1)))
+        self.mutate('client-story',lambda d:([row.update(page=1) for row in d['pages']],
+            d['observation_decisions'][0].update(page=1),d.update(kit_coverage=[
+                {'id':row['id'],'page':1,'anchor':row['anchor']} for row in plan['coverage']])))
         self.assertEqual(self.check('client.composition')['status'],'PASS')
         self.mutate('client-story',lambda d:d.update(pages=[r for r in d['pages'] if r['role']!='agency_value']))
         self.assertEqual(self.check('client.composition')['status'],'BLOCKED')

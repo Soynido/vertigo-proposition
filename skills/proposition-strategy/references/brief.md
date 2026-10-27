@@ -16,6 +16,8 @@
 
 Associer à chaque point une preuve ou une étiquette d'hypothèse. Une source officielle ne garantit pas méthode ou pertinence ; vérifier définition, période, population et conflits. Les profils concurrents doivent servir un choix, pas remplir un nombre de pages.
 
+Sélectionner chaque analyse pour une question et une décision qu'elle peut changer. Lors d'un enrichissement, distinguer fait réellement nouveau, corroboration d'un fait déjà connu, reformulation, hypothèse et inconnu ; citer la source/zone et le brief antérieur lorsqu'il existe. Sans version antérieure, établir l'état initial sans inventer d'avant/après. Reporter ces distinctions dans les raisons des observations de `creative-inputs`, le changement recommandé et l'alternative existante. Une précision supplémentaire ne devient pas automatiquement une nouvelle opportunité, un nouvel ICP ou une raison de refaire le site. Une capacité indisponible décrit la limite de l'essai ; elle n'établit ni défaut du prospect ni impossibilité d'autres sources publiques.
+
 ## Passation à la création
 
 Dans le parcours complet, le brief suit la collecte, les analyses et leur réconciliation. Il ne se limite pas à un logo et à des photos. Pour chaque changement retenu, transmettre une référence stable : observation et source/zone/date ; statut observé, déclaré ou hypothétique ; changement proposé et priorité ; objectif ; signes de marque à préserver ; liberté de mise en scène ; limites ou contre-hypothèse. Exemple : `O1`, deux gammes présentées séparément sans attributs comparables → `C1`, les rapprocher dans une comparaison utile → aider un architecte à identifier la gamme adaptée. Cette intention ne prouve aucun gain commercial.

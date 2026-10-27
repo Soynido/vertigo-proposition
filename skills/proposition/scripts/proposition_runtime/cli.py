@@ -58,14 +58,13 @@ def doctor():
     try:
         from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
-            for channel in (os.environ.get('PROPOSITION_BROWSER_CHANNEL', 'chrome'), None):
-                try:
-                    instance = p.chromium.launch(headless=True, **({'channel': channel} if channel and channel != 'chromium' else {}))
-                    browser = {'status': 'AVAILABLE', 'version': instance.version, 'channel': channel or 'chromium'}
-                    instance.close()
-                    break
-                except Exception:
-                    continue
+            from .browser import launch_browser
+            try:
+                instance, channel = launch_browser(p)
+                browser = {'status': 'AVAILABLE', 'version': instance.version, 'channel': channel}
+                instance.close()
+            except Exception:
+                pass
     except ImportError:
         pass
     return {'status': 'PASS' if all(dependencies.values()) and browser['status'] == 'AVAILABLE' else 'BLOCKED',
@@ -106,11 +105,16 @@ def parser():
     s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path); s.add_argument('--creative-mandate', type=Path)
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
     s = sub.add_parser('prepare-inputs'); s.add_argument('run_dir', type=Path); s.add_argument('manifest', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--timeout-seconds', type=float, default=5)
+    s = sub.add_parser('preprocess'); s.add_argument('run_dir', type=Path); s.add_argument('--mode', choices=['auto','codex','cloudflare'])
     s = sub.add_parser('history'); s.add_argument('operation', choices=['collect','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--urls', nargs='*', default=[]); s.add_argument('--report', type=Path)
+    s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','check','reconcile','channels']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
     for command in ('validate', 'receipt', 'workbench', 'next-stage', 'check-experience'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path)
         if command == 'check-experience':
             s.add_argument('--stage', choices=['creative.direction','client.composition','export.documents','verify.final'], default='creative.direction')
+            modes=s.add_mutually_exclusive_group()
+            modes.add_argument('--inputs-only', action='store_true', help='Check current inputs and reading receipt before rendering candidates')
+            modes.add_argument('--composition-plan-only', action='store_true', help='Check and register the deck plan/pilot before complete outputs exist')
     s = sub.add_parser('measure'); s.add_argument('run_dir', type=Path); s.add_argument('--quota-remaining-percent', type=float); s.add_argument('--quota-source')
     for command in ('source', 'fact', 'plan'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path); s.add_argument('json_file', type=Path)
@@ -133,6 +137,17 @@ def parser():
 
 def execute(a):
     c = a.command
+    if c == 'preprocess':
+        from .preprocessing import prepare
+        return prepare(a.run_dir,mode=a.mode)
+    if c == 'discovery':
+        from . import discovery_evidence
+        if a.operation in ('register','reconcile'):
+            if not a.report: raise ValueError('discovery register/reconcile requires --report')
+            return getattr(discovery_evidence,a.operation)(a.run_dir, a.report)
+        state.invalidate_changed(a.run_dir)
+        inspect=discovery_evidence.inspect_channels if a.operation=='channels' else discovery_evidence.inspect_discovery
+        return inspect(state.load_run(a.run_dir))
     if c in ('freeze-creatives', 'check-creatives'):
         from .preservation import freeze_creatives, inspect_preservation
         return freeze_creatives(a.run_dir, read_json(a.selection)) if c == 'freeze-creatives' else inspect_preservation(state.load_run(a.run_dir))
@@ -159,8 +174,12 @@ def execute(a):
     if c == 'validate': return state.validate_run(a.run_dir)
     if c == 'next-stage': return state.next_stage(a.run_dir)
     if c == 'check-experience':
-        from .experience import inspect_experience
+        from .experience import inspect_experience, inspect_creative_inputs
         state.invalidate_changed(a.run_dir)
+        if a.inputs_only:return inspect_creative_inputs(state.load_run(a.run_dir))
+        if a.composition_plan_only:
+            from .composition import review_plan
+            return review_plan(a.run_dir)
         return inspect_experience(state.load_run(a.run_dir), a.stage)
     if c == 'measure': return measure(a.run_dir, quota=a.quota_remaining_percent, source=a.quota_source)
     if c == 'workbench': return workbench(a.run_dir)
@@ -210,7 +229,7 @@ def main(argv=None):
         print(json.dumps({'status':'ERROR','message':str(error)},ensure_ascii=False))
         return 1
     print(json.dumps(result,ensure_ascii=False,indent=2,default=str))
-    return 2 if result.get('status') in ('FAIL','BLOCKED','STALE','PARTIAL') else 0
+    return 2 if str(result.get('status', '')).upper() in ('FAIL','BLOCKED','STALE','PARTIAL','UNAVAILABLE') else 0
 
 
 if __name__ == '__main__':

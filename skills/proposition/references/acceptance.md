@@ -89,3 +89,7 @@ Pour chaque obligation : identifiant, applicabilité motivée, état, observatio
 | R81 | DA neuve pour l’entreprise | Choix d’univers justifiés depuis preuves et idée client ; comparaison montre qu’aucune palette, typographie ou composition maison n’est imposée. |
 
 Les obligations conditionnelles sont exclues seulement sur condition observable documentée. Les capacités indisponibles restent distinctes d’un contrôle exécuté et de son résultat. Aucune preuve périmée, score moyen ou déclaration de l’auteur ne clôt une obligation active sans son observation requise.
+
+## Complétude du KIT courant
+
+R13 inclut la couverture K01–K08 et le préalable de composition selon [le format canonique](experience-evidence.md#plan-de-composition-préalable) : mécanisme montré, scénario, changement comparable, effet envisageable et mesure/inconnue, mission conditionnée et décision. Les rôles, seuils et scènes protégés restent inchangés ; les champs remplis ne suffisent pas au jugement. R22/R23/R26 relient Sales, suivi et technique aux pages/ancres et empreintes du client courant. Un ancien reçu conserve sa portée historique et ne qualifie pas ces nouvelles sous-obligations.

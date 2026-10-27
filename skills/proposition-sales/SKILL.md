@@ -10,6 +10,8 @@ license: MIT
 
 Recevoir le projet client stabilisé et ses preuves, puis le contexte commercial privé seulement s'il est disponible et autorisé. En son absence, produire une base interne conditionnelle, avec les procédures inconnues visibles. Aucun contact, résultat ou règle interne inventé.
 
+Le paquet reçu identifie source client, carte, catalogue, PDF/PPTX et leurs empreintes courantes. Pour chaque fonction commerciale, donner page/zone à montrer, formulation courte, question, objection/preuve, transition et prochaine action. Enregistrer `sales-playbook` et `follow-up-register`, puis `sales-source`/`sales-pdf` ; les dépendances vers le client courant sont obligatoires. Une modification de mission/décision ou de page référencée périme les dérivés et leurs revues, même si leurs octets n'ont pas changé. Aucun script privé dans les notes du PPTX client.
+
 Définir l'objectif de l'échange et la décision attendue ; qualifier la pertinence de la mission ; préparer les questions de découverte, démonstrations et objections reliées au projet. Les avantages reposent sur preuves ou hypothèses à tester. Inclure les conditions de non-fit et les limites à reconnaître.
 
 ## Actions suivables

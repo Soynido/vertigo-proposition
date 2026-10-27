@@ -192,7 +192,8 @@ def init_run(url, run_root, profile=None, *, creative_mandate=None):
              "requirement_ids": [row["id"] for row in _requirements()],
              "sources": {}, "facts": {}, "artifacts": {}, "evaluations": {},
              "reviews": {}, "stage_reviews": {}, "checkpoints": {},
-             "metadata": {"creative_exploration_contract":contract}}
+             "metadata": {"creative_exploration_contract":contract,"creative_reading_contract":1,
+                          "sales_kit_contract":1}}
     save_run(root, state)
     return state
 
@@ -225,6 +226,12 @@ def save_run(run_dir, state):
         contract=previous.get('metadata',{}).get('creative_exploration_contract')
         if contract is not None and state.get('metadata',{}).get('creative_exploration_contract')!=contract:
             raise ValueError('Initialized creative exploration contract cannot be changed or removed')
+        reading=previous.get('metadata',{}).get('creative_reading_contract')
+        if reading is not None and state.get('metadata',{}).get('creative_reading_contract')!=reading:
+            raise ValueError('Initialized creative reading contract cannot be changed or removed')
+        kit=previous.get('metadata',{}).get('sales_kit_contract')
+        if kit is not None and state.get('metadata',{}).get('sales_kit_contract')!=kit:
+            raise ValueError('Initialized sales kit contract cannot be changed or removed')
     payload = deepcopy(state)
     payload["updated_at"] = _now()
     descriptor, temporary = tempfile.mkstemp(prefix=".state-", suffix=".json", dir=root)
@@ -326,6 +333,8 @@ def add_artifact(run_dir, artifact_id, path, audience, dependencies=()):
 
 
 def _artifact_record(state, artifact_id, path, audience, dependencies=()):
+    from .composition import bind_dependencies
+    dependencies=bind_dependencies(state,artifact_id,dependencies)
     root = Path(state["root"])
     evidence = _safe_path(root, path)
     record = {"id": _identifier(artifact_id), "path": evidence.relative_to(root).as_posix(),
@@ -528,6 +537,23 @@ def _stage_report(state, stage_id):
                 "issues": [], "reason": "Internal deliverables excluded by explicit client scope"}
     requirements = [row for row in _requirements() if row["stage_id"] == stage_id]
     issues = []
+    if stage_id == 'discovery.site':
+        from .discovery_evidence import inspect_discovery
+        for message in inspect_discovery(state)['issues']:
+            issues.append({'code':'discovery_evidence','id':stage_id,'message':message})
+        for identifier in ('R08','R09','R10'):
+            assessment=state['evaluations'].get(identifier)
+            if assessment and 'artifact:site-discovery' not in _dependency_closure(state,assessment['evidence']):
+                issues.append({'code':'discovery_evidence','id':identifier,'message':'Navigation assessment must depend on the registered Discovery receipt'})
+    if stage_id == 'discovery.channels':
+        from .discovery_evidence import inspect_channels
+        for message in inspect_channels(state)['issues']:
+            issues.append({'code':'discovery_channels','id':stage_id,'message':message})
+        if 'discovery-channels' in state['artifacts']:
+            for requirement in requirements:
+                assessment=state['evaluations'].get(requirement['id'])
+                if assessment and 'artifact:discovery-channels' not in _dependency_closure(state,assessment['evidence']):
+                    issues.append({'code':'discovery_channels','id':requirement['id'],'message':'Channel assessment must depend on the current external evidence bundle'})
     if stage_id in {'discovery.channels','company.v1','company.v2','analysis.specialists','brief.public','creative.direction','client.composition','verify.final'}:
         from .history import inspect_history
         for message in inspect_history(state)['issues']:
@@ -560,12 +586,24 @@ def _stage_report(state, stage_id):
         from .experience import inspect_experience
         for message in inspect_experience(state, stage_id)["issues"]:
             issue("creative_experience", stage_id, message)
+    if stage_id in {'internal.handoffs','export.documents','verify.final'}:
+        from .composition import handoff_issues
+        for message in handoff_issues(state):
+            issue('client_handoff_revision',stage_id,message)
     review = state["stage_reviews"].get(stage_id)
     score = None
     if review is None:
         issue("missing_stage_review", stage_id, "A scored isolated stage review is required")
     else:
         score = sum(review["scores"])
+        if stage_id in {'client.composition','review.client'}:
+            from .composition import enabled, CLIENT_INPUTS
+            if enabled(state) and not set(CLIENT_INPUTS).issubset(review['evidence']):
+                issue('kit_review_packet',stage_id,'Review must receive the current client source, plan, receipt, catalogue, story and both exports')
+        if stage_id=='discovery.site' and 'artifact:site-discovery' not in _dependency_closure(state,review['evidence']):
+            issue('discovery_evidence',stage_id,'Stage review must cover the current Discovery receipt')
+        if stage_id=='discovery.channels' and 'discovery-channels' in state['artifacts'] and 'artifact:discovery-channels' not in _dependency_closure(state,review['evidence']):
+            issue('discovery_channels',stage_id,'Stage review must cover the current external evidence bundle')
         criterion_evidence = review.get("criterion_evidence", {})
         if set(criterion_evidence) != {row["id"] for row in stage["criteria"]}:
             issue("missing_criterion_evidence", stage_id, "Every stage criterion needs its own evidence references")
@@ -697,6 +735,9 @@ def validate_run(run_dir):
             issue("review_not_passed", reviewer, "Required review has not passed")
         if sum(review["scores"]) < 9:
             issue("review_score", reviewer, "Each required reviewer must independently score at least 9/10")
+        from .composition import enabled, CLIENT_INPUTS
+        if enabled(state) and not set(CLIENT_INPUTS).issubset(review['evidence']):
+            issue('kit_review_packet',reviewer,'Both client reviewers must receive the current complete kit packet')
         for message in _review_receipt_issues(state, root, review):
             issue("review_independence", reviewer, message)
     stage_reports = {}

@@ -105,11 +105,8 @@ def export_pdf(source: Path, output: Path, *, audience: str = "client") -> dict:
     checker.feed(source.read_text())
     output.parent.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
-        try:
-            channel = os.environ.get('PROPOSITION_BROWSER_CHANNEL', 'chrome')
-            browser = p.chromium.launch(headless=True, **({'channel': channel} if channel != 'chromium' else {}))
-        except Exception:
-            browser = p.chromium.launch(headless=True)
+        from .browser import launch_browser
+        browser, _ = launch_browser(p)
         context = browser.new_context(java_script_enabled=False, service_workers="block")
         def route(request_route):
             parsed = urlsplit(request_route.request.url)

@@ -39,22 +39,25 @@ class StateTests(unittest.TestCase):
         path.write_text(content, encoding="utf-8")
         return path
 
-    def complete_run(self, scores_b=None, include_stages=True):
+    def complete_run(self, scores_b=None, include_stages=True, discovery_receipt=True):
         run = self.new_run()
         self.write(run, "sources/page.txt", "Public fixture observation")
         state.add_source(run["root"], "page", "sources/page.txt", kind="public")
         state.add_fact(run["root"], "offer", "A public fixture offer", ["page"],
                        audience="client", public_allowed=True)
-        for audience in ("client", "sales", "technical"):
+        for audience in ("sales", "technical"):
             self.write(run, f"exports/{audience}.pdf", f"Fixture {audience} file")
             state.add_artifact(run["root"], f"{audience}-pdf", f"exports/{audience}.pdf",
                                audience, ["fact:offer"])
         from creative_fixture import install_preservation
-        install_preservation(state.load_run(run['root']))
+        if discovery_receipt:
+            from discovery_fixture import install_discovery
+            install_discovery(run)
+        install_preservation(state.load_run(run['root']),pdf_path='exports/client.pdf')
         for number in range(1, 82):
             state.record_evaluation(run["root"], f"R{number:02}", {
                 "status": "PASS", "applicable": True,
-                "evidence": ["artifact:client-pdf"], "unknowns": [],
+                "evidence": ["artifact:client-pdf"] + (["artifact:site-discovery"] if discovery_receipt and number in (8,9,10) else []), "unknowns": [],
                 "reason": "Fixture evidence assessed for this requirement",
             })
         artifacts = state.load_run(run["root"])["artifacts"]

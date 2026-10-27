@@ -12,6 +12,8 @@ Construire le récit depuis les preuves : identité et acquis reconnus → oppor
 
 Préparer la carte `client-story-map` avant composition : chaque page a un titre-conclusion, une idée décisive, une preuve et sa limite, un visuel précis, le bénéfice envisagé, l'apport de Vertigo et la transition. Regrouper les répétitions ; réserver le récit aux scènes qui font comprendre l'évolution et conserver les autres selon le contrat de préservation. Une exploration seule ne devient pas une proposition complète.
 
+Renseigner K01–K08 dans cette même carte selon [le format préalable](../proposition/references/experience-evidence.md#plan-de-composition-préalable). Expliquer l'approche depuis les propres scènes du projet si aucune référence publique qualifiée n'est disponible. Transmettre carte, médias et références exactes au compositeur ; il doit qualifier le plan visuel et le pilote avant de fabriquer le KIT complet. Les fonctions commerciales ne deviennent ni huit pages ni des effets imposés.
+
 ## Sortie et relecture
 
 Fil argumentaire, mission/livrables/limites, décision, carte des pages et wording prêt à composer. Lire les titres seuls puis le texte : le lecteur peut reformuler ce qu'il achèterait, ce que cela changerait et ce qu'il doit décider. Relire avec Stop Slop et vérifier le sens en français. Les légendes parlent d'actions et de conséquences utiles, pas de fabrication graphique. Préserver une voix réussie ; conditionner les bénéfices non mesurés. Aucun prix ni élément interne dans le client.

@@ -35,6 +35,38 @@ Pour les méthodes : `commit` vient du verrou installé ; `reference_ref` pointe
 
 Le créatif reçoit le paquet public **et l’accès explicite à ces arbres publics**, sans autre client ni historique privé. Il lit progressivement les fichiers pertinents, y compris les références liées par les SKILL. L’allowlist de `context-packet` inclut brief, `creative-inputs` et les quatre artefacts de méthodes, approuvés localement pour cette projection et avec provenance. La commande refuse une passation amputée de ces références. Les chemins de travail ne sont jamais recopiés dans le document client.
 
+## Lecture préalable : artefact `creative-reading`
+
+Les nouveaux runs fixent `metadata.creative_reading_contract:1` à l'initialisation ; il ne se retire pas pour débloquer un run. Les anciens runs sans marqueur conservent leur portée historique.
+
+Le créateur vérifie les empreintes du paquet reçu puis lit les quatre entrypoints en entier, dans des sorties bornées. Il récupère les parties tronquées avant création et lit les références liées pertinentes. Il retourne ce reçu au propriétaire avant de rendre les scènes ; le propriétaire l'enregistre avec l'ID `creative-reading`, lié à `creative-inputs` et aux quatre artefacts de méthodes. Les références publiques ne sont pas des instructions du site prospect.
+
+```json
+{
+  "version":1,
+  "inputs_sha256":"<empreinte-creative-inputs-recu>",
+  "reader_id":"<identifiant-du-createur>",
+  "methods":[{
+    "family":"impeccable",
+    "read_sha256":"<empreinte-de-la-reference-lue>",
+    "segments":[{"start_line":1,"end_line":42,"read_at":"<date-reelle-avec-fuseau>"}]
+  }],
+  "supporting_reads":[]
+}
+```
+
+L'exemple abrège les méthodes et les plages : le reçu réel couvre les quatre familles exactement une fois et toutes les lignes de chaque entrypoint réellement reçu, sans trou ni plage hors fichier. Plusieurs segments sont permis. Les dates suivent l'enregistrement des inputs courants et précèdent celui du reçu. Chaque référence liée utilisée ajoute dans `supporting_reads` : `{family,path,sha256,purpose,segments}` ; `path` est relatif à l'arbre public vérifié de la famille, `segments` conserve les seules sections lues, et `purpose` explique leur utilité. Ne pas recopier une déclaration de lecture complète si l'outil a tronqué sa sortie. Les reçus d'opérations réelles restent disponibles pour la revue.
+
+Avant toute dépense de rendu :
+
+```text
+python3 <MAIN_SKILL_DIR>/scripts/proposition.py check-experience RUN_DIR --inputs-only
+```
+
+Ce précontrôle vérifie inputs, versions et couverture déclarée ; il n'exige ni scène ni plan et ne vaut pas PASS créatif. Le propriétaire transmet son résultat au même créateur avant les scènes centrales. Leur `rendered_at`, daté lors du rendu réel, est strictement postérieur à l'enregistrement du reçu de lecture et antérieur ou égal à leur enregistrement comme artefacts. Le gate complet contrôle cet ordre pour chaque candidat, y compris écarté. En reprise, reprendre les seuls dépendants invalidés ; un reçu tardif n'autorise pas à antidater une ancienne scène ou à la réenregistrer comme nouvelle.
+
+Ces contrôles relient des déclarations locales et des octets ; ils ne prouvent ni lecture sémantique, ni compréhension, ni vérité des dates. La revue confronte les reçus aux opérations réellement observables, puis juge l'application sur les images exactes. Le contrôle de cache complet et les quatre applications restent requis.
+
 ## Exploration avant sélection : artefact `creative-exploration`
 
 Les nouveaux runs fixent dans leurs métadonnées `creative_exploration_contract`, version 1 : mode `explore`, au moins deux candidats, sélection par l'agent après comparaison. Le brief et `creative-inputs` ne changent pas ce mandat. Les anciens runs sans ce marqueur conservent leur portée historique ; les rouvrir ne vaut pas qualification du nouveau contrat.
@@ -59,6 +91,7 @@ Après les scènes centrales et leur inspection, enregistrer le JSON `creative-e
     "id":"a",
     "central_scene_ref":"artifact:a-central",
     "central_scene_sha256":"<empreinte-du-rendu>",
+    "rendered_at":"<date-reelle-du-rendu-avec-fuseau>",
     "client_anchor":"source:material",
     "structure":{
       "composition":"Relation des masses et architecture de lecture visibles",
@@ -131,6 +164,68 @@ Une cible d’action reste celle de l’inventaire. Un changement autorisé empl
 
 Ce gate qualifie des intentions statiques uniquement. Un comportement développé exige une qualification de prototype séparée, sans renommage opportuniste de `motion_status`.
 
+## Plan de composition préalable
+
+Les nouveaux runs fixent `metadata.sales_kit_contract: 1` à l'initialisation ; cette version ne peut être retirée ou changée. Les runs historiques sans cette version conservent leur portée : ne pas les réécrire pour simuler une qualification du nouveau contrat.
+
+Après exploration, sélection, développement et gel des scènes, `proposition-story` fournit la carte ; `proposition-composition` conçoit le deck. Son plan visuel situe l'ouverture et les raccords preuve→proposition puis proposition→mission→décision, avec rôle et échelle des scènes. Il peut être sommaire, regrouper les passages et réutiliser les mêmes médias. Le pilote à taille finale remplit le contrôle central existant, sans seconde exploration ni double reconstruction. Aucun outil de génération particulier n'est requis.
+
+Enregistrer la carte JSON avec l'ID **`client-story-map`**. Ces champs sont requis ; le format de données n'impose ni nombre de slides ni forme graphique :
+
+| Champ | Format / contenu |
+|---|---|
+| `version`, `revision` | `1`, puis nom de révision non vide. |
+| `inputs_ref` | `artifact:creative-inputs`, déjà courant. |
+| `creative_lock_sha256` | Empreinte réelle du verrou créé par `freeze-creatives`. |
+| `coverage` | Huit entrées distinctes K01–K08 ; plusieurs peuvent partager une page. Chacune : `{id, page, anchor, message, proof, claim_status, visual_ref}`. Page entière positive, zone exacte, titre-conclusion et démonstration localisable. |
+| `claim_status` par entrée | `observed`, `declared`, `proposed`, `estimate` ou `unknown`. |
+| `proof` par entrée | `source:ID` publique observée ou `fact:ID` confirmé et explicitement autorisé publiquement. Ni assertion de l'auteur, ni source privée reclassée. |
+| `visual_ref` par entrée | `artifact:ID` courant du paquet public/client du projet. |
+| K03 : `mechanism` | Explication concrète du mécanisme montré dans les états ; voie publique du contrat de récit. |
+| K06 : `effect`, `measurement` | Effet envisageable conditionnel ; `measurement.acquisition` et `.conversion`, chacun `{indicator, data_status, ...}`. `available` exige `proof` publique ; `unknown` ou `not_applicable` exige `reason`. Une mesure inconnue ne supprime pas K06. |
+| K07 : `mission` | `{scope, included, excluded, conditions}` : périmètre concret, puis trois listes non vides de textes explicites. Raccordements non vérifiés conditionnés. |
+| K08 : `decision` | Prochain accord concret ; aucun interlocuteur, prix ou calendrier inventé. |
+| `visual_plan` | Trois entrées `{role, render_ref, inspection}` : `opening`, `proof_to_proposal`, `proposal_to_decision`. Le même rendu peut montrer plusieurs passages ; trois rôles ne signifient pas trois images/slides. |
+| `pilot` | `{render_ref, intention_ref, comparison}` : rendu à taille finale et comparaison localisée avec un rendu du plan visuel. Rendus PNG/JPEG/WebP réellement enregistrés. |
+| `outputs` | Chemins neufs des quatre sorties canoniques, comme ci-dessous. Le pilote utilise d'autres chemins. |
+
+Extrait fictif pour les champs imbriqués ; le fichier réel contient les huit entrées complètes et leurs vrais sources/textes, pas ces phrases génériques :
+
+```json
+{
+  "id": "K06", "page": 4, "anchor": "preuve-et-reponse",
+  "message": "Conséquence précise du changement montré.",
+  "proof": "source:observation", "claim_status": "proposed",
+  "visual_ref": "artifact:scene-action",
+  "effect": "Objectif conditionnel, distinct d'un résultat mesuré.",
+  "measurement": {
+    "acquisition": {"indicator":"Visites qualifiées","data_status":"unknown","reason":"Mesure privée indisponible."},
+    "conversion": {"indicator":"Demandes utiles","data_status":"unknown","reason":"Mesure proposée après engagement."}
+  }
+}
+```
+
+```json
+{
+  "outputs": {
+    "client-source": "client/r1/index.html",
+    "presentation-catalog": "client/r1/presentation.json",
+    "client-pdf": "client/r1/Proposition.pdf",
+    "client-pptx": "client/r1/Proposition.pptx"
+  }
+}
+```
+
+Avant de fabriquer la source **complète**, son catalogue et ses exports, appeler :
+
+```text
+python3 <MAIN_SKILL_DIR>/scripts/proposition.py check-experience RUN_DIR --composition-plan-only
+```
+
+Le mode enregistre **`composition-plan-review`**, ses entrées/empreintes et une date locale, sans PDF final. Les quatre chemins `outputs` doivent encore être inexistants. Il refuse un plan constitué après création des sorties, même non enregistrées. Relancer un préalable inchangé conserve le reçu d'origine. Une correction du plan ou de ses entrées périme le reçu et ses dépendants ; préparer des chemins de nouvelle révision, sans écraser les exports. La revue confronte la chronologie aux opérations réellement observées : un horodatage local ne constitue pas une attestation infalsifiable.
+
+Après le préalable, enregistrer dans l'ordre **`client-source`**, **`presentation-catalog`**, **`client-pdf`**, **`client-pptx`**, puis **`client-story`**. Le moteur ajoute les dépendances disponibles vers plan/reçu/source ; déclarer aussi les CSS, actifs et sources consommés avec `--depends`. L'enregistrement générique d'une pièce intermédiaire ne donne pas PASS : le contrôle final refuse un paquet incomplet, antérieur ou non lié au préalable courant. Des champs complets ne prouvent ni le sens des images ni le WOW.
+
 ## Montage : artefact `client-story`
 
 Enregistrer `client-story.json` avec l’ID `client-story` :
@@ -138,12 +233,15 @@ Enregistrer `client-story.json` avec l’ID `client-story` :
 - `pages` : entrées `{role, page, message, proof}`. Rôles requis : `understanding`, `evidence`, `opportunity`, `creative_world`, `transformation`, `agency_value`, `mission`, `next_step`. Fonctions éditoriales, pas huit pages obligatoires : plusieurs peuvent partager une page. Chaque page existe dans le PDF courant enregistré `client-pdf`.
 - `observation_decisions` : `{id, page, reason}` pour chaque observation des inputs. Une retenue a une page réelle ; une exclusion conserve sa raison. Corriger sélection ou montage si la donnée existe, plutôt que relancer un crawl.
 - `next_step` : `{decision, followup}` intelligibles et concrets. Responsable, adresse et modalité ne sont jamais inventés ; un manque décisif demeure visible dans le contrôle.
+- Pour les nouveaux runs : `kit_coverage` contient huit entrées `{id, page, anchor}` K01–K08, avec pages et zones **finales** du PDF/PPTX courants. Carte, reçu préalable, source et catalogue restent joints aux deux revues. Plusieurs fonctions peuvent partager une page. Le catalogue final n'est pas la preuve d'un plan antérieur.
 
 Le JSON vérifie les liens ; la carte éditoriale `client-story-map` suit [le contrat de montage](../../proposition-story/references/argument.md) et démontre sur les pages exactes la chaîne preuve → changement visible → bénéfice envisagé → mission → décision. Les scènes du site ne dictent pas le plan du deck. Les variantes restent identifiées ; les compléments conservés vont en annexe à la taille requise par le verrou, pas en simples miniatures.
 
 L’univers peut se montrer par moodboard, matières ou scènes développées. La valeur d’agence explique pourquoi le changement justifie Vertigo ; la mission ne dit pas seulement « faire un beau site ». Le prochain échange indique comment poursuivre.
 
 Conserver le rapport `client-copy-review`, avec méthode Stop Slop réellement lue et relecture du sens en français : action/objet, conséquence, preuve/condition. Garder le relevé de surfaces, la comparaison PDF/PPTX et l’essai d’édition dans leurs preuves existantes. Une fonction déclarée dans ce JSON ne prouve pas sa qualité dans la slide.
+
+En parcours complet, dériver `sales-playbook`, `follow-up-register`, `technical-handoff`, leurs sources/PDF et le contexte `client-context` depuis le client stabilisé. Ces IDs reçoivent les dépendances disponibles vers `client-source`, `presentation-catalog`, `client-pdf`, `client-pptx`, `client-story-map`, `client-story` et `composition-plan-review`. Paquet reçu et pages/ancres doivent correspondre ; réenregistrer une pièce préparée avant que ses entrées existent. Le gate des handoffs refuse les trois pièces de reprise sans cette chaîne. Une modification de mission/décision ou d'export périme les dérivés concernés. Le manifeste final inventorie les pièces sans devenir leur entrée. Aucune note privée dans le PPTX client.
 
 ## Contrôles et portée
 
