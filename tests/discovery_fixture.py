@@ -32,4 +32,7 @@ def write_report(run, batch='fixture'):
 
 def install_discovery(run):
     from proposition_runtime.discovery_evidence import register
-    return register(run['root'],write_report(run))
+    result=register(run['root'],write_report(run))
+    from public_research_fixture import install_public_research
+    install_public_research(run)
+    return result

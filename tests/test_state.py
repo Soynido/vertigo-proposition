@@ -53,6 +53,8 @@ class StateTests(unittest.TestCase):
         if discovery_receipt:
             from discovery_fixture import install_discovery
             install_discovery(run)
+            current=state.load_run(run['root']);current['metadata']['fixture_strategy']=True
+            state.save_run(run['root'],current)
         install_preservation(state.load_run(run['root']),pdf_path='exports/client.pdf')
         for number in range(1, 82):
             state.record_evaluation(run["root"], f"R{number:02}", {
@@ -335,6 +337,10 @@ class StateTests(unittest.TestCase):
 
     def initial_context(self):
         run = self.new_run()
+        from discovery_fixture import install_discovery
+        install_discovery(run)
+        current=state.load_run(run['root']);current['metadata']['fixture_strategy']=True
+        state.save_run(run['root'],current)
         self.write(run, "source.txt", "Authorized client fixture material")
         state.add_source(run["root"], "input", "source.txt", kind="client")
         state.add_fact(run["root"], "offer", "Fixture offer", ["input"], audience="client", public_allowed=True)
@@ -345,6 +351,8 @@ class StateTests(unittest.TestCase):
         })
         from experience_fixture import prepare_inputs
         prepare_inputs(state.load_run(run["root"]))
+        artifact=state.add_artifact(run['root'],'brief','brief.txt','client',['fact:offer','artifact:creative-inputs'])
+        state.record_evaluation(run['root'],'R78',{'status':'PASS','evidence':['artifact:brief'],'reason':'Current fixture brief and strategic provenance inspected'})
         self.stage_review(run, "brief.public", {"artifact:brief": artifact["sha256"]})
         run = state.load_run(run["root"])
         for key,row in run["artifacts"].items():

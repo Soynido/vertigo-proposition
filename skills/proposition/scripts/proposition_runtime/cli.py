@@ -113,8 +113,9 @@ def parser():
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
     s = sub.add_parser('prepare-inputs'); s.add_argument('run_dir', type=Path); s.add_argument('manifest', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--timeout-seconds', type=float, default=5)
     s = sub.add_parser('preprocess'); s.add_argument('run_dir', type=Path); s.add_argument('--mode', choices=['auto','codex','cloudflare'])
+    s = sub.add_parser('strategy'); s.add_argument('operation', choices=['prepare','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path); s.add_argument('--cache', type=Path); s.add_argument('--stage', choices=['analysis.specialists','company.v2','brief.public'],default='brief.public')
     s = sub.add_parser('history'); s.add_argument('operation', choices=['collect','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--urls', nargs='*', default=[]); s.add_argument('--report', type=Path)
-    s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','check','reconcile','channels']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
+    s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','check','reconcile','channels','research-plan']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
     for command in ('validate', 'receipt', 'workbench', 'next-stage', 'check-experience'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path)
         if command == 'check-experience':
@@ -144,10 +145,21 @@ def parser():
 
 def execute(a):
     c = a.command
+    if c=='strategy':
+        from . import strategy
+        if a.operation=='prepare': return strategy.prepare(a.run_dir,a.cache)
+        if a.operation=='register':
+            if not a.report: raise ValueError('strategy register requires --report')
+            return strategy.register(a.run_dir,a.report)
+        state.invalidate_changed(a.run_dir)
+        return strategy.inspect(state.load_run(a.run_dir),a.stage)
     if c == 'preprocess':
         from .preprocessing import prepare
         return prepare(a.run_dir,mode=a.mode)
     if c == 'discovery':
+        if a.operation=='research-plan':
+            from .public_research import prepare
+            return prepare(a.run_dir)
         from . import discovery_evidence
         if a.operation in ('register','reconcile'):
             if not a.report: raise ValueError('discovery register/reconcile requires --report')

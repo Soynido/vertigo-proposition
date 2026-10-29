@@ -6,7 +6,11 @@ license: MIT
 
 # Construire le brief d'opportunité
 
-Le brief est un livrable produit depuis les sources ; il n'est pas un prérequis que l'utilisateur doit fournir. Recevoir modèle entreprise, couverture et contraintes encore valides. Lire [le contrat du brief](references/brief.md).
+Le brief est un livrable produit depuis les sources ; il n'est pas un prérequis que l'utilisateur doit fournir. Recevoir modèle entreprise, couverture et contraintes encore valides. Lire [le contrat du brief](references/brief.md) et [la passation publics/besoins](references/audience-handoff.md).
+
+Après le modèle V1, lancer `strategy prepare RUN_DIR`, lire les deux méthodes épinglées et appliquer leur adaptation publique. Enregistrer `observation-analysis-map` par `strategy register` ; vérifier les missions ciblées puis conserver `audience_need_summary` dans le modèle V2 et `creative-inputs`. Contrôler `strategy check` à chaque gate concerné. Une méthode téléchargée ne vaut pas méthode appliquée.
+
+Lire [les admissions et limites publiques](references/public-analysis.md) pour choisir les capacités et interpréter leurs preuves.
 
 1. Choisir les analyses qui changent la décision : accès/contenu SEO/GEO, parcours, design, marché. Pour chaque famille réellement utilisée, conserver référence, version, outils, décisions et reçu `native`, `adapted` ou `unavailable`.
 2. Comparer des pairs justifiés : concurrents de marché, résultats de recherche et références créatives ont des rôles distincts. Dates et dimensions doivent être comparables. Une métrique absente reste inconnue.

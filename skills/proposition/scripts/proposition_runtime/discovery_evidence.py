@@ -187,6 +187,8 @@ def _channel_data(run,path):
             if not source.get('path') or state._sha(state._safe_path(Path(run['root']),source['path']))!=source['sha256']:
                 raise ValueError('External source is no longer current')
         elif not row.get('reason','').strip(): raise ValueError('Unavailable/excluded external issue needs a reason')
+    from .public_research import validate
+    validate(run,data)
     return data
 
 
@@ -196,6 +198,8 @@ def reconcile(run_dir,receipts_path):
     data=_channel_data(run,path)
     identifier='channel-attempts-'+state._sha(path)[:16]
     dependencies=['source:'+row['source_id'] for row in data['attempts'] if row.get('source_id')]
+    from .public_research import validate
+    dependencies.extend(validate(run,data))
     run['artifacts'][identifier]=state._artifact_record(run,identifier,path.relative_to(root).as_posix(),'internal',dependencies)
     previous=run['metadata'].get('discovery_external_reports',[])
     run['metadata']['discovery_external_reports']=list(dict.fromkeys([*previous,identifier]))
@@ -222,5 +226,11 @@ def inspect_channels(run):
             else: issues.append('External destination not attempted: '+entry['url'])
     except (OSError,ValueError,TypeError,KeyError) as error:
         issues.append('Invalid external reconciliation: '+str(error)[:240])
-    return {'status':'BLOCKED' if issues else 'PASS','issues':issues,'entries':entries,
+    research={'status':'BLOCKED','issues':[],'topics':[]}
+    try:
+        from .public_research import inspect
+        research=inspect(run);issues.extend(research['issues'])
+    except (OSError,ValueError,TypeError,KeyError) as error:
+        issues.append('Invalid public research: '+str(error)[:240])
+    return {'status':'BLOCKED' if issues else 'PASS','issues':issues,'entries':entries,'public_research':research,
             'scope':'external_attempt_reconciliation_only','identity':'NOT_INFERRED','analysis':'NOT_INFERRED','rights':'NOT_INFERRED'}

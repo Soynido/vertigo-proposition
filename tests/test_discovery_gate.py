@@ -99,6 +99,8 @@ class DiscoveryGateTests(unittest.TestCase):
         self.assertEqual('BLOCKED',module.inspect_channels(state.load_run(run['root']))['status'])
         journal=path.parent/'external.json'
         journal.write_text(json.dumps({'version':1,'attempts':[{'url':'https://www.instagram.com/fixture/','status':'unavailable','observed_at':'2026-10-26T01:00:00+00:00','reason':'Public access blocked','source_id':None}]}))
+        from public_research_fixture import install_public_research
+        install_public_research(run)
         result=reconcile(run['root'],journal)
         self.assertEqual('PASS',result['status'])
         self.assertEqual(2,len(result['entries']))
@@ -152,6 +154,8 @@ class DiscoveryGateTests(unittest.TestCase):
         report['link_entries']=[{'url':url,'text':'Instagram','source_id':'source:fixture-desktop'}]
         path.write_text(json.dumps(report));register(run['root'],path)
         from proposition_runtime.discovery_evidence import reconcile
+        from public_research_fixture import install_public_research
+        install_public_research(run)
         first=path.parent/'external-1.json'
         first.write_text(json.dumps({'version':1,'attempts':[{'url':url,'status':'unavailable','observed_at':'2026-10-26T01:00:00+00:00','source_id':None,'reason':'Blocked first attempt'}]}))
         reconcile(run['root'],first)

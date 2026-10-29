@@ -25,6 +25,16 @@ class MethodReadingTests(unittest.TestCase):
     def test_complete_prior_reading_preserves_the_valid_creative_graph(self):
         self.assertEqual(self.check()['status'],'PASS',self.check())
 
+    def test_analysis_source_pack_does_not_expand_or_replace_the_four_creative_methods(self):
+        result=self.check()
+        self.assertEqual('PASS',result['status'],result)
+        inputs=json.loads((self.root/'creative-inputs.json').read_text())
+        self.assertEqual({'claude-seo','impeccable','scroll-craft','apple-design'},
+                         {m['family'] for m in inputs['methods']})
+        inputs['methods'][0]['family']='marketingskills'
+        write_artifact(self.run,'creative-inputs','creative-inputs.json',inputs)
+        self.assertEqual('BLOCKED',self.check()['status'])
+
     def test_missing_reading_receipt_blocks_promotion_and_freezing(self):
         (self.root/'creative-reading.json').unlink()
         self.assertEqual(self.check()['status'],'BLOCKED')

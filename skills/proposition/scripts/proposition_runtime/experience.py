@@ -181,9 +181,11 @@ def _inputs(run):
             raise ValueError('Candidate count differs from the initialized explicit mandate')
         if contract['mode']=='external_selection' and set(ids)!=set(contract['candidate_ids']):
             raise ValueError('Candidate IDs differ from the initialized external selection')
-    specs={s['id']:s for s in json.loads((state.DATA_ROOT/'upstream-lock.json').read_text())['families'] if s.get('default',True)}
+    creative_families={'claude-seo','impeccable','scroll-craft','apple-design'}
+    specs={s['id']:s for s in json.loads((state.DATA_ROOT/'upstream-lock.json').read_text())['families']
+           if s['id'] in creative_families and s.get('default',True)}
     methods=data['methods']
-    if len(methods)!=len(specs) or {m['family'] for m in methods}!=set(specs):
+    if set(specs)!=creative_families or len(methods)!=len(specs) or {m['family'] for m in methods}!=set(specs):
         raise ValueError('All four named upstream families must be transmitted')
     for method in methods:
         if method['commit']!=specs[method['family']]['commit']:

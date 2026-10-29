@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import base64
 import importlib
 import io
 import json
@@ -230,6 +231,92 @@ class UpstreamTests(unittest.TestCase):
                 upstream.status(cache=skill / "cache")
             report = upstream.status(cache=self.root / "outside-skill")
         self.assertFalse(report["families"][0]["present"])
+
+    def selected_family(self):
+        self.family['source_paths'] = ['LICENSE', 'skills/demo', 'references']
+        self.family['reference_files'] = ['references/details.md']
+        self.lock.write_text(json.dumps({'schema_version': 1, 'families': [self.family]}))
+
+    def blob_network(self, tree=None, corrupt=False):
+        inventory = self.tree() if tree is None else tree
+        contents = {hashlib.sha1(f'blob {len(data)}\0'.encode()+data).hexdigest(): data
+                    for data in self.files.values()}
+
+        def opened(_opener, request, *args, **kwargs):
+            url = request.full_url
+            if '/git/trees/' in url:
+                return Response(json.dumps(inventory).encode(), url)
+            self.assertIn('/git/blobs/', url, 'A selected source pack must not fetch an unselected archive')
+            sha = url.rsplit('/', 1)[-1]
+            content = contents[sha]
+            payload = content + b'changed' if corrupt else content
+            return Response(json.dumps({'sha': sha, 'size': len(payload), 'encoding': 'base64',
+                'content': base64.b64encode(payload).decode()}).encode(), url)
+        return patch('urllib.request.OpenerDirector.open', autospec=True, side_effect=opened)
+
+    def test_selected_sources_skip_unrelated_alias_without_following_or_materializing_it(self):
+        self.selected_family()
+        tree = self.tree()
+        tree['tree'].append({'path': 'CLAUDE.md', 'type': 'blob', 'mode': '120000',
+            'size': 9, 'sha': '3' * 40})
+        with self.blob_network(tree=tree) as network:
+            item = upstream.fetch(cache=self.cache)['families'][0]
+        self.assertTrue(item['complete'], item.get('error'))
+        source = Path(item['source_path'])
+        self.assertEqual({'LICENSE', 'skills/demo/SKILL.md', 'references/details.md'},
+                         {str(p.relative_to(source)) for p in source.rglob('*') if p.is_file()})
+        self.assertFalse((source/'CLAUDE.md').exists())
+        self.assertFalse((self.root/'EXECUTED').exists())
+        self.assertFalse(item['installed'])
+        self.assertEqual('unknown', item['execution_status'])
+        self.assertEqual('selected_paths', item['source_scope'])
+        self.assertEqual(4, network.call_count)
+        with self.blob_network() as second:
+            self.assertTrue(upstream.fetch(cache=self.cache)['families'][0]['complete'])
+        self.assertEqual(0, second.call_count)
+
+    def test_required_selected_symlink_and_missing_reference_are_rejected_before_blob_fetch(self):
+        self.selected_family()
+        for variant in ('selected_symlink', 'missing_reference'):
+            tree = self.tree()
+            if variant == 'selected_symlink':
+                next(e for e in tree['tree'] if e['path']=='references/details.md')['mode'] = '120000'
+            else:
+                tree['tree'] = [e for e in tree['tree'] if e['path'] != 'references/details.md']
+            with self.subTest(variant=variant), self.blob_network(tree=tree) as network:
+                item = upstream.fetch(cache=self.cache/variant)['families'][0]
+            self.assertFalse(item['complete'])
+            self.assertEqual(1, network.call_count)
+
+    def test_selected_blob_integrity_and_license_still_block_completeness(self):
+        self.selected_family()
+        with self.blob_network(corrupt=True):
+            item = upstream.fetch(cache=self.cache/'corrupt')['families'][0]
+        self.assertFalse(item['complete'])
+        tree = self.tree()
+        tree['tree'] = [e for e in tree['tree'] if e['path'] != 'LICENSE']
+        with self.blob_network(tree=tree) as network:
+            item = upstream.fetch(cache=self.cache/'no-license')['families'][0]
+        self.assertFalse(item['complete'])
+        self.assertEqual(1, network.call_count)
+
+    def test_selection_must_cover_entrypoints_and_licenses_and_not_change_existing_cache_scope(self):
+        self.selected_family()
+        with self.blob_network():
+            item = upstream.fetch(cache=self.cache)['families'][0]
+        self.assertTrue(item['complete'], item.get('error'))
+        self.family['source_paths'].append('README.md')
+        self.lock.write_text(json.dumps({'schema_version':1,'families':[self.family]}))
+        with self.blob_network() as network:
+            changed = upstream.status(cache=self.cache)['families'][0]
+        self.assertFalse(changed['complete'])
+        self.assertEqual(0, network.call_count)
+        self.family['source_paths'] = ['references']
+        self.lock.write_text(json.dumps({'schema_version':1,'families':[self.family]}))
+        with self.blob_network() as network:
+            with self.assertRaises(ValueError):
+                upstream.fetch(cache=self.cache/'unsafe-scope')
+        self.assertEqual(0, network.call_count)
 
 
 if __name__ == "__main__":

@@ -193,7 +193,7 @@ def init_run(url, run_root, profile=None, *, creative_mandate=None):
              "sources": {}, "facts": {}, "artifacts": {}, "evaluations": {},
              "reviews": {}, "stage_reviews": {}, "checkpoints": {},
              "metadata": {"creative_exploration_contract":contract,"creative_reading_contract":1,
-                          "sales_kit_contract":1}}
+                          "sales_kit_contract":1,"public_research_contract":1,"audience_handoff_contract":1}}
     save_run(root, state)
     return state
 
@@ -232,6 +232,12 @@ def save_run(run_dir, state):
         kit=previous.get('metadata',{}).get('sales_kit_contract')
         if kit is not None and state.get('metadata',{}).get('sales_kit_contract')!=kit:
             raise ValueError('Initialized sales kit contract cannot be changed or removed')
+        research=previous.get('metadata',{}).get('public_research_contract')
+        if research is not None and state.get('metadata',{}).get('public_research_contract')!=research:
+            raise ValueError('Initialized public research contract cannot be changed or removed')
+        audience=previous.get('metadata',{}).get('audience_handoff_contract')
+        if audience is not None and state.get('metadata',{}).get('audience_handoff_contract')!=audience:
+            raise ValueError('Initialized audience handoff contract cannot be changed or removed')
     payload = deepcopy(state)
     payload["updated_at"] = _now()
     descriptor, temporary = tempfile.mkstemp(prefix=".state-", suffix=".json", dir=root)
@@ -554,6 +560,10 @@ def _stage_report(state, stage_id):
                 assessment=state['evaluations'].get(requirement['id'])
                 if assessment and 'artifact:discovery-channels' not in _dependency_closure(state,assessment['evidence']):
                     issues.append({'code':'discovery_channels','id':requirement['id'],'message':'Channel assessment must depend on the current external evidence bundle'})
+    if stage_id in {'analysis.specialists','company.v2','brief.public','creative.direction','client.composition','verify.final'}:
+        from .strategy import inspect as inspect_strategy
+        for message in inspect_strategy(state,stage_id)['issues']:
+            issues.append({'code':'audience_handoff','id':stage_id,'message':message})
     if stage_id in {'discovery.channels','company.v1','company.v2','analysis.specialists','brief.public','creative.direction','client.composition','verify.final'}:
         from .history import inspect_history
         for message in inspect_history(state)['issues']:
@@ -604,6 +614,10 @@ def _stage_report(state, stage_id):
             issue('discovery_evidence',stage_id,'Stage review must cover the current Discovery receipt')
         if stage_id=='discovery.channels' and 'discovery-channels' in state['artifacts'] and 'artifact:discovery-channels' not in _dependency_closure(state,review['evidence']):
             issue('discovery_channels',stage_id,'Stage review must cover the current external evidence bundle')
+        consumer={'analysis.specialists':'observation-analysis-map','company.v2':'company-evidence-brief','brief.public':'creative-inputs'}.get(stage_id)
+        if state.get('metadata',{}).get('audience_handoff_contract')==1 and consumer:
+            if 'artifact:'+consumer not in _dependency_closure(state,review['evidence']):
+                issue('audience_handoff',stage_id,'Stage review must cover its current audience/need consumer')
         criterion_evidence = review.get("criterion_evidence", {})
         if set(criterion_evidence) != {row["id"] for row in stage["criteria"]}:
             issue("missing_criterion_evidence", stage_id, "Every stage criterion needs its own evidence references")
