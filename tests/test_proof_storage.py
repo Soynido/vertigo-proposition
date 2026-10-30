@@ -46,7 +46,7 @@ class ProofStorageTests(unittest.TestCase):
         data['coverage']['omitted_urls']=[]
         repeated=dict(data['sources'][0]['artifacts'][0]);repeated['encoding']='contradictory';data['sources'][1]['artifacts'].append(repeated);path.write_text(json.dumps(data))
         problem=None
-        with patch.object(discovery,'_collect',side_effect=AssertionError('network path entered')):
+        with patch.object(discovery.socket,'getaddrinfo',side_effect=AssertionError('DNS path entered')) as dns:
             try:discovery.continue_collect(path,self.root/'next')
             except Exception as error:problem=error
-        self.assertIsInstance(problem,ValueError);self.assertIn('descriptor',str(problem))
+        self.assertIsInstance(problem,ValueError);self.assertIn('descriptor',str(problem));dns.assert_not_called()

@@ -97,6 +97,7 @@ class MethodReadingTests(unittest.TestCase):
                 current=state.load_run(self.root)
                 import hashlib
                 current['artifacts']['creative-reading']['sha256']=hashlib.sha256(path.read_bytes()).hexdigest()
+                current['artifacts']['creative-reading']['size_bytes']=path.stat().st_size
                 state.save_run(self.root,current)
                 self.assertEqual(self.check()['status'],'BLOCKED',self.check())
 
@@ -127,6 +128,7 @@ class MethodReadingTests(unittest.TestCase):
                 path=self.root/'creative-reading.json';path.write_text(json.dumps(data))
                 current=state.load_run(self.root)
                 current['artifacts']['creative-reading']['sha256']=hashlib.sha256(path.read_bytes()).hexdigest()
+                current['artifacts']['creative-reading']['size_bytes']=path.stat().st_size
                 state.save_run(self.root,current)
                 self.assertEqual(self.check()['status'],'PASS' if defect=='valid' else 'BLOCKED',self.check())
 
