@@ -20,6 +20,7 @@ def text(value, label):
 
 
 def current_source(run, identifier, *, public=False):
+    state._identifier(identifier)
     source=run['sources'].get(identifier)
     if not source or source['status']!='COLLECTED' or not source.get('path'):
         raise ValueError('Research requires collected evidence: '+str(identifier))
@@ -32,21 +33,30 @@ def current_source(run, identifier, *, public=False):
 
 def validate(run, data):
     """Validate only declared operations, scope and current evidence links."""
-    research=data.get('public_research')
-    if research is None: return []
-    if research.get('version')!=1: raise ValueError('Unsupported public research contract')
+    if not isinstance(data,dict): raise ValueError('External journal must be an object')
+    if 'public_research' not in data: return []
+    research=data['public_research']
+    if not isinstance(research,dict): raise ValueError('Public research must be an object')
+    if type(research.get('version')) is not int or research['version']!=1:
+        raise ValueError('Unsupported public research contract')
+    if not isinstance(research.get('entity'),dict): raise ValueError('Research entity must be an object')
     entity=research['entity'];text(entity.get('name'),'entity name');text(entity.get('match_reason'),'entity match reason')
     if not isinstance(entity.get('source_ids'),list) or not entity['source_ids']:
         raise ValueError('Entity association requires public source evidence')
     refs=[current_source(run,s,public=True) for s in entity['source_ids']]
     attempts={}
+    if not isinstance(data.get('attempts'),list): raise ValueError('Research attempts must be a list')
     for row in data['attempts']:
+        if not isinstance(row,dict): raise ValueError('Research attempt must be an object')
         if 'topic' not in row: continue
-        if row['topic'] not in TOPICS: raise ValueError('Unknown public research topic')
+        if not isinstance(row['topic'],str) or row['topic'] not in TOPICS:
+            raise ValueError('Unknown public research topic')
         identifier=text(row.get('id'),'research attempt id')
         if identifier in attempts: raise ValueError('Duplicate research attempt id')
         attempts[identifier]=row
         for key in ('operation','query','provider','geography','window'): text(row.get(key),'research '+key)
+        if 'fallback' in row and not isinstance(row['fallback'],dict):
+            raise ValueError('Research fallback must be an object')
         if row['status']=='retrieved':
             refs.append(current_source(run,row.get('source_id'),public=True))
         elif row['status']=='unavailable':
@@ -57,17 +67,20 @@ def validate(run, data):
             if fallback.get('reason'): text(fallback['reason'],'fallback reason')
         else: raise ValueError('Public research must be read or explicitly unavailable')
     topics=research.get('topics',[])
-    if not isinstance(topics,list) or len(topics)!=len(TOPICS) or {r.get('topic') for r in topics}!=set(TOPICS):
+    if (not isinstance(topics,list) or len(topics)!=len(TOPICS)
+            or any(not isinstance(r,dict) or not isinstance(r.get('topic'),str) for r in topics)
+            or {r['topic'] for r in topics}!=set(TOPICS)):
         raise ValueError('Public research requires four separate topics')
     used=set()
     for item in topics:
         text(item.get('limits'),'topic scope and limits')
-        if item.get('conclusion') not in {'observed','not_found_in_scope','unknown'}:
+        if not isinstance(item.get('conclusion'),str) or item['conclusion'] not in {'observed','not_found_in_scope','unknown'}:
             raise ValueError('Research conclusion cannot establish global absence or private results')
         ids=item.get('attempt_ids')
         if not isinstance(ids,list) or not ids: raise ValueError('Topic needs actual attempt references')
         rows=[]
         for identifier in ids:
+            state._identifier(identifier)
             row=attempts.get(identifier)
             if not row or row['topic']!=item['topic']: raise ValueError('Topic refers to a missing or foreign attempt')
             rows.append(row);used.add(identifier)
@@ -76,20 +89,23 @@ def validate(run, data):
     if used!=set(attempts): raise ValueError('Every research attempt must have a topic outcome')
     for row in attempts.values():
         alternate=row.get('fallback',{}).get('attempt_id')
+        if alternate is not None: state._identifier(alternate)
         if alternate and (alternate==row['id'] or alternate not in attempts or attempts[alternate]['topic']!=row['topic']):
             raise ValueError('Fallback must refer to a different actual attempt for the same topic')
     return list(dict.fromkeys(refs))
 
 
 def inspect(run):
-    if run.get('metadata',{}).get('public_research_contract')!=1:
+    try:
+        version=state._contract_version(run,'public_research_contract')
+    except ValueError as error:
+        return {'status':'BLOCKED','issues':[str(error)],'scope':'unsupported_public_research_contract','topics':[]}
+    if version is None:
         return {'status':'NOT_REQUIRED','issues':[],'scope':'legacy_run_without_public_research_contract','topics':[]}
     latest=None
-    for identifier in run['metadata'].get('discovery_external_reports',[]):
+    from .discovery_evidence import _channel_data, _channel_reports
+    for identifier in _channel_reports(run):
         artifact=run['artifacts'][identifier];path=state._safe_path(Path(run['root']),artifact['path'])
-        if artifact['status']!='CURRENT' or state._sha(path)!=artifact['sha256']:
-            raise ValueError('Public research journal changed or stale')
-        from .discovery_evidence import _channel_data
         data=_channel_data(run,path)
         if 'public_research' in data: latest=data['public_research']
     issues=[] if latest else ['Missing public research: Google search, Google Ads, Meta Ads and reviews']

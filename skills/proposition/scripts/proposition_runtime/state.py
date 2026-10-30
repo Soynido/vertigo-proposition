@@ -54,6 +54,17 @@ def _record_digest(record):
     return _digest(payload)
 
 
+def _contract_version(state, key):
+    """Only an absent key denotes a historical run; bool is not version one."""
+    metadata = state.get('metadata', {})
+    if key not in metadata:
+        return None
+    version = metadata[key]
+    if type(version) is not int or version != 1:
+        raise ValueError('Unsupported '+key+' version')
+    return version
+
+
 def _sha(path):
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -216,6 +227,8 @@ def save_run(run_dir, state):
     """Validate then atomically replace state.json, preserving run identity."""
     root = _external_root(run_dir)
     _validate_structure(state)
+    for key in ('public_research_contract', 'audience_handoff_contract'):
+        _contract_version(state, key)
     if Path(state["root"]) != root or state["id"] != root.name:
         raise ValueError("State belongs to a different run")
     target = _safe_path(root, "state.json", exists=False)
@@ -338,7 +351,7 @@ def add_artifact(run_dir, artifact_id, path, audience, dependencies=()):
     return record
 
 
-def _artifact_record(state, artifact_id, path, audience, dependencies=()):
+def _artifact_record(state, artifact_id, path, audience, dependencies=(), *, reuse_current=False):
     from .composition import bind_dependencies
     dependencies=bind_dependencies(state,artifact_id,dependencies)
     root = Path(state["root"])
@@ -346,8 +359,15 @@ def _artifact_record(state, artifact_id, path, audience, dependencies=()):
     record = {"id": _identifier(artifact_id), "path": evidence.relative_to(root).as_posix(),
               "sha256": _sha(evidence), "size_bytes": evidence.stat().st_size,
               "audience": audience, "status": "CURRENT", "public_allowed": False,
-              "approval": None, "recorded_at": _now()}
+              "approval": None}
     _bind(state, record, dependencies)
+    previous = state['artifacts'].get(artifact_id)
+    if reuse_current and previous and previous['status'] in ('CURRENT', 'STALE'):
+        fields = ('id', 'path', 'sha256', 'size_bytes', 'audience', 'profile_hash', 'dependency_hashes')
+        if (all(previous.get(key) == record[key] for key in fields)
+                and set(previous['dependencies']) == set(record['dependencies'])):
+            return deepcopy(previous)
+    record['recorded_at'] = _now()
     _schema("artifact", record)
     return record
 
@@ -696,6 +716,8 @@ def validate_run(run_dir):
                          if record["stage_id"] == PUBLICATION_STAGE]
     quality_refs = _dependency_closure(state, quality_roots)
     publication_only = _dependency_closure(state, publication_roots) - quality_refs
+    from .discovery_evidence import historical_channel_refs
+    replaced_history = historical_channel_refs(state)
 
     def issue(code, identifier, message):
         issues.append({"code": code, "id": identifier, "message": message})
@@ -707,6 +729,8 @@ def validate_run(run_dir):
     for kind, collection in _COLLECTIONS.items():
         for identifier, record in state[collection].items():
             reference = f"{kind}:{identifier}"
+            if reference in replaced_history:
+                continue
             if (reference in publication_only
                     or (record.get("metadata", {}).get("scope") == "publication" and reference not in quality_refs)):
                 continue

@@ -173,23 +173,68 @@ def inspect_discovery(run):
 def _channel_data(run,path):
     if path.stat().st_size>4*1024*1024: raise ValueError('External journal exceeds byte budget')
     data=json.loads(path.read_text())
-    if data.get('version')!=1 or not isinstance(data.get('attempts'),list): raise ValueError('Invalid external attempt journal')
+    if (not isinstance(data,dict) or type(data.get('version')) is not int
+            or data['version']!=1 or not isinstance(data.get('attempts'),list)):
+        raise ValueError('Invalid external attempt journal')
     if len(data['attempts'])>5000: raise ValueError('External journal exceeds attempt budget')
     from .discovery import _url
     for row in data['attempts']:
+        if not isinstance(row,dict): raise ValueError('External attempt must be an object')
+        if not isinstance(row.get('url'),str): raise ValueError('External destination must be a string')
         if _url(row['url'],allow_local=False,resolve=False)!=row['url']: raise ValueError('Invalid external destination')
-        if row['status'] not in {'retrieved','unavailable','document_not_analyzed','excluded'}: raise ValueError('Invalid external issue')
+        if not isinstance(row.get('status'),str) or row['status'] not in {'retrieved','unavailable','document_not_analyzed','excluded'}:
+            raise ValueError('Invalid external issue')
+        if not isinstance(row.get('observed_at'),str): raise ValueError('External attempt needs a date')
         if datetime.fromisoformat(row['observed_at']).tzinfo is None: raise ValueError('External attempt needs timezone')
+        if row.get('source_id') is not None: state._identifier(row['source_id'])
         source=run['sources'].get(row.get('source_id'))
         if row['status'] in {'retrieved','document_not_analyzed'}:
             if not source or source['status']!='COLLECTED' or source.get('locator')!=row['url']:
                 raise ValueError('Retrieved external issue requires its collected source')
             if not source.get('path') or state._sha(state._safe_path(Path(run['root']),source['path']))!=source['sha256']:
                 raise ValueError('External source is no longer current')
-        elif not row.get('reason','').strip(): raise ValueError('Unavailable/excluded external issue needs a reason')
+        elif not isinstance(row.get('reason'),str) or not row['reason'].strip():
+            raise ValueError('Unavailable/excluded external issue needs a reason')
     from .public_research import validate
     validate(run,data)
     return data
+
+
+def _channel_reports(run):
+    """Read the current bundle's bindings, keeping superseded history separate."""
+    history=run.get('metadata',{}).get('discovery_external_reports',[])
+    if not history: return []
+    if any(identifier not in run['artifacts'] for identifier in history):
+        raise ValueError('External history contains a missing journal')
+    bundle=run['artifacts'].get('discovery-channels');root=Path(run['root'])
+    if not bundle or bundle['status']!='CURRENT' or state._stale_reasons(run,root,bundle):
+        raise ValueError('External reconciliation bundle is stale or changed')
+    identifiers=[]
+    for ref in bundle['dependencies']:
+        if not ref.startswith('artifact:') or ref.split(':',1)[1] not in history:
+            raise ValueError('External reconciliation has an unregistered journal')
+        identifier=ref.split(':',1)[1];artifact=run['artifacts'][identifier]
+        if artifact['status']!='CURRENT' or state._stale_reasons(run,root,artifact):
+            raise ValueError('External journal is stale or changed')
+        identifiers.append(identifier)
+    return identifiers
+
+
+def historical_channel_refs(run):
+    """Exclude only replaced journal evidence unused by every other record."""
+    try:
+        active=set(_channel_reports(run))
+    except (OSError,ValueError,KeyError,TypeError):
+        return set()
+    if not active: return set()
+    retired={'artifact:'+identifier for identifier in run['metadata']['discovery_external_reports']
+             if identifier not in active and run['artifacts'][identifier]['status']=='STALE'}
+    protected=[kind+':'+identifier for kind,collection in state._COLLECTIONS.items()
+               if kind!='source' for identifier in run[collection]
+               if kind+':'+identifier not in retired]
+    historical=state._dependency_closure(run,retired)-state._dependency_closure(run,protected)
+    return {ref for ref in historical if ref in retired or
+            (ref.startswith('source:') and (state._resolve(run,ref) or {}).get('kind') in ('public','observation'))}
 
 
 def reconcile(run_dir,receipts_path):
@@ -200,12 +245,23 @@ def reconcile(run_dir,receipts_path):
     dependencies=['source:'+row['source_id'] for row in data['attempts'] if row.get('source_id')]
     from .public_research import validate
     dependencies.extend(validate(run,data))
-    run['artifacts'][identifier]=state._artifact_record(run,identifier,path.relative_to(root).as_posix(),'internal',dependencies)
+    before=state._canonical(run)
+    previous_record=run['artifacts'].get(identifier)
+    run['artifacts'][identifier]=state._artifact_record(run,identifier,path.relative_to(root).as_posix(),
+                                                      'internal',dependencies,reuse_current=True)
+    if run['artifacts'][identifier]['status']!='CURRENT': return inspect_channels(run)
     previous=run['metadata'].get('discovery_external_reports',[])
     run['metadata']['discovery_external_reports']=list(dict.fromkeys([*previous,identifier]))
-    run['artifacts']['discovery-channels']=state._artifact_record(run,'discovery-channels',path.relative_to(root).as_posix(),'internal',
-        ['artifact:'+name for name in run['metadata']['discovery_external_reports']])
-    state.save_run(root,run)
+    active=['artifact:'+name for name in run['metadata']['discovery_external_reports']
+            if run['artifacts'][name]['status']=='CURRENT']
+    bundle=run['artifacts'].get('discovery-channels')
+    bundle_path=path.relative_to(root).as_posix()
+    if (previous_record==run['artifacts'][identifier] and bundle and bundle['status']=='CURRENT'
+            and set(bundle['dependencies'])==set(active)):
+        bundle_path=bundle['path']
+    run['artifacts']['discovery-channels']=state._artifact_record(run,'discovery-channels',bundle_path,
+                                                              'internal',active,reuse_current=True)
+    if state._canonical(run)!=before: state.save_run(root,run)
     return inspect_channels(run)
 
 
@@ -214,7 +270,7 @@ def inspect_channels(run):
     entries=[e for e in site['entries'] if e['destination_status']=='external_pending']
     issues=list(site['issues']);outcomes={};root=Path(run['root'])
     try:
-        for identifier in run.get('metadata',{}).get('discovery_external_reports',[]):
+        for identifier in _channel_reports(run):
             artifact=run['artifacts'][identifier];path=state._safe_path(root,artifact['path'])
             if artifact['status']!='CURRENT' or state._sha(path)!=artifact['sha256']: raise ValueError('External journal is stale or changed')
             for row in _channel_data(run,path)['attempts']: outcomes[row['url']]=row

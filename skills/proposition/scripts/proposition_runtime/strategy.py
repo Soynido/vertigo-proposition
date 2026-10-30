@@ -132,12 +132,21 @@ def register(run_dir, report_path):
     state.invalidate_changed(run_dir);run=state.load_run(run_dir)
     path=state._safe_path(Path(run['root']),report_path)
     data=read(path);refs=validate(run,data)
-    state.add_artifact(run_dir,'observation-analysis-map',path.relative_to(run['root']).as_posix(),'internal',refs)
-    return inspect(state.load_run(run_dir),'analysis.specialists')
+    identifier='observation-analysis-map'
+    record=state._artifact_record(run,identifier,path.relative_to(run['root']).as_posix(),
+                                  'internal',refs,reuse_current=True)
+    if record!=run['artifacts'].get(identifier):
+        run['artifacts'][identifier]=record
+        state.save_run(run_dir,run)
+    return inspect(run,'analysis.specialists')
 
 
 def inspect(run, stage='brief.public'):
-    if run.get('metadata',{}).get('audience_handoff_contract')!=1:
+    try:
+        version=state._contract_version(run,'audience_handoff_contract')
+    except ValueError as error:
+        return {'status':'BLOCKED','issues':[str(error)],'scope':'unsupported_audience_handoff_contract'}
+    if version is None:
         return {'status':'NOT_REQUIRED','issues':[],'scope':'legacy_run_without_audience_handoff_contract'}
     try:
         _,path=artifact(run,'observation-analysis-map');data=read(path);validate(run,data)
