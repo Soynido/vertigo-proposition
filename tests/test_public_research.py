@@ -18,6 +18,14 @@ class PublicResearchTests(unittest.TestCase):
         self.run=self.fixture.new_run()
         discovery_evidence.register(self.run['root'],write_report(self.run))
 
+    def test_one_topic_can_be_adopted_without_claiming_the_other_three(self):
+        from proposition_runtime import public_research
+        self.assertTrue(callable(getattr(public_research,'validate_topic',None)),'One topic cannot yet be qualified separately')
+        data=json.loads(journal(self.run).read_text());data['attempts']=data['attempts'][:1];data['public_research']['topics']=data['public_research']['topics'][:1];run=state.load_run(self.run['root'])
+        self.assertTrue(public_research.validate_topic(run,data,'google_search'))
+        with self.assertRaises(ValueError):public_research.validate(run,data)
+        with self.assertRaises(ValueError):public_research.validate_topic(run,data,'meta_ads')
+
     def test_linked_destination_coverage_cannot_replace_public_research(self):
         run=state.load_run(self.run['root'])
         run['metadata']['public_research_contract']=1;state.save_run(run['root'],run)

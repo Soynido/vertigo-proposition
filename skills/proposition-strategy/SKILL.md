@@ -22,3 +22,7 @@ Lire [les admissions et limites publiques](references/public-analysis.md) pour c
 Modèle V2 et contradictions ; constats reliés aux sources ; brief public distinct et empreinte ; questions restantes avec impact ; registre des capacités réellement employées. L'objectif proposé n'est pas un gain mesuré. Une hypothèse peut alimenter un travail préparatoire si sa condition est visible ; un doute qui changerait l'idée reste un blocage ciblé.
 
 Le lecteur suivant doit pouvoir développer une proposition sans réinterpréter un audit brut ou accéder à un historique privé.
+
+## Exécution et reprise
+
+Appliquer [les dépendances et reçus natifs](../proposition/references/performance.md) : brouillon de compréhension, missions réelles, puis réconciliation et consommateurs. Lire les deux méthodes séquentiellement ; une hypothèse préparée ne devient pas une observation exécutée. Conserver les réserves V2 jusqu'au brief.

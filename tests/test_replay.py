@@ -259,7 +259,8 @@ class ResearchBoundaryTests(unittest.TestCase):
         before = state.load_run(self.root)
         for n, data in enumerate(cases):
             with self.subTest(case=n):
-                state.save_run(self.root, before)
+                # Deliberate fixture reset, with an explicit current CAS precondition.
+                state.save_run(self.root, before, expected_state_hash=state.load_run(self.root).base_sha256)
                 path = self.root/'malformed.json'
                 path.write_text(json.dumps(data))
                 error = None
@@ -291,7 +292,7 @@ class ResearchBoundaryTests(unittest.TestCase):
     def test_present_invalid_contract_versions_are_blocked(self):
         path = make_analysis(self.run)
         strategy.register(self.root, path)
-        for value in (None, False, True, 0, 2, '1'):
+        for value in (None, False, True, 0, 3, '1'):
             with self.subTest(version=value):
                 current = state.load_run(self.root)
                 current['metadata']['public_research_contract'] = value

@@ -25,7 +25,7 @@ def make_analysis(run):
     state.add_source(root,'strategy-source','strategy-source.txt',kind='public',locator=run['url'])
     (root/'mission-trace.txt').write_text('Synthetic browser task trace, not actual user research')
     state.add_source(root,'mission-trace','mission-trace.txt',kind='observation',locator=run['url'])
-    data=dict(version=1,methods=methods,
+    data=dict(version=run['metadata'].get('audience_handoff_contract',1),methods=methods,
         audiences=[dict(id='a1',role='Product visitor',kind='site_visitor',status='hypothesis',source_ids=['strategy-source'])],
         needs=[dict(id='n1',audience_ids=['a1'],status='hypothesis',source_ids=['strategy-source'],source_group='official-offer',context='Compare an existing product detail',
             delta='baseline_not_compared',decision='retained',recommendation='Make the sourced product detail accessible',experience_consequence='Show material before the existing quote action',

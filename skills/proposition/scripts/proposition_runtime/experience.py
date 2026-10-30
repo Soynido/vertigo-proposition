@@ -17,12 +17,15 @@ from urllib.parse import urlsplit
 from PIL import Image
 from . import state
 from .artifacts import sha256
+from .telemetry import file_read
+from .validation import file_reader
 
 STORY_ROLES = {'understanding','evidence','opportunity','creative_world',
                'transformation','agency_value','mission','next_step'}
 MANDATE_INPUT_LIMIT = 256 * 1024
 
 
+@file_reader(MANDATE_INPUT_LIMIT, mode='bounded_json')
 def read_mandate_input(path):
     """Bound regular-file checks and reading by bytes and a killable 5s child."""
     try:
@@ -32,6 +35,7 @@ def read_mandate_input(path):
         raise ValueError('Creative mandate input read deadline exceeded (5s)') from error
     if result.returncode!=0 or len(result.stdout)>MANDATE_INPUT_LIMIT:
         raise ValueError('Creative mandate input must be a readable regular file of at most 256 KiB, without symlinks')
+    file_read('reader.json', path, len(result.stdout))
     return result.stdout
 
 

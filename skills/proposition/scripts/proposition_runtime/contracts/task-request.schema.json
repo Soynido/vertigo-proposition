@@ -1,0 +1,421 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "kind": {
+      "enum": [
+        "plan",
+        "request"
+      ]
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^task-[0-9a-f]{24}$"
+    },
+    "task_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_fingerprint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+    },
+    "stage_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "enum": [
+        "full",
+        "client"
+      ]
+    },
+    "input_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "attempt_limit": {
+          "const": 2
+        },
+        "budget_seconds": {
+          "const": 600
+        },
+        "stop": {
+          "type": "string",
+          "minLength": 1
+        },
+        "max_host_tasks": {
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "max_pages": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "concurrency": {
+          "enum": [
+            1,
+            2,
+            4
+          ]
+        },
+        "panel_scan": {
+          "enum": [
+            "legacy",
+            "batch"
+          ]
+        },
+        "image_wait_policy": {
+          "enum": [
+            "legacy",
+            "terminal_aware"
+          ]
+        },
+        "proof_storage": {
+          "enum": [
+            "expanded",
+            "content_addressed"
+          ]
+        },
+        "allow_local_fixture": {
+          "type": "boolean"
+        },
+        "frontier_descriptor": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                  "minLength": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "size_bytes": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "path",
+                "sha256",
+                "size_bytes"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "topic": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mission_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+        }
+      },
+      "required": [
+        "attempt_limit",
+        "budget_seconds",
+        "stop",
+        "max_host_tasks"
+      ]
+    },
+    "input_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "maxProperties": 20000
+    },
+    "profile_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "contract_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "maxProperties": 20000
+    },
+    "packet_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "none",
+            "creative_public",
+            "review_inputs",
+            "private_internal"
+          ]
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "size_bytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "audience": {
+                "enum": [
+                  "public",
+                  "client",
+                  "sales",
+                  "technical",
+                  "internal"
+                ]
+              }
+            },
+            "required": [
+              "path",
+              "sha256",
+              "size_bytes",
+              "role",
+              "audience"
+            ]
+          },
+          "maxItems": 6000
+        },
+        "record_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "maxItems": 20000
+        },
+        "allowed_audiences": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "maxItems": 5
+        }
+      },
+      "required": [
+        "kind",
+        "files",
+        "record_refs",
+        "allowed_audiences"
+      ]
+    },
+    "packet": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "none",
+                "creative_public",
+                "review_inputs",
+                "private_internal"
+              ]
+            },
+            "manifest_path": {
+              "type": "string",
+              "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+              "minLength": 1
+            },
+            "manifest_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                    "minLength": 1
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "size_bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "role": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "audience": {
+                    "enum": [
+                      "public",
+                      "client",
+                      "sales",
+                      "technical",
+                      "internal"
+                    ]
+                  }
+                },
+                "required": [
+                  "path",
+                  "sha256",
+                  "size_bytes",
+                  "role",
+                  "audience"
+                ]
+              },
+              "maxItems": 6000
+            }
+          },
+          "required": [
+            "kind",
+            "manifest_path",
+            "manifest_hash",
+            "files"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "output_roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "maxItems": 30
+    },
+    "output_destinations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+        "minLength": 1
+      },
+      "maxProperties": 30
+    },
+    "required_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "maxItems": 20
+    },
+    "isolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "fresh_public",
+            "continue_public",
+            "independent_review",
+            "coordinator"
+          ]
+        },
+        "creator_context_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "creator_context_ref"
+      ]
+    },
+    "request_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "task_id",
+    "task_key",
+    "task_fingerprint",
+    "run_id",
+    "stage_id",
+    "scope",
+    "input_parameters",
+    "input_hashes",
+    "profile_hash",
+    "contract_hashes",
+    "packet_plan",
+    "packet",
+    "output_roles",
+    "output_destinations",
+    "required_capabilities",
+    "isolation"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "request"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "request_hash"
+        ]
+      },
+      "else": {
+        "properties": {
+          "packet": {
+            "type": "null"
+          },
+          "request_hash": false
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

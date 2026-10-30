@@ -1,0 +1,890 @@
+{
+  "schema_version": "1.0",
+  "tasks": [
+    {
+      "task_key": "discovery.site.collect",
+      "stage_id": "discovery.site",
+      "inputs": [],
+      "completed_by": [
+        "site-discovery"
+      ],
+      "methods": [],
+      "capabilities": [
+        "browser"
+      ],
+      "packet": "none",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "discovery-report": {
+          "name": "discovery.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "discovery-material": {
+          "name": "sources",
+          "kind": "tree",
+          "audience": "internal",
+          "work_prefix": "sources"
+        }
+      },
+      "skill": "proposition-discovery"
+    },
+    {
+      "task_key": "research.topic",
+      "stage_id": "discovery.channels",
+      "inputs": [
+        "site-discovery"
+      ],
+      "completed_by": [],
+      "methods": [],
+      "capabilities": [
+        "public_search"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "report": {
+          "name": "research-topic.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "research-material": {
+          "name": "research-material",
+          "kind": "tree",
+          "audience": "internal",
+          "optional": true
+        }
+      },
+      "skill": "proposition-discovery"
+    },
+    {
+      "task_key": "research.reconcile",
+      "stage_id": "discovery.channels",
+      "inputs": [
+        "site-discovery"
+      ],
+      "completed_by": [
+        "discovery-channels"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "discovery-channels": {
+          "name": "discovery-channels.json",
+          "kind": "file",
+          "audience": "internal"
+        }
+      },
+      "skill": "proposition-discovery"
+    },
+    {
+      "task_key": "company.v1.synthesize",
+      "stage_id": "company.v1",
+      "inputs": [
+        "site-discovery",
+        "discovery-channels"
+      ],
+      "completed_by": [
+        "company-evidence-brief"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "company-evidence-brief": {
+          "name": "company-evidence-brief.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "research-material": {
+          "name": "research-material",
+          "kind": "tree",
+          "audience": "internal",
+          "optional": true
+        }
+      },
+      "skill": "proposition-strategy"
+    },
+    {
+      "task_key": "strategy.understand",
+      "stage_id": "analysis.specialists",
+      "inputs": [
+        "company-evidence-brief",
+        "discovery-channels"
+      ],
+      "completed_by": [
+        "strategy-draft"
+      ],
+      "methods": [
+        "marketingskills"
+      ],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "strategy-draft": {
+          "name": "strategy-draft.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "research-material": {
+          "name": "research-material",
+          "kind": "tree",
+          "audience": "internal",
+          "optional": true
+        }
+      },
+      "skill": "proposition-strategy"
+    },
+    {
+      "task_key": "strategy.mission",
+      "stage_id": "analysis.specialists",
+      "inputs": [
+        "strategy-draft"
+      ],
+      "completed_by": [],
+      "methods": [],
+      "capabilities": [
+        "browser"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "report": {
+          "name": "strategy-mission.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "research-material": {
+          "name": "research-material",
+          "kind": "tree",
+          "audience": "internal",
+          "optional": true
+        }
+      },
+      "skill": "proposition-strategy"
+    },
+    {
+      "task_key": "strategy.reconcile",
+      "stage_id": "analysis.specialists",
+      "inputs": [
+        "strategy-draft"
+      ],
+      "completed_by": [
+        "observation-analysis-map"
+      ],
+      "methods": [
+        "marketingskills"
+      ],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "observation-analysis-map": {
+          "name": "observation-analysis-map.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "research-material": {
+          "name": "research-material",
+          "kind": "tree",
+          "audience": "internal",
+          "optional": true
+        }
+      },
+      "skill": "proposition-strategy"
+    },
+    {
+      "task_key": "analysis.specialists.seo_geo",
+      "stage_id": "analysis.specialists",
+      "inputs": [
+        "company-evidence-brief",
+        "discovery-channels"
+      ],
+      "completed_by": [
+        "seo_geo-analysis"
+      ],
+      "methods": [
+        "claude-seo"
+      ],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "seo_geo-analysis": {
+          "name": "seo_geo-analysis.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "research-material": {
+          "name": "research-material",
+          "kind": "tree",
+          "audience": "internal",
+          "optional": true
+        }
+      },
+      "skill": "proposition-strategy"
+    },
+    {
+      "task_key": "analysis.specialists.ux",
+      "stage_id": "analysis.specialists",
+      "inputs": [
+        "company-evidence-brief",
+        "discovery-channels"
+      ],
+      "completed_by": [
+        "ux-analysis"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "ux-analysis": {
+          "name": "ux-analysis.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "research-material": {
+          "name": "research-material",
+          "kind": "tree",
+          "audience": "internal",
+          "optional": true
+        }
+      },
+      "skill": "proposition-strategy"
+    },
+    {
+      "task_key": "analysis.specialists.design",
+      "stage_id": "analysis.specialists",
+      "inputs": [
+        "company-evidence-brief",
+        "discovery-channels"
+      ],
+      "completed_by": [
+        "design-analysis"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "design-analysis": {
+          "name": "design-analysis.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "research-material": {
+          "name": "research-material",
+          "kind": "tree",
+          "audience": "internal",
+          "optional": true
+        }
+      },
+      "skill": "proposition-strategy"
+    },
+    {
+      "task_key": "company.v2.reconcile",
+      "stage_id": "company.v2",
+      "inputs": [
+        "observation-analysis-map"
+      ],
+      "completed_by": [
+        "company-evidence-brief"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "company-evidence-brief": {
+          "name": "company-evidence-brief.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "research-material": {
+          "name": "research-material",
+          "kind": "tree",
+          "audience": "internal",
+          "optional": true
+        }
+      },
+      "skill": "proposition-strategy"
+    },
+    {
+      "task_key": "brief.public.prepare",
+      "stage_id": "brief.public",
+      "inputs": [
+        "company-evidence-brief"
+      ],
+      "completed_by": [
+        "creative-inputs"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "creative-inputs": {
+          "name": "creative-inputs.json",
+          "kind": "file",
+          "audience": "public"
+        }
+      },
+      "skill": "proposition-strategy"
+    },
+    {
+      "task_key": "creative.direction.prepare",
+      "stage_id": "creative.direction",
+      "inputs": [
+        "creative-inputs"
+      ],
+      "completed_by": [
+        "creative-reading"
+      ],
+      "methods": [
+        "claude-seo",
+        "impeccable",
+        "scroll-craft",
+        "apple-design"
+      ],
+      "capabilities": [
+        "host.fresh_context"
+      ],
+      "packet": "creative_public",
+      "isolation": "fresh_public",
+      "audiences": [
+        "public",
+        "client"
+      ],
+      "outputs": {
+        "creative-reading": {
+          "name": "creative-reading.json",
+          "kind": "file",
+          "audience": "internal"
+        }
+      },
+      "skill": "proposition-creative"
+    },
+    {
+      "task_key": "creative.direction.explore",
+      "stage_id": "creative.direction",
+      "inputs": [
+        "creative-inputs",
+        "creative-reading"
+      ],
+      "completed_by": [
+        "creative-exploration"
+      ],
+      "methods": [
+        "claude-seo",
+        "impeccable",
+        "scroll-craft",
+        "apple-design"
+      ],
+      "capabilities": [
+        "host.continue_context"
+      ],
+      "packet": "creative_public",
+      "isolation": "continue_public",
+      "audiences": [
+        "public",
+        "client"
+      ],
+      "outputs": {
+        "creative-exploration": {
+          "name": "creative-exploration.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "creative-material": {
+          "name": "creative-material",
+          "kind": "tree",
+          "audience": "public"
+        }
+      },
+      "skill": "proposition-creative"
+    },
+    {
+      "task_key": "creative.direction.develop",
+      "stage_id": "creative.direction",
+      "inputs": [
+        "creative-inputs",
+        "creative-reading",
+        "creative-exploration"
+      ],
+      "completed_by": [
+        "creative-experience"
+      ],
+      "methods": [
+        "claude-seo",
+        "impeccable",
+        "scroll-craft",
+        "apple-design"
+      ],
+      "capabilities": [
+        "host.continue_context"
+      ],
+      "packet": "creative_public",
+      "isolation": "continue_public",
+      "audiences": [
+        "public",
+        "client"
+      ],
+      "outputs": {
+        "creative-experience": {
+          "name": "creative-experience.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "creative-material": {
+          "name": "creative-material",
+          "kind": "tree",
+          "audience": "public"
+        }
+      },
+      "skill": "proposition-creative"
+    },
+    {
+      "task_key": "client.composition.plan",
+      "stage_id": "client.composition",
+      "inputs": [
+        "creative-inputs",
+        "creative-experience",
+        "creative-exploration"
+      ],
+      "completed_by": [
+        "client-story-map"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "client-story-map": {
+          "name": "client-story-map.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "composition-material": {
+          "name": "composition-material",
+          "kind": "tree",
+          "audience": "public"
+        }
+      },
+      "skill": "proposition-composition"
+    },
+    {
+      "task_key": "client.composition.build",
+      "stage_id": "client.composition",
+      "inputs": [
+        "client-story-map",
+        "composition-plan-review"
+      ],
+      "completed_by": [
+        "client-source",
+        "presentation-catalog",
+        "client-pdf",
+        "client-pptx",
+        "client-story",
+        "creative-placements"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "client-source": {
+          "name": "client-source.html",
+          "kind": "file",
+          "audience": "client"
+        },
+        "presentation-catalog": {
+          "name": "presentation-catalog.json",
+          "kind": "file",
+          "audience": "client"
+        },
+        "client-pdf": {
+          "name": "client-pdf.pdf",
+          "kind": "file",
+          "audience": "client"
+        },
+        "client-pptx": {
+          "name": "client-pptx.pptx",
+          "kind": "file",
+          "audience": "client"
+        },
+        "client-story": {
+          "name": "client-story.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "creative-placements": {
+          "name": "creative-placements.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "composition-material": {
+          "name": "composition-material",
+          "kind": "tree",
+          "audience": "public",
+          "optional": true
+        }
+      },
+      "skill": "proposition-composition"
+    },
+    {
+      "task_key": "review.client.review_a",
+      "stage_id": "review.client",
+      "inputs": [
+        "client-source",
+        "presentation-catalog",
+        "client-pdf",
+        "client-pptx",
+        "client-story-map",
+        "client-story",
+        "composition-plan-review"
+      ],
+      "completed_by": [
+        "client-review-receipt-review_a",
+        "client-review-report-review_a"
+      ],
+      "methods": [],
+      "capabilities": [
+        "host.independent_context"
+      ],
+      "packet": "review_inputs",
+      "isolation": "independent_review",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "receipt": {
+          "name": "independence.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "report": {
+          "name": "review.json",
+          "kind": "file",
+          "audience": "internal"
+        }
+      },
+      "skill": "proposition-quality"
+    },
+    {
+      "task_key": "review.client.review_b",
+      "stage_id": "review.client",
+      "inputs": [
+        "client-source",
+        "presentation-catalog",
+        "client-pdf",
+        "client-pptx",
+        "client-story-map",
+        "client-story",
+        "composition-plan-review"
+      ],
+      "completed_by": [
+        "client-review-receipt-review_b",
+        "client-review-report-review_b"
+      ],
+      "methods": [],
+      "capabilities": [
+        "host.independent_context"
+      ],
+      "packet": "review_inputs",
+      "isolation": "independent_review",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "receipt": {
+          "name": "independence.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "report": {
+          "name": "review.json",
+          "kind": "file",
+          "audience": "internal"
+        }
+      },
+      "skill": "proposition-quality"
+    },
+    {
+      "task_key": "internal.handoffs.sales",
+      "stage_id": "internal.handoffs",
+      "inputs": [
+        "client-source",
+        "presentation-catalog",
+        "client-pdf",
+        "client-pptx",
+        "client-story-map",
+        "client-story",
+        "composition-plan-review"
+      ],
+      "completed_by": [
+        "sales-playbook",
+        "follow-up-register",
+        "sales-source",
+        "sales-pdf"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "sales-playbook": {
+          "name": "sales-playbook.json",
+          "kind": "file",
+          "audience": "sales"
+        },
+        "follow-up-register": {
+          "name": "follow-up-register.json",
+          "kind": "file",
+          "audience": "sales"
+        },
+        "sales-source": {
+          "name": "sales-source.html",
+          "kind": "file",
+          "audience": "sales"
+        },
+        "sales-pdf": {
+          "name": "sales-pdf.pdf",
+          "kind": "file",
+          "audience": "sales"
+        }
+      },
+      "skill": "proposition-sales"
+    },
+    {
+      "task_key": "internal.handoffs.technical",
+      "stage_id": "internal.handoffs",
+      "inputs": [
+        "client-source",
+        "presentation-catalog",
+        "client-pdf",
+        "client-pptx",
+        "client-story-map",
+        "client-story",
+        "composition-plan-review"
+      ],
+      "completed_by": [
+        "technical-handoff",
+        "technical-source",
+        "technical-pdf"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "technical-handoff": {
+          "name": "technical-handoff.json",
+          "kind": "file",
+          "audience": "technical"
+        },
+        "technical-source": {
+          "name": "technical-source.html",
+          "kind": "file",
+          "audience": "technical"
+        },
+        "technical-pdf": {
+          "name": "technical-pdf.pdf",
+          "kind": "file",
+          "audience": "technical"
+        }
+      },
+      "skill": "proposition-technical"
+    },
+    {
+      "task_key": "export.documents.consolidate",
+      "stage_id": "export.documents",
+      "inputs": [
+        "client-source",
+        "presentation-catalog",
+        "client-pdf",
+        "client-pptx",
+        "client-story-map",
+        "client-story",
+        "composition-plan-review"
+      ],
+      "completed_by": [
+        "export-consolidation",
+        "client-context"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "report": {
+          "name": "export-documents-consolidate.json",
+          "kind": "file",
+          "audience": "internal"
+        },
+        "client-context": {
+          "name": "Contexte client.md",
+          "kind": "file",
+          "audience": "internal"
+        }
+      },
+      "skill": "proposition-composition"
+    },
+    {
+      "task_key": "verify.final.inspect",
+      "stage_id": "verify.final",
+      "inputs": [
+        "client-source",
+        "presentation-catalog",
+        "client-pdf",
+        "client-pptx",
+        "client-story-map",
+        "client-story",
+        "composition-plan-review"
+      ],
+      "completed_by": [
+        "final-inspection"
+      ],
+      "methods": [],
+      "capabilities": [
+        "python"
+      ],
+      "packet": "private_internal",
+      "isolation": "coordinator",
+      "audiences": [
+        "public",
+        "client",
+        "internal"
+      ],
+      "outputs": {
+        "report": {
+          "name": "verify-final-inspect.json",
+          "kind": "file",
+          "audience": "internal"
+        }
+      },
+      "skill": "proposition-quality"
+    }
+  ]
+}

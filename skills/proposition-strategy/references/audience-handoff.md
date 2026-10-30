@@ -12,7 +12,7 @@ Adapter les confirmations et accès privés demandés par défaut : brouillon pu
 
 ## Rapport dans `observation-analysis-map`
 
-Créer un JSON `version: 1`, puis `strategy register RUN_DIR --report CHEMIN`. Ne pas réécrire les acquis pour remplir un format ; reprendre les constats actuels avec leurs preuves et conserver les décisions antérieures. Les collections ci-dessous portent des IDs uniques et stables, avec au plus 100 lignes chacune :
+Créer un JSON dont `version` est celle du fichier de tâche produit par `strategy prepare` et des métadonnées `audience_handoff_contract` : `2` pour les nouveaux runs, `1` pour les runs explicitement initialisés en V1. Puis `strategy register RUN_DIR --report CHEMIN`. Ne pas réécrire les acquis pour remplir un format ; reprendre les constats actuels avec leurs preuves et conserver les décisions antérieures. Les collections ci-dessous portent des IDs uniques et stables, avec au plus 100 lignes chacune :
 
 - `methods` : deux entrées `name` (`product-marketing`, `customer-research`), `commit`, `reference_root`, `sha256` du SKILL, `mode: adapted`, `read_sections` effectivement lues, `adaptation` publique précise et `applied_to` vers les IDs de publics/besoins concernés. Le cache complet sélectionné et ses empreintes doivent correspondre au lock. Garder les traces de lecture de l'hôte pour la revue ; les champs déclaratifs ne prouvent pas seuls la lecture.
 - `audiences` : `id`, `role`, `kind` (`site_visitor` ou `vertigo_buyer`), `status` (`declared`, `attributed`, `hypothesis`), `source_ids`. Distinguer visiteur, personne citée, acheteur et prospect de Vertigo. Un rôle attribué à un témoignage n'est pas un segment validé ; aucun ICP prioritaire n'est déduit d'une fréquence non démontrée.
@@ -24,7 +24,7 @@ Tout besoin retenu rejoint au moins une mission, dans les deux sens. Une recomma
 
 ## Conservation jusqu'au créatif
 
-Le résumé `audience_need_summary` est le même dans les JSON existants `company-evidence-brief` et `creative-inputs` :
+Le résumé `audience_need_summary` est le même dans les JSON existants `company-evidence-brief` et `creative-inputs`. Pour un run V2, copier l'objet exact renvoyé par `strategy register` ou `strategy check --stage analysis.specialists` ; la commande calcule la projection, sans exécuter les méthodes ni la navigation. Pour un run V1, conserver cette projection historique :
 
 ```json
 {
@@ -34,6 +34,8 @@ Le résumé `audience_need_summary` est le même dans les JSON existants `compan
 }
 ```
 
+La projection V2 ajoute `version: 2`, les `mission_ids` de chaque besoin et une collection `missions`. Chaque mission y conserve exactement `id`, `need_ids`, `outcome`, `limits`, `source_ids`, plus `reason` si `outcome` vaut `blocked`. Les missions bloquées liées à un besoin retenu ajoutent aussi une limitation explicite aux `unknowns`, sans retirer les inconnus existants. Voir les schémas fermés [rapport V2](../../proposition/scripts/proposition_runtime/contracts/strategy-report-v2.schema.json) et [projection V2](../../proposition/scripts/proposition_runtime/contracts/strategy-summary-v2.schema.json). Les chemins de cache, les méthodes, les traces brutes et les consignes de navigation restent internes. Une mission bloquée conserve sa raison et sa limite publiques ; elle ne devient ni une préférence d'utilisateur ni une preuve de succès, et n'interdit pas à elle seule une hypothèse explicitement conservée.
+
 Conserver tous les publics et besoins avec les champs montrés, y compris les décisions de non-retenue. Pour ces dernières, `experience_consequence` peut être vide ; leur justification reste dans le rapport interne. Le modèle dépend de `artifact:observation-analysis-map`, et `creative-inputs` dépend du modèle courant. Les observations créatives retenues portent `need_ids` et une preuve dont les dépendances conservent les sources du besoin. La conséquence fixe le problème ou l'action utile, sans imposer une mise en scène.
 
 Contrôler `strategy check RUN_DIR --stage analysis.specialists`, puis `company.v2`, puis `brief.public` au moment de leurs gates existants. La commande ne note pas la qualité du positionnement. Les nouveaux runs vérifient conservation et dépendances dans ces gates ; les anciens restent lisibles dans leur portée. Le paquet public inclut déjà `creative-inputs` : son résumé doit donc rester public, sourcé et sans dossier privé. Les détails techniques et le rapport complet de recherche ne sont pas transmis automatiquement. La revue vérifie ensuite que besoin → preuve → recommandation → scène et action existent réellement ; aucune admission autonome depuis les seuls tests moteur.
@@ -42,4 +44,4 @@ Contrôler `strategy check RUN_DIR --stage analysis.specialists`, puis `company.
 
 Enregistrer à nouveau le même rapport au même chemin, avec les mêmes octets et dépendances, conserve sa date, ses empreintes et son approbation. Les modèles et briefs qui en dépendent restent valides. Une vraie modification du rapport ou de ses preuves continue de les invalider. Rejouer un rapport inchangé mais périmé ne le rend pas actuel : résoudre la cause et produire l'observation nécessaire avant de poursuivre.
 
-Le contrat courant accepte uniquement l'entier `1`. Une clé présente avec un booléen, `null` ou une version inconnue est bloquante ; seule l'absence de la clé `audience_handoff_contract` dans les métadonnées désigne un ancien run sans ce contrat. Ces règles de reprise ne modifient ni le contenu exigé du rapport ni la conservation jusqu'au créatif.
+Le contrat accepte uniquement les entiers `1` et `2`, épinglés et immuables à l'initialisation. `init --audience-handoff-contract 1` permet une comparaison V1 explicite ; le défaut est V2. Une clé présente avec un booléen, `null` ou une version inconnue est bloquante ; seule l'absence de la clé `audience_handoff_contract` dans les métadonnées désigne un ancien run sans ce contrat. Le rapport doit correspondre à cette version. Ces règles de reprise ne modifient ni les acquis V1 ni la conservation jusqu'au créatif.

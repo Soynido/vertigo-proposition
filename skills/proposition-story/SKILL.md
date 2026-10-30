@@ -17,3 +17,7 @@ Renseigner K01–K08 dans cette même carte selon [le format préalable](../prop
 ## Sortie et relecture
 
 Fil argumentaire, mission/livrables/limites, décision, carte des pages et wording prêt à composer. Lire les titres seuls puis le texte : le lecteur peut reformuler ce qu'il achèterait, ce que cela changerait et ce qu'il doit décider. Relire avec Stop Slop et vérifier le sens en français. Les légendes parlent d'actions et de conséquences utiles, pas de fabrication graphique. Préserver une voix réussie ; conditionner les bénéfices non mesurés. Aucun prix ni élément interne dans le client.
+
+## Exécution et reprise
+
+Suivre [les passations figées et leurs dépendances](../proposition/references/performance.md). Le récit conserve les preuves et scènes de la direction retenue ; il ne remplace ni les méthodes créatives ni la progression K01–K08. Une reprise réutilise les entrées encore valides.

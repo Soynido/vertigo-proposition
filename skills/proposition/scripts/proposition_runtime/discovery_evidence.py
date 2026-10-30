@@ -6,6 +6,8 @@ import re
 from urllib.parse import urlsplit
 
 from . import state
+from .telemetry import traced
+from .validation import cached
 
 
 def _local(root, path):
@@ -34,7 +36,7 @@ def _validate(run, path):
                     and any(r.get('from')==run['url'] and r.get('to')==page['final_url']
                             and r.get('http_status') in (301,302,303,307,308) for r in page.get('redirects',[]))):
                 allowed.add(_origin(page['final_url']))
-    files={}; sources={}; total=0
+    files={}; sources={}; descriptors={}; total=0
     for source in data['sources']:
         identifier=source['id']
         state._identifier(identifier.removeprefix('source:'))
@@ -45,11 +47,17 @@ def _validate(run, path):
             name=artifact['path'];relative=PurePosixPath(name)
             if (relative.is_absolute() or '\\' in name or ':' in name or any(x in ('','.','..') for x in name.split('/'))):
                 raise ValueError('Unsafe Discovery proof path')
+            if name in descriptors:
+                if artifact!=descriptors[name]: raise ValueError('Contradictory Discovery proof descriptor')
+                continue
+            descriptors[name]=dict(artifact)
             proof=_local(root,path.parent/name)
             if (type(artifact['bytes']) is not int or not 0<artifact['bytes']<=64*1024*1024
                     or not re.fullmatch('[0-9a-f]{64}',artifact['sha256'])
                     or proof.stat().st_size!=artifact['bytes'] or state._sha(proof)!=artifact['sha256']):
                 raise ValueError('Discovery proof integrity mismatch')
+            if name.startswith('sources/blobs/') and (relative.suffix not in ('.txt','.html') or relative.stem!=artifact['sha256']):
+                raise ValueError('Content-addressed proof descriptor mismatch')
             if name not in files: total+=artifact['bytes']
             files[name]=proof
     if total>512*1024*1024 or len(files)>6000: raise ValueError('Discovery bundle exceeds byte/file budget')
@@ -118,6 +126,8 @@ def register(run_dir, report_path):
     return inspect_discovery(run)
 
 
+@cached('discovery.inspect')
+@traced('discovery.inspect')
 def inspect_discovery(run):
     """Mechanical completeness/integrity only. Exact pixels still need review."""
     issues=[];pages={};entries=[];known=set();last=None;origins=set()
@@ -170,6 +180,7 @@ def inspect_discovery(run):
             'entries':entries,'semantic_analysis':'NOT_INFERRED','visual_quality':'NOT_INFERRED'}
 
 
+@cached('channel.data')
 def _channel_data(run,path):
     if path.stat().st_size>4*1024*1024: raise ValueError('External journal exceeds byte budget')
     data=json.loads(path.read_text())
@@ -265,6 +276,8 @@ def reconcile(run_dir,receipts_path):
     return inspect_channels(run)
 
 
+@cached('channels.inspect')
+@traced('channels.inspect')
 def inspect_channels(run):
     site=inspect_discovery(run)
     entries=[e for e in site['entries'] if e['destination_status']=='external_pending']

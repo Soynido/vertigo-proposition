@@ -25,3 +25,7 @@ Enregistrer `client-story` selon [les preuves de progression](../proposition/ref
 En `client`, produire seulement PDF/PPTX client et leurs sources ; exclure les dossiers internes. Dans le parcours complet, dériver ensuite les projections Sales et technique. Préserver le format du brief, le [contrat créatif](../proposition-creative/references/creative-contract.md), la structure PowerPoint native et le contexte autonome selon [la livraison éditable](../proposition/references/editable-delivery.md).
 
 Viser environ 70 % de visuel utile ; le relevé constate le résultat, sans compenser une page faible par sa surface. Sites peut servir d'atelier si disponible et autorisé ; sinon continuer localement. Inspecter toutes les pages PDF et slides PPTX exactes, sources, notes, métadonnées et édition. Après correction, exports et revues dépendants sont périmés. Un export réussi ne certifie ni force commerciale ni diffusion.
+
+## Exécution et reprise
+
+Appliquer [la réservation et la séquence client](../proposition/references/performance.md) : destinations réservées avant plan, préalable et pilote inspectés, montage aux mêmes chemins, deux revues avant stabilisation et dossiers internes. Une tâche reçue ou adoptée ne dispense d'aucun contrôle des fichiers exacts.

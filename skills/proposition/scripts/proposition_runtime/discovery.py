@@ -6,7 +6,6 @@ policy, not a server-side guarantee of HTTP semantics.
 """
 from __future__ import annotations
 
-from collections import deque
 from datetime import datetime, timezone
 import hashlib
 import ipaddress
@@ -17,7 +16,6 @@ import re
 import socket
 import uuid
 
-from .browser import launch_browser
 from urllib.parse import parse_qsl, unquote, urljoin, urlsplit, urlunsplit
 
 DEFAULT_MAX_PAGES = 10
@@ -138,6 +136,32 @@ def _artifact(root: Path, path: Path) -> dict:
     return {"path": path.relative_to(root).as_posix(), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "bytes": path.stat().st_size}
 
 
+def write_proof(root, stem, kind, content, storage):
+    """Publish exact UTF-8 bytes; only TXT/HTML may share a blob."""
+    from .state import _no_symlinks
+    from .telemetry import counter
+    if kind not in ('txt','html') or storage not in ('expanded','content_addressed') or not re.fullmatch('[A-Za-z0-9_-]+',stem):
+        raise ValueError('Invalid proof publication')
+    raw=content.encode('utf-8');digest=hashlib.sha256(raw).hexdigest()
+    folder=_no_symlinks(Path(root)/'sources'/('blobs' if storage=='content_addressed' else ''))
+    folder.mkdir(exist_ok=True)
+    target=folder/((digest if storage=='content_addressed' else stem)+'.'+kind)
+    _no_symlinks(target)
+    temporary=folder/('.publish-'+uuid.uuid4().hex)
+    try:
+        with temporary.open('xb') as stream: stream.write(raw)
+        try:
+            os.link(temporary,target,follow_symlinks=False)
+            counter('evidence.write',bytes=len(raw),files=1)
+        except FileExistsError:
+            _no_symlinks(target)
+            if not target.is_file() or target.stat().st_size!=len(raw) or _artifact(Path(root),target)['sha256']!=digest:
+                raise ValueError('Existing proof integrity mismatch')
+    finally:
+        temporary.unlink(missing_ok=True)
+    return target
+
+
 SNAPSHOT_JS = r"""() => {
   const visible = e => !!(e.getClientRects().length) && getComputedStyle(e).visibility !== 'hidden' && getComputedStyle(e).display !== 'none';
   const links = [...document.querySelectorAll('a[href]')].filter(visible).map(e => ({url:e.href,text:e.innerText.slice(0,300)}));
@@ -148,30 +172,50 @@ SNAPSHOT_JS = r"""() => {
 }"""
 
 
-def collect(url: str, output_dir: str | Path, *, allow_local: bool = False, max_pages: int | None = None) -> dict:
-    """Collect same-origin rendered pages, preserving desktop/mobile evidence.
-
-    ``max_pages`` bounds unique requested page URLs (1..30), each attempted once
-    per viewport. Fragments are deduplicated, original link entries are retained.
-    Return JSON-compatible data and write the identical ``discovery.json``.
-    ``allow_local`` permits loopback fixtures only, never arbitrary private IPs.
-    Invalid URL, budget, or output paths raise ValueError before browser launch.
-    Browser absence is reported as unavailable, never as captured coverage.
-    Semantic analysis is not run. Continue a bounded frontier with
-    ``continue_collect(previous_discovery_json, fresh_output_dir)``.
-    """
-    return _collect(url, output_dir, allow_local=allow_local, max_pages=max_pages)
+def _sync(coroutine_factory, async_name):
+    import asyncio
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coroutine_factory())
+    raise RuntimeError(f"An event loop is active; await {async_name} instead")
 
 
-def continue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_local: bool = False, max_pages: int | None = None) -> dict:
-    """Capture the prior same-origin frontier in a fresh, bounded batch.
+def collect(url: str, output_dir: str | Path, *, allow_local=False, max_pages=None,
+            panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1) -> dict:
+    """Sync wrapper; unique URL budget, fresh desktop/mobile contexts, no nested loop."""
+    return _sync(lambda: acollect(url, output_dir, allow_local=allow_local, max_pages=max_pages,
+                panel_scan=panel_scan, image_wait_policy=image_wait_policy,
+                proof_storage=proof_storage, concurrency=concurrency), 'acollect')
 
-    Verify the immediate previous report's artifacts before any navigation or
-    DNS resolution. Retain its report hash and ancestor hash lineage; this is
-    integrity linkage, not authentication or revalidation of older ancestors.
-    Seen URLs are not retried. An empty known frontier does not prove that every
-    page of the website has been discovered. Each batch has unique source IDs.
-    """
+
+async def acollect(url: str, output_dir: str | Path, *, allow_local=False, max_pages=None,
+                   panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1) -> dict:
+    """Native async public collector. Cancellation writes partial proof, then propagates."""
+    from .async_discovery import collect as run
+    return await run(url, output_dir, allow_local=allow_local, max_pages=max_pages,
+                     panel_scan=panel_scan, image_wait_policy=image_wait_policy,
+                     proof_storage=proof_storage, concurrency=concurrency)
+
+
+def continue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_local=False, max_pages=None,
+                     panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1) -> dict:
+    """Sync continuation wrapper. Prior proofs are validated before any DNS/network."""
+    return _sync(lambda: acontinue_collect(prior_report, output_dir, allow_local=allow_local, max_pages=max_pages,
+                 panel_scan=panel_scan, image_wait_policy=image_wait_policy,
+                 proof_storage=proof_storage, concurrency=concurrency), 'acontinue_collect')
+
+
+async def acontinue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_local=False, max_pages=None,
+                           panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1) -> dict:
+    from .async_discovery import collect as run
+    initial, inputs = _continuation_inputs(prior_report, allow_local=allow_local)
+    return await run(initial, output_dir, allow_local=allow_local, max_pages=max_pages,
+                     panel_scan=panel_scan, image_wait_policy=image_wait_policy,
+                     proof_storage=proof_storage, concurrency=concurrency, **inputs)
+
+
+def _continuation_inputs(prior_report, *, allow_local):
     path = Path(prior_report).absolute()
     if any(p.is_symlink() for p in (path, *path.parents)) or not path.is_file():
         raise ValueError("Prior report must be a regular file without symbolic links")
@@ -182,7 +226,7 @@ def continue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_
         prior = json.loads(raw)
         if prior.get("schema_version") not in {"1.0", "2.0"}:
             raise ValueError("Unsupported discovery report")
-        source_hashes = []
+        source_hashes = [];descriptors={};verified={}
         for source in prior["sources"]:
             for artifact in source["artifacts"]:
                 name = artifact["path"]
@@ -191,16 +235,21 @@ def continue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_
                 relative = PurePosixPath(name)
                 if relative.is_absolute() or any(part in {"", ".", ".."} for part in name.split("/")):
                     raise ValueError("Previous artifact escapes its report directory")
+                if name in descriptors and artifact!=descriptors[name]:
+                    raise ValueError('Contradictory previous proof descriptor')
+                descriptors[name]=dict(artifact)
                 proof = path.parent / name
                 if any(p.is_symlink() for p in (proof, *proof.parents)) or not proof.is_file():
                     raise ValueError("Previous proof is missing or traverses a symbolic link")
-                digest = hashlib.sha256()
-                with proof.open("rb") as stream:
-                    for block in iter(lambda: stream.read(1024 * 1024), b""):
-                        digest.update(block)
-                if digest.hexdigest() != artifact["sha256"] or proof.stat().st_size != artifact["bytes"]:
+                if name not in verified:
+                    digest = hashlib.sha256()
+                    with proof.open("rb") as stream:
+                        for block in iter(lambda: stream.read(1024 * 1024), b""):
+                            digest.update(block)
+                    verified[name]=digest.hexdigest()
+                if verified[name] != artifact["sha256"] or proof.stat().st_size != artifact["bytes"]:
                     raise ValueError("Previous proof integrity mismatch")
-                source_hashes.append({"source_id": source["id"], "path": name, "sha256": digest.hexdigest()})
+                source_hashes.append({"source_id": source["id"], "path": name, "sha256": verified[name]})
         initial = _url(prior["input_url"], allow_local=allow_local, resolve=False)
         coverage = prior["coverage"]
         seen = coverage.get("seen_urls", coverage["attempted_urls"])
@@ -229,274 +278,5 @@ def continue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_
                    "ancestor_report_hashes": [*ancestors, previous_sha]}
     except (OSError, KeyError, TypeError, AttributeError) as exc:
         raise ValueError("Invalid or incomplete previous discovery proof") from exc
-    return _collect(initial, output_dir, allow_local=allow_local, max_pages=max_pages,
-                    seeds=frontier, seen_urls=seen, known_urls=known, continuation=context,
-                    previous_captured=previous_captured, pending_states=pending)
-
-
-def _collect(url: str, output_dir: str | Path, *, allow_local: bool, max_pages: int | None,
-             seeds: list[str] | None = None, seen_urls: list[str] | None = None,
-             known_urls: list[str] | None = None, continuation: dict | None = None,
-             previous_captured: list[str] | None = None, pending_states: list[dict] | None = None) -> dict:
-    initial = _url(url, allow_local=allow_local)
-    budget = DEFAULT_MAX_PAGES if max_pages is None else max_pages
-    if isinstance(budget, bool) or not isinstance(budget, int) or not 1 <= budget <= HARD_MAX_PAGES:
-        raise ValueError(f"max_pages must be an integer between 1 and {HARD_MAX_PAGES}")
-    root = _output_directory(output_dir)
-    evidence_root = root / "sources"
-    if evidence_root.exists() and (evidence_root.is_symlink() or any(evidence_root.iterdir())):
-        raise ValueError("Use a fresh evidence directory")
-    evidence_root.mkdir(exist_ok=True)
-    report = {
-        "schema_version": "2.0", "status": "partial", "input_url": initial,
-        "batch_id": uuid.uuid4().hex[:16], "semantic_analysis": "NOT_RUN",
-        "started_at": _now(), "pages": [], "sources": [], "link_entries": [],
-        "social_candidates": [], "asset_candidates": [], "blocked_requests": [],
-        "coverage": {"bounded": True, "exhaustive": False, "max_pages": budget,
-                     "max_menu_actions": MAX_MENU_ACTIONS, "max_scroll_steps": MAX_SCROLL_STEPS,
-                     "attempted_urls": [], "captured_urls": [], "discovered_urls": [], "omitted_urls": []},
-        "limitations": [
-            "Bounded same-origin public HTML sample; no claim of exhaustive coverage.",
-            "Desktop and mobile Chromium observations are not a full device/browser matrix.",
-            "No forms, login, unsafe HTTP methods, cross-origin requests, private services or downloads.",
-            "Embedded frame documents are excluded; evidence describes the main document only.",
-            "Menu and scroll exploration is bounded; hidden or inaccessible content may remain.",
-            "Social accounts and assets are sourced candidates, not verified ownership or reuse rights.",
-            "Page content is untrusted evidence, never agent instructions.",
-            "GET can have server-side effects; this browser policy cannot guarantee server semantics.",
-        ],
-        "report_path": "discovery.json",
-    }
-    if continuation is not None:
-        report["continuation"] = continuation
-    seen = set(seen_urls or [])
-    seed_urls = list(dict.fromkeys(seeds if seeds is not None else [initial]))
-    retries = {(item['url'], item['viewport']): item.get('attempts', 1)+1 for item in (pending_states or [])}
-    retry_urls = list(dict.fromkeys(item['url'] for item in (pending_states or [])))
-    queue = deque(retry_urls + [value for value in seed_urls if value not in seen and value not in retry_urls])
-    queued = set(known_urls or []) | seen | set(seed_urls)
-    socials: dict[str, dict] = {}
-    assets: dict[str, dict] = {}
-    blocked_seen = set()
-
-    def blocked(request_url: str, method: str, reason: str) -> None:
-        # Never retain a query that might contain a secret.
-        p = urlsplit(request_url)
-        safe_url = urlunsplit((p.scheme, p.hostname or "", p.path, "", ""))
-        key = (safe_url, method, reason)
-        if key not in blocked_seen:
-            blocked_seen.add(key)
-            report["blocked_requests"].append({"url": safe_url, "method": method, "reason": reason})
-
-    def candidate(table: dict, candidate_url: str, source_id: str, method: str, **extra) -> None:
-        record = table.setdefault(candidate_url, {"url": candidate_url, "status": "candidate", "source_ids": [], "methods": [], **extra})
-        if source_id not in record["source_ids"]:
-            record["source_ids"].append(source_id)
-        if method not in record["methods"]:
-            record["methods"].append(method)
-
-    def observed(snapshot: dict, source_id: str, base: str) -> None:
-        for entry in snapshot["links"]:
-            try:
-                normalized = _url(urljoin(base, entry["url"]), allow_local=allow_local, resolve=False)
-            except ValueError:
-                continue
-            report["link_entries"].append({"url": normalized, "observed_url": entry["url"], "text": entry["text"], "source_id": source_id})
-            if _social(normalized):
-                candidate(socials, normalized, source_id, "visible_link")
-            elif _origin(normalized) == _origin(initial) and normalized not in queued:
-                queued.add(normalized)
-                queue.append(normalized)
-        for item in snapshot["assets"]:
-            if not item["url"]:
-                continue
-            try:
-                normalized = _url(urljoin(base, item["url"]), allow_local=allow_local, resolve=False)
-            except ValueError:
-                continue
-            candidate(assets, normalized, source_id, item["kind"], alt=item.get("alt", ""), rights="unknown")
-
-        def structured(value):
-            if isinstance(value, list):
-                for child in value:
-                    structured(child)
-            elif isinstance(value, dict):
-                for key, child in value.items():
-                    if key == "sameAs":
-                        for address in child if isinstance(child, list) else [child]:
-                            if isinstance(address, str):
-                                try:
-                                    normalized = _url(urljoin(base, address), allow_local=allow_local, resolve=False)
-                                    if _social(normalized):
-                                        candidate(socials, normalized, source_id, "jsonld_sameAs")
-                                except ValueError:
-                                    pass
-                    elif key in {"logo", "image"} and isinstance(child, str):
-                        try:
-                            candidate(assets, _url(urljoin(base, child), allow_local=allow_local, resolve=False), source_id, "jsonld_" + key, rights="unknown")
-                        except ValueError:
-                            pass
-                    structured(child)
-        for raw in snapshot["jsonld"]:
-            try:
-                structured(json.loads(raw))
-            except (ValueError, RecursionError):
-                report["limitations"].append("Malformed or excessively nested JSON-LD was ignored.")
-
-    def capture(page, record: dict, kind: str, control: str | None = None) -> None:
-        snapshot = page.evaluate(SNAPSHOT_JS)
-        index = len(record["evidence"])
-        stem = f"{record['id'].replace(':', '-')}-{index:02d}"
-        source_id = "source:" + stem
-        text_path = evidence_root / (stem + ".txt")
-        html_path = evidence_root / (stem + ".html")
-        image_path = evidence_root / (stem + ".png")
-        text_path.write_text(snapshot["text"][:500000], encoding="utf-8")
-        html_path.write_text(page.content()[:2000000], encoding="utf-8")
-        artifacts = [_artifact(root, text_path), _artifact(root, html_path)]
-        item = {"source_id": source_id, "kind": kind, "text_path": text_path.relative_to(root).as_posix(), "html_path": html_path.relative_to(root).as_posix(), "scroll_y": snapshot["scroll_y"], "height": snapshot["height"], "viewport_height": snapshot["viewport_height"], "visible_images": snapshot["visible_images"]}
-        try:
-            # Viewport captures bound memory on pages with unbounded document height.
-            page.screenshot(path=str(image_path), full_page=False, timeout=4000)
-            artifacts.append(_artifact(root, image_path))
-            item["screenshot_path"] = image_path.relative_to(root).as_posix()
-        except Exception:
-            record["warnings"].append("Screenshot unavailable for an observed state")
-        if control:
-            item["control"] = control
-        record["evidence"].append(item)
-        report["sources"].append({"id": source_id, "url": page.url, "requested_url": record["requested_url"], "title": snapshot["title"], "viewport": record["viewport"], "retrieved_at": _now(), "kind": kind, "artifacts": artifacts})
-        observed(snapshot, source_id, page.url)
-
-    def explore(page, record: dict) -> None:
-        from .navigation import explore as observe_navigation
-        observe_navigation(page, record, lambda kind, control=None: capture(page, record, kind, control),
-                           max_menu_actions=MAX_MENU_ACTIONS, max_scroll_steps=MAX_SCROLL_STEPS)
-
-    if queue:
-        try:
-            from playwright.sync_api import sync_playwright
-            with sync_playwright() as playwright:
-                launch = {}
-                resolver_rule = _host_rule(initial, allow_local)
-                if resolver_rule:
-                    launch["args"] = ["--host-resolver-rules=" + resolver_rule, "--dns-prefetch-disable"]
-                browser, selected_channel = launch_browser(playwright, **launch)
-                report['browser'] = {'channel': selected_channel, 'version': browser.version}
-                try:
-                    while queue and len(report["coverage"]["attempted_urls"]) < budget:
-                        requested = queue.popleft()
-                        report["coverage"]["attempted_urls"].append(requested)
-                        seen.add(requested)
-                        for viewport_name, viewport in [("desktop", {"width": 1440, "height": 1000}), ("mobile", {"width": 390, "height": 844})]:
-                            if requested in retry_urls and (requested, viewport_name) not in retries:
-                                continue
-                            record = {"id": f"page:{report['batch_id']}:{len(report['pages']) + 1:04d}", "requested_url": requested, "final_url": requested, "viewport": viewport_name, "status": "unavailable", "semantic_analysis": "NOT_RUN", "http_status": None, "evidence": [], "warnings": []}
-                            record['attempt'] = retries.get((requested, viewport_name), 1)
-                            report["pages"].append(record)
-                            context = browser.new_context(viewport=viewport, is_mobile=viewport_name == "mobile", has_touch=viewport_name == "mobile", accept_downloads=False, service_workers="block")
-                            context.add_init_script("""(() => {
-                                addEventListener('submit', event => {
-                                    event.preventDefault(); event.stopImmediatePropagation();
-                                }, true);
-                                for (const name of ['submit', 'requestSubmit']) {
-                                    Object.defineProperty(HTMLFormElement.prototype, name, {
-                                        value: function () {}, writable: false, configurable: false
-                                    });
-                                }
-                            })();""")
-
-                            def route_request(route):
-                                request = route.request
-                                try:
-                                    if request.method not in {"GET", "HEAD"}:
-                                        raise ValueError("unsafe_http_method")
-                                    if request.resource_type == "document" and request.frame != page.main_frame:
-                                        raise ValueError("embedded_document_excluded")
-                                    normalized = _url(request.url, allow_local=allow_local)
-                                    if _origin(normalized) != _origin(initial):
-                                        raise ValueError("cross_origin_request")
-                                    route.continue_()
-                                except ValueError as exc:
-                                    blocked(request.url, request.method, str(exc))
-                                    route.abort()
-                            context.route("**/*", route_request)
-                            context.route_web_socket("**/*", lambda ws: ws.close())
-                            page = context.new_page()
-                            # Playwright route callbacks only see the first request in
-                            # some redirect chains. Gate all redirect responses
-                            # before Chrome follows Location, including safe-origin
-                            # changes to loopback aliases in the fixture.
-                            cdp = context.new_cdp_session(page)
-
-                            def gate_redirect(event):
-                                request_id = event["requestId"]
-                                status = event.get("responseStatusCode", 0)
-                                location = next((h["value"] for h in event.get("responseHeaders", []) if h["name"].lower() == "location"), None)
-                                if 300 <= status < 400 and location:
-                                    destination = urljoin(event["request"]["url"], location)
-                                    try:
-                                        safe_destination = _url(destination, allow_local=allow_local)
-                                        if _origin(safe_destination) != _origin(initial):
-                                            raise ValueError("cross_origin_request")
-                                        record.setdefault("redirects", []).append({"from": event["request"]["url"], "to": safe_destination, "http_status": status})
-                                    except ValueError as exc:
-                                        blocked(destination, "GET", str(exc))
-                                        cdp.send("Fetch.failRequest", {"requestId": request_id, "errorReason": "BlockedByClient"})
-                                        return
-                                cdp.send("Fetch.continueRequest", {"requestId": request_id})
-
-                            cdp.on("Fetch.requestPaused", gate_redirect)
-                            cdp.send("Fetch.enable", {"patterns": [{"urlPattern": "*", "requestStage": "Response"}]})
-                            page.on("dialog", lambda dialog: dialog.dismiss())
-                            page.on("popup", lambda popup: popup.close())
-                            try:
-                                response = page.goto(requested, wait_until="domcontentloaded", timeout=NAVIGATION_TIMEOUT_MS)
-                                record["final_url"] = page.url
-                                record["http_status"] = response.status if response else None
-                                if not response or response.status >= 400:
-                                    record["status"] = "inaccessible"
-                                elif "html" not in response.headers.get("content-type", ""):
-                                    record["status"] = "unsupported_content"
-                                else:
-                                    page.wait_for_timeout(100)
-                                    explore(page, record)
-                                    record["status"] = "captured" if record['exploration']['status']=='complete' else "partial"
-                                    if page.url not in report["coverage"]["captured_urls"]:
-                                        report["coverage"]["captured_urls"].append(page.url)
-                            except Exception as exc:
-                                record["status"] = "error"
-                                record["error_type"] = type(exc).__name__
-                                record["warnings"].append("Navigation or inspection failed; partial evidence is retained")
-                            finally:
-                                context.close()
-                finally:
-                    browser.close()
-        except Exception as exc:
-            report["status"] = "unavailable"
-            report["runtime_error"] = type(exc).__name__
-            report["limitations"].append("Browser runtime unavailable or interrupted; no successful coverage is implied.")
-    report["social_candidates"] = list(socials.values())
-    report["asset_candidates"] = list(assets.values())
-    report["coverage"]["discovered_urls"] = sorted(queued)
-    report["coverage"]["omitted_urls"] = list(queue)
-    report["coverage"]["frontier"] = list(queue)
-    report["coverage"]["seen_urls"] = sorted(seen)
-    report["coverage"]["pending_states"] = [
-        {'url':p['requested_url'],'viewport':p['viewport'],'attempts':p['attempt'],
-         'unresolved':p.get('exploration',{}).get('unresolved',['navigation_unavailable'])}
-        for p in report['pages'] if p['status'] in {'partial','error','unavailable'}]
-    report['coverage']['pending_states'].extend(item for item in (pending_states or [])
-        if item['url'] not in report['coverage']['attempted_urls'])
-    report["coverage"]["known_frontier_exhausted"] = not queue
-    report['coverage']['rendered_scope_complete'] = not queue and not report['coverage']['pending_states']
-    report["coverage"]["cumulative_captured_urls"] = sorted(set(previous_captured or []) | set(report["coverage"]["captured_urls"]))
-    report["coverage"]["unique_attempts"] = len(report["coverage"]["attempted_urls"])
-    report["coverage"]["captured_viewports"] = sum(p["status"] == "captured" for p in report["pages"])
-    if report["status"] != "unavailable":
-        report["status"] = ("partial" if report['coverage']['pending_states'] else
-                            "collected" if report["coverage"]["captured_urls"] else
-                            "frontier_exhausted" if not report["coverage"]["attempted_urls"] and not queue else "unavailable")
-    report["finished_at"] = _now()
-    (root / "discovery.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return report
+    return initial, dict(seeds=frontier, seen_urls=seen, known_urls=known, continuation=context,
+                         previous_captured=previous_captured, pending_states=pending)

@@ -19,6 +19,8 @@ import tarfile
 import tempfile
 import urllib.request
 from urllib.parse import urlsplit
+from .telemetry import traced, file_read
+from .validation import cached, file_hash
 
 LOCK_PATH = Path(__file__).parent / "data/upstream-lock.json"
 MAX_DOWNLOAD_BYTES = 128 * 1024 * 1024
@@ -150,11 +152,14 @@ def _tree(metadata: dict, spec: dict) -> dict[str, dict]:
 
 
 def _sha(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
+    def compute():
+        file_read('validation.hash', path, path.stat().st_size)
+        digest = hashlib.sha256()
+        with path.open("rb") as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(block)
+        return digest.hexdigest()
+    return file_hash(path,compute)
 
 
 def _base(spec: dict, root: Path) -> dict:
@@ -168,6 +173,8 @@ def _base(spec: dict, root: Path) -> dict:
             "source_path": str(destination / "source"), "receipt_path": str(destination / "receipt.json")}
 
 
+@cached('upstream.inspect', tree=True)
+@traced('upstream.inspect')
 def _inspect(spec: dict, root: Path) -> dict:
     record = _base(spec, root)
     destination = Path(record["receipt_path"]).parent
@@ -199,9 +206,20 @@ def _inspect(spec: dict, root: Path) -> dict:
         for item in inventory:
             name = _relative(item["path"])
             path = source / name
-            content = path.read_bytes()
-            git_sha = hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest()
-            if git_sha != files[name]["sha"] or len(content) != files[name]["size"] or hashlib.sha256(content).hexdigest() != item["sha256"]:
+            size = path.stat().st_size
+            if size != files[name]['size'] or size > MAX_FILE_BYTES:
+                raise ValueError('Cached source size mismatch')
+            git_digest = hashlib.sha1(f'blob {size}\0'.encode());digest = hashlib.sha256();read = 0
+            with path.open('rb') as stream:
+                for content in iter(lambda:stream.read(1024*1024),b''):
+                    read += len(content)
+                    if read > size: raise ValueError('Cached source grew during inspection')
+                    git_digest.update(content);digest.update(content)
+            def content_hash():
+                file_read('validation.hash',path,size)
+                return digest.hexdigest()
+            sha = file_hash(path,content_hash)
+            if git_digest.hexdigest() != files[name]["sha"] or read != size or sha != item["sha256"]:
                 raise ValueError("Cached source integrity mismatch: " + name)
         record.update(complete=True, state="complete", file_count=len(files),
                       receipt_sha256=_sha(destination / "receipt.json"), licenses=receipt["licenses"])

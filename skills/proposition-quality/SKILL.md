@@ -35,3 +35,7 @@ Contrôler aussi `check-experience` aux passages créatif/composition/export/fin
 ## Sortie
 
 Reçu avec entrées/empreintes, rôle et isolation, type de revue, cinq observations et notes, total, obligations et preuves, défauts localisés, corrections, état et limites. Après changement, marquer les dépendants `STALE`, corriger au bon niveau puis revoir les nouvelles empreintes. Une revue interne ou un scan ne vaut pas accord de diffusion ou publication relue.
+
+## Exécution et reprise
+
+Contrôler [les preuves d'exécution et de reprise](../proposition/references/performance.md) : identités réelles, paquets/lectures liés aux empreintes, verdicts propres aux fichiers et validité courante. Un reçu historique ne réactive aucun résultat périmé ; les contrôles techniques ne prouvent pas la qualité créative.

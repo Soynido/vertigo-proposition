@@ -24,13 +24,15 @@ class StateTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.base = Path(self.temporary.name)
 
-    def new_run(self):
+    def new_run(self, audience_handoff_contract=1):
+        # Existing regressions retain their V1 scope; V2 has dedicated tests.
         return state.init_run(
             "https://example.test/",
             self.base / "runs",
             {"actor": "operator", "responsible": "project-owner",
              "responsible_confirmed": True,
              "required_reviewers": ["review-a", "review-b"]},
+            audience_handoff_contract=audience_handoff_contract,
         )
 
     def write(self, run, name, content):

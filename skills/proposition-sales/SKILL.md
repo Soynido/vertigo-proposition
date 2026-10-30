@@ -19,3 +19,7 @@ Définir l'objectif de l'échange et la décision attendue ; qualifier la pertin
 Chaque action précise déclencheur, rôle responsable, entrée/preuve, formulation possible, prochaine décision, suivi et condition d'arrêt. Les relances suivent un signal réel ou un accord, pas une cadence imposée copiée d'un skill de prospection.
 
 Livrer un playbook lisible en situation, avec cas pertinent, objection/réponse/preuve/question, prochaine action et dépendances privées manquantes. Les champs de publication ou de système métier restent séparés. Un brouillon n'autorise ni envoi, ni invitation, ni écriture externe.
+
+## Exécution et reprise
+
+Produire depuis la proposition client stabilisée selon [les dépendances de passation](../proposition/references/performance.md). Réutiliser ses scènes et décisions exactes ; une reprise technique n'autorise pas de reconstruire une autre proposition ni de transmettre le dossier privé à un créateur.

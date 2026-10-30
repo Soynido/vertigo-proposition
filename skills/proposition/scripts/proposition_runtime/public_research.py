@@ -31,8 +31,22 @@ def current_source(run, identifier, *, public=False):
     return 'source:'+identifier
 
 
+from .telemetry import traced
+from .validation import cached
+
+
+@cached('research.validate')
+@traced('research.validate')
 def validate(run, data):
     """Validate only declared operations, scope and current evidence links."""
+    return _validate_topics(run,data,TOPICS)
+
+def validate_topic(run,data,topic):
+    if topic not in TOPICS:raise ValueError('Unknown public research topic')
+    if 'public_research' not in data:raise ValueError('A topic result requires its actual public research record')
+    return _validate_topics(run,data,(topic,))
+
+def _validate_topics(run,data,expected_topics):
     if not isinstance(data,dict): raise ValueError('External journal must be an object')
     if 'public_research' not in data: return []
     research=data['public_research']
@@ -49,7 +63,7 @@ def validate(run, data):
     for row in data['attempts']:
         if not isinstance(row,dict): raise ValueError('Research attempt must be an object')
         if 'topic' not in row: continue
-        if not isinstance(row['topic'],str) or row['topic'] not in TOPICS:
+        if not isinstance(row['topic'],str) or row['topic'] not in expected_topics:
             raise ValueError('Unknown public research topic')
         identifier=text(row.get('id'),'research attempt id')
         if identifier in attempts: raise ValueError('Duplicate research attempt id')
@@ -67,9 +81,9 @@ def validate(run, data):
             if fallback.get('reason'): text(fallback['reason'],'fallback reason')
         else: raise ValueError('Public research must be read or explicitly unavailable')
     topics=research.get('topics',[])
-    if (not isinstance(topics,list) or len(topics)!=len(TOPICS)
+    if (not isinstance(topics,list) or len(topics)!=len(expected_topics)
             or any(not isinstance(r,dict) or not isinstance(r.get('topic'),str) for r in topics)
-            or {r['topic'] for r in topics}!=set(TOPICS)):
+            or {r['topic'] for r in topics}!=set(expected_topics)):
         raise ValueError('Public research requires four separate topics')
     used=set()
     for item in topics:
@@ -113,8 +127,7 @@ def inspect(run):
             'scope':'operation_and_evidence_trace_only','semantic_truth':'HOST_REVIEW_REQUIRED'}
 
 
-def prepare(run_dir):
-    run=state.load_run(run_dir)
+def task_data(run):
     task={'version':1,'url':run['url'],'stage':'discovery.channels',
           'entity':'Resolve the official entity from current site evidence before external lookups; record name, match_reason and source_ids.',
           'topics':[{'topic':name,'operation':TASKS[name]} for name in TOPICS],
@@ -122,6 +135,11 @@ def prepare(run_dir):
           'output':'Use the existing external journal version=1, attempts plus public_research version=1. Follow the exact format in proposition-discovery/references/public-research.md; register public source copies before discovery reconcile.',
           'downstream':'company.v1 records declarations/unknowns; analysis.specialists applies public marketing/research methods; targeted navigation missions then company.v2 and brief.public retain source→need→decision links.',
           'quality':'This task is not executed by the runtime and does not certify searches or commercial value.'}
+    return task
+
+
+def prepare(run_dir):
+    run=state.load_run(run_dir);task=task_data(run)
     path=Path(run['root'])/'public-research-task.json'
     if path.is_symlink(): raise ValueError('Research task path cannot be a symlink')
     path.write_text(json.dumps(task,ensure_ascii=False,indent=2)+'\n')

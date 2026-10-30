@@ -14,10 +14,12 @@ Dans le checkout de développement, utiliser `.venv/bin/python` (`.venv\Scripts\
 |---|---|
 | Capacités | `doctor` |
 | Distributions upstream | `upstream status` ; `upstream fetch [--family NAME] [--cache DIR]` |
-| Run | `init URL [--runs-root DIR] [--profile FILE] [--creative-mandate FILE]` ; `validate RUN_DIR` |
-| Collecte | `collect URL --output DIR [--allow-local-fixture] [--max-pages N]` |
+| Run | `init URL [--runs-root DIR] [--profile FILE] [--creative-mandate FILE] [--audience-handoff-contract 1|2]` (défaut `2`, épinglé au run) ; `validate RUN_DIR` |
+| Collecte | `collect URL --output DIR [--allow-local-fixture] [--max-pages N] [--panel-scan legacy|batch] [--image-wait-policy legacy|terminal_aware] [--proof-storage expanded|content_addressed]` ; mêmes options en reprise, défauts `legacy` et `expanded`, réglages effectifs dans le rapport |
 | Preuves Discovery | `discovery register RUN_DIR --report FILE` ; `discovery check RUN_DIR` — fichier 2.0 et preuves déjà dans le run, intégrité/complétude rendue, pas note de qualité |
 | Issues externes | `discovery reconcile RUN_DIR --report JOURNAL` ; `discovery channels RUN_DIR` — jointure des tentatives sans officialité/analyse/droits implicites |
+| Plan de recherche publique | `discovery research-plan RUN_DIR` — prépare une mission hôte pour les quatre topics ; n’exécute aucune recherche |
+| Passation stratégique | `strategy prepare RUN_DIR [--cache DIR]` ; `strategy register RUN_DIR --report FILE` ; `strategy check RUN_DIR [--stage analysis.specialists\|company.v2\|brief.public]` — préparation puis contrôles de preuves et dépendances |
 | Historique optionnel | `history collect RUN_DIR [--urls URL]` ; `history register RUN_DIR --report FILE` ; `history check RUN_DIR` — récupération, pas analyse visuelle implicite |
 | Reprise locale bornée | `prepare-inputs RUN_DIR MANIFEST --output NEW_LOCAL_DIR [--timeout-seconds 5]` — manifeste `{inputs:[{id,path,sha256}]}`, seules entrées nécessaires, chemins relatifs au run |
 | Continuer la couverture | `collect --frontier PREVIOUS_DISCOVERY_JSON --output NEW_DIR [--max-pages N]` — vérifie les preuves précédentes, reprend les destinations et états manquants dans un lot neuf ; une reprise au plus du même état échoué |
@@ -32,6 +34,7 @@ Dans le checkout de développement, utiliser `.venv/bin/python` (`.venv\Scripts\
 | Plan / accord | `plan RUN_DIR JSON_FILE` ; `approve RUN_DIR --plan-hash HASH --actor ID --evidence FILE` |
 | Publication de test | `publish RUN_DIR --adapter fixture` — explicite, aucun système métier réel |
 | Mesure / reçu | `measure RUN_DIR --help` ; `receipt RUN_DIR` |
+| Mesures techniques locales | `metrics RUN_DIR [--format json\|markdown]` — lecture pure de traces bornées ; [portée et limites](performance.md) |
 
 Pour les JSON, lire le contrat embarqué pertinent dans `scripts/proposition_runtime/contracts/` et le registre dans `scripts/proposition_runtime/data/` ; ne pas inventer des champs compatibles. `validate` vérifie le contrat qu'il annonce, pas la vérité du contenu. Les statuts métier sont `NOT_RUN`, `PASS`, `FAIL`, `BLOCKED`, `NOT_APPLICABLE` motivé et `STALE` après modification.
 
@@ -48,3 +51,7 @@ La revue d'étape fournit cinq notes explicites, un rôle de réviseur, ses preu
 Avant la fabrication complète du deck, `check-experience RUN_DIR --composition-plan-only` vérifie la carte K01–K08, le plan visuel et le pilote inspecté, puis enregistre `composition-plan-review` lié aux entrées courantes. Ce mode ne demande aucun PDF final ; les sorties complètes déclarées doivent encore être inexistantes. Lire [le format préalable](experience-evidence.md#plan-de-composition-préalable). Les flags `--inputs-only` et `--composition-plan-only` sont exclusifs : le premier précède la création du site, le second précède la déclinaison du deck. Leur PASS est mécanique, sans note esthétique.
 
 `next-stage RUN_DIR` indique le premier passage applicable non validé. `check-experience RUN_DIR --inputs-only` vérifie les inputs et le reçu de lecture avant les rendus, sans qualifier la création. `check-experience RUN_DIR` vérifie ensuite lecture préalable, exploration, sélection et développement ; `--stage client.composition` inclut la carte de récit et les pages du PDF. Le défaut d'un nouveau run demande au moins deux mondes centraux avant sélection. `--creative-mandate` s'emploie seulement avec une instruction externe de nombre ou de direction déjà choisie, vérifiée et liée dès l'initialisation. Lire [les champs attendus](experience-evidence.md) avant de créer les artefacts. `freeze-creatives` refuse le gel sans ces preuves. `inspect --help` expose `--max-pages` pour une limite explicitement demandée ; aucune limite par défaut. Ces contrôles ne produisent pas une note esthétique.
+
+## Exécution native et mesures
+
+Lire [le protocole complet](performance.md) avant usage. `init URL --execution-config CONFIG.json` fige les réglages techniques d'un nouveau run. `collect` et sa reprise acceptent `--concurrency 1|2|4` et conservent leurs politiques explicites. `ready-tasks RUN_DIR --capabilities HOST.json` et `execution-status RUN_DIR` sont des lectures pures. `claim-task RUN_DIR TASK_ID --request PLAN.json`, `task-event RUN_DIR EVENT.json` et `accept-task-result RUN_DIR RESULT.json` assurent réservation, preuves hôte et adoption ; leurs objets suivent les schémas du runtime installé. `apply-batch RUN_DIR BATCH.json` applique uniquement les opérations fermées avec préconditions et reçu idempotent ; aucun réseau/rendu sous verrou. `metrics RUN_DIR --format json|markdown` relève seulement les phases instrumentées. Ces commandes ne donnent aucun PASS métier et ne publient rien.

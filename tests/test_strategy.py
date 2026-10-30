@@ -20,6 +20,26 @@ class StrategyTests(unittest.TestCase):
         try: return importlib.import_module('proposition_runtime.strategy')
         except ImportError: self.fail('Missing canonical strategic handoff consumer')
 
+    def test_proposed_missions_have_their_own_draft_without_fabricated_outcomes(self):
+        api=self.api();self.assertTrue(callable(getattr(api,'validate_draft',None)),'Prepared missions still require fabricated actual outcomes')
+        path=make_analysis(self.run);data=json.loads(path.read_text());missions=[]
+        for mission in data['missions']:
+            missions.append({k:v for k,v in mission.items() if k in ('id','need_ids','target','task','success','stop','source_ids')}|{'depends_on':[]})
+        draft={'schema_version':'1.0','handoff_version':data['version'],'methods':data['methods'],'audiences':data['audiences'],'needs':data['needs'],'proposed_missions':missions,'unknowns':data['unknowns']}
+        refs=api.validate_draft(state.load_run(self.run['root']),draft);self.assertTrue(refs);self.assertNotIn('observation-analysis-map',state.load_run(self.run['root'])['artifacts'])
+        bad=copy.deepcopy(draft);bad['proposed_missions'][0]['outcome']='completed'
+        with self.assertRaises(ValueError):api.validate_draft(state.load_run(self.run['root']),bad)
+        bad=copy.deepcopy(draft);bad['proposed_missions'][0]['depends_on']=[bad['proposed_missions'][0]['id']]
+        with self.assertRaises(ValueError):api.validate_draft(state.load_run(self.run['root']),bad)
+
+    def test_mission_outcome_must_match_the_prepared_task_and_current_proof(self):
+        api=self.api();self.assertTrue(callable(getattr(api,'validate_mission',None)),'A mission result is not bound to its prepared task')
+        data=json.loads(make_analysis(self.run).read_text());mission=data['missions'][0];planned={k:v for k,v in mission.items() if k in ('id','need_ids','target','task','success','stop','source_ids')}|{'depends_on':[]}
+        draft={'proposed_missions':[planned]};run=state.load_run(self.run['root']);self.assertTrue(api.validate_mission(run,draft,mission['id'],mission))
+        for field,value in [('task','Different easy task'),('source_ids',[])]:
+            bad=copy.deepcopy(mission);bad[field]=value
+            with self.assertRaises(ValueError):api.validate_mission(run,draft,mission['id'],bad)
+
     def test_missing_handoff_blocks_analysis_and_downstream(self):
         for stage in ('analysis.specialists','company.v2','brief.public'):
             report=state.stage_report(self.run['root'],stage)
