@@ -1,5 +1,7 @@
 """Bounded visible interactions; transport/network policy stays in Discovery."""
 import re
+import time
+from .telemetry import traced
 
 CONTROLS = ('button[aria-expanded], [role="button"][aria-expanded], button[aria-haspopup], '
             'details > summary, button[aria-label*="menu" i], .w-dropdown-toggle')
@@ -12,8 +14,78 @@ INFO = """e => {let p=[],n=e;while(n&&n!==document.body){p.unshift(n.tagName+':'
 OPEN = """e => e.tagName==='SUMMARY' ? e.parentElement.open : e.getAttribute('aria-expanded')==='true'"""
 IMAGES = """() => [...document.images].filter(e=>{let r=e.getBoundingClientRect();return r.width&&r.height&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth}).every(e=>e.complete&&e.naturalWidth>0)"""
 
+PANEL_INFO = """e => {const s=window.__vertigoPanels ||= {ids:new WeakMap(),next:0};
+if(!s.ids.has(e))s.ids.set(e,++s.next);let p=[],n=e;
+while(n&&n!==document.body){p.unshift(n.tagName+':'+[...n.parentElement.children].indexOf(n));n=n.parentElement}
+return {token:s.ids.get(e),key:p.join('/')}}"""
+PANEL_GEOMETRY = """e=>{let r=e.getBoundingClientRect();return r.width>80&&r.height>60&&e.scrollHeight>e.clientHeight+20&&/auto|scroll/.test(getComputedStyle(e).overflowY)}"""
 
-def explore(page, record, capture, *, max_menu_actions, max_scroll_steps):
+
+@traced('navigation.scan')
+def panel_candidates(page, scope, mode):
+    if mode not in ('legacy','batch'): raise ValueError('Unknown panel scan')
+    locator=scope.locator('body *' if scope is page else '*')
+    if mode=='legacy':
+        elements=[(-1,scope)] if scope is not page else []
+        elements += list(enumerate(locator.all()[:2000]))
+        return [dict(index=i,**e.evaluate(PANEL_INFO)) for i,e in elements
+                if e.is_visible() and e.evaluate(PANEL_GEOMETRY)]
+    # Bound before filtering, in original DOM order. Opacity/viewport are not visibility.
+    script='es=>es.slice(0,2000).map((e,index)=>({e,index})).filter(x=>('+PANEL_GEOMETRY+')(x.e)).map(x=>({index:x.index,...('+PANEL_INFO+')(x.e)}))'
+    candidates=locator.evaluate_all(script)
+    if scope is not page and scope.evaluate(PANEL_GEOMETRY):
+        candidates.insert(0,dict(index=-1,**scope.evaluate(PANEL_INFO)))
+    return [c for c in candidates if (scope if c['index']==-1 else locator.nth(c['index'])).is_visible()]
+
+
+def resolve_panel(page, scope, candidate):
+    from playwright.sync_api import Error
+    locator=scope if candidate['index']==-1 else scope.locator('body *' if scope is page else '*').nth(candidate['index'])
+    try:
+        handle=locator.element_handle(timeout=1000)
+    except Error:
+        return None
+    if handle is not None:
+        if handle.evaluate(PANEL_INFO)=={k:candidate[k] for k in ('token','key')} and handle.is_visible() and handle.evaluate(PANEL_GEOMETRY):
+            return handle
+        handle.dispose()
+    return None
+
+
+IMAGE_OBSERVER = """(() => {if(window.__vertigoImages)return;
+const s=window.__vertigoImages={errors:new WeakMap()};
+const spec=e=>[e.getAttribute('src'),e.currentSrc,e.getAttribute('srcset')].join('|');
+window.addEventListener('error',ev=>{if(ev.target instanceof HTMLImageElement)s.errors.set(ev.target,{spec:spec(ev.target),at:performance.timeOrigin+performance.now()})},true);
+window.addEventListener('load',ev=>{if(ev.target instanceof HTMLImageElement)s.errors.delete(ev.target)},true);
+new MutationObserver(ms=>{for(const m of ms)if(m.target instanceof HTMLImageElement)s.errors.delete(m.target)}).observe(document,{subtree:true,attributes:true,attributeFilter:['src','srcset','sizes']});
+})()"""
+IMAGE_STATUS = """requests=>[...document.images].filter(e=>{let r=e.getBoundingClientRect();return r.width&&r.height&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth}).map(e=>{
+const error=window.__vertigoImages?.errors.get(e),spec=[e.getAttribute('src'),e.currentSrc,e.getAttribute('srcset')].join('|');
+return {loaded:e.complete&&e.naturalWidth>0,terminal:!!(e.complete&&error&&error.spec===spec&&requests[e.currentSrc]!==undefined&&error.at>requests[e.currentSrc])}})"""
+
+
+class ImageTracker:
+    """One page/visit. Unknown generations retain the full pending wait."""
+    def __init__(self,page): self.page=page;self.requests={}
+    def note_request(self,url,started=None): self.requests[url]=started if started is not None and started>0 else time.time()*1000
+    def install(self):
+        self.page.add_init_script(IMAGE_OBSERVER);self.page.evaluate(IMAGE_OBSERVER)
+        self.page.on('request',lambda request:self.note_request(request.url,request.timing.get('startTime')) if request.resource_type=='image' else None)
+    @traced('navigation.image_wait')
+    def wait(self):
+        states=self.page.evaluate(IMAGE_STATUS,self.requests)
+        if any(not s['loaded'] and not s['terminal'] for s in states):
+            try:
+                self.page.wait_for_function('requests=>('+IMAGE_STATUS+')(requests).every(s=>s.loaded||s.terminal)',arg=self.requests,timeout=750)
+            except Exception:
+                return False
+        return all(s['loaded'] for s in self.page.evaluate(IMAGE_STATUS,self.requests))
+
+
+def explore(page, record, capture, *, max_menu_actions, max_scroll_steps,
+            panel_scan='legacy', image_wait_policy='legacy', image_tracker=None):
+    if panel_scan not in ('legacy','batch') or image_wait_policy not in ('legacy','terminal_aware'):
+        raise ValueError('Unknown navigation policy')
     actions = record['interactions'] = []
     unresolved = []
     start_url = page.url
@@ -22,7 +94,10 @@ def explore(page, record, capture, *, max_menu_actions, max_scroll_steps):
 
     def shot(kind, label=None):
         try:
-            page.wait_for_function(IMAGES, timeout=750)
+            if image_wait_policy=='terminal_aware' and image_tracker is not None:
+                if not image_tracker.wait(): unresolved.append('visible_images_unavailable')
+            else:
+                page.wait_for_function(IMAGES, timeout=750)
         except Exception:
             unresolved.append('visible_images_unavailable')
         capture(kind, label)
@@ -75,14 +150,17 @@ def explore(page, record, capture, *, max_menu_actions, max_scroll_steps):
     handled_panels=set()
 
     def scroll_panels(scope):
-        panels=scope.locator('body *' if scope is page else '*').all()[:2000]
-        if scope is not page: panels=[scope,*panels]
-        for panel in panels:
-            if not panel.is_visible(): continue
-            relevant=panel.evaluate("e=>{let r=e.getBoundingClientRect();return r.width>80&&r.height>60&&e.scrollHeight>e.clientHeight+20&&/auto|scroll/.test(getComputedStyle(e).overflowY)}")
-            if not relevant: continue
-            key=panel.evaluate(INFO)['key']
-            if key in handled_panels: continue
+        candidates=panel_candidates(page,scope,panel_scan);rescanned=False
+        while candidates:
+            candidate=candidates.pop(0)
+            panel=resolve_panel(page,scope,candidate)
+            if panel is None:
+                if not rescanned:
+                    candidates=panel_candidates(page,scope,panel_scan);rescanned=True;continue
+                unresolved.append('inner_panel_identity_changed');break
+            key=candidate['key']
+            if key in handled_panels:
+                panel.dispose();continue
             handled_panels.add(key)
             reached=False
             panel.scroll_into_view_if_needed(timeout=1000)
@@ -97,6 +175,7 @@ def explore(page, record, capture, *, max_menu_actions, max_scroll_steps):
                 if reached: break
             actions.append({'kind':'inner_scroll','status':'resolved' if reached else 'unresolved',**geometry})
             if not reached: unresolved.append('inner_scroll_ceiling')
+            panel.dispose()
 
     def menus(depth=0, scope=None):
         if depth > max_menu_actions: return

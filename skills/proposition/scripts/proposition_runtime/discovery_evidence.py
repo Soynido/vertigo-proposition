@@ -6,6 +6,8 @@ import re
 from urllib.parse import urlsplit
 
 from . import state
+from .telemetry import traced
+from .validation import cached
 
 
 def _local(root, path):
@@ -34,7 +36,7 @@ def _validate(run, path):
                     and any(r.get('from')==run['url'] and r.get('to')==page['final_url']
                             and r.get('http_status') in (301,302,303,307,308) for r in page.get('redirects',[]))):
                 allowed.add(_origin(page['final_url']))
-    files={}; sources={}; total=0
+    files={}; sources={}; descriptors={}; total=0
     for source in data['sources']:
         identifier=source['id']
         state._identifier(identifier.removeprefix('source:'))
@@ -45,11 +47,17 @@ def _validate(run, path):
             name=artifact['path'];relative=PurePosixPath(name)
             if (relative.is_absolute() or '\\' in name or ':' in name or any(x in ('','.','..') for x in name.split('/'))):
                 raise ValueError('Unsafe Discovery proof path')
+            if name in descriptors:
+                if artifact!=descriptors[name]: raise ValueError('Contradictory Discovery proof descriptor')
+                continue
+            descriptors[name]=dict(artifact)
             proof=_local(root,path.parent/name)
             if (type(artifact['bytes']) is not int or not 0<artifact['bytes']<=64*1024*1024
                     or not re.fullmatch('[0-9a-f]{64}',artifact['sha256'])
                     or proof.stat().st_size!=artifact['bytes'] or state._sha(proof)!=artifact['sha256']):
                 raise ValueError('Discovery proof integrity mismatch')
+            if name.startswith('sources/blobs/') and (relative.suffix not in ('.txt','.html') or relative.stem!=artifact['sha256']):
+                raise ValueError('Content-addressed proof descriptor mismatch')
             if name not in files: total+=artifact['bytes']
             files[name]=proof
     if total>512*1024*1024 or len(files)>6000: raise ValueError('Discovery bundle exceeds byte/file budget')
@@ -118,6 +126,8 @@ def register(run_dir, report_path):
     return inspect_discovery(run)
 
 
+@cached('discovery.inspect')
+@traced('discovery.inspect')
 def inspect_discovery(run):
     """Mechanical completeness/integrity only. Exact pixels still need review."""
     issues=[];pages={};entries=[];known=set();last=None;origins=set()
@@ -170,24 +180,72 @@ def inspect_discovery(run):
             'entries':entries,'semantic_analysis':'NOT_INFERRED','visual_quality':'NOT_INFERRED'}
 
 
+@cached('channel.data')
 def _channel_data(run,path):
     if path.stat().st_size>4*1024*1024: raise ValueError('External journal exceeds byte budget')
     data=json.loads(path.read_text())
-    if data.get('version')!=1 or not isinstance(data.get('attempts'),list): raise ValueError('Invalid external attempt journal')
+    if (not isinstance(data,dict) or type(data.get('version')) is not int
+            or data['version']!=1 or not isinstance(data.get('attempts'),list)):
+        raise ValueError('Invalid external attempt journal')
     if len(data['attempts'])>5000: raise ValueError('External journal exceeds attempt budget')
     from .discovery import _url
     for row in data['attempts']:
+        if not isinstance(row,dict): raise ValueError('External attempt must be an object')
+        if not isinstance(row.get('url'),str): raise ValueError('External destination must be a string')
         if _url(row['url'],allow_local=False,resolve=False)!=row['url']: raise ValueError('Invalid external destination')
-        if row['status'] not in {'retrieved','unavailable','document_not_analyzed','excluded'}: raise ValueError('Invalid external issue')
+        if not isinstance(row.get('status'),str) or row['status'] not in {'retrieved','unavailable','document_not_analyzed','excluded'}:
+            raise ValueError('Invalid external issue')
+        if not isinstance(row.get('observed_at'),str): raise ValueError('External attempt needs a date')
         if datetime.fromisoformat(row['observed_at']).tzinfo is None: raise ValueError('External attempt needs timezone')
+        if row.get('source_id') is not None: state._identifier(row['source_id'])
         source=run['sources'].get(row.get('source_id'))
         if row['status'] in {'retrieved','document_not_analyzed'}:
             if not source or source['status']!='COLLECTED' or source.get('locator')!=row['url']:
                 raise ValueError('Retrieved external issue requires its collected source')
             if not source.get('path') or state._sha(state._safe_path(Path(run['root']),source['path']))!=source['sha256']:
                 raise ValueError('External source is no longer current')
-        elif not row.get('reason','').strip(): raise ValueError('Unavailable/excluded external issue needs a reason')
+        elif not isinstance(row.get('reason'),str) or not row['reason'].strip():
+            raise ValueError('Unavailable/excluded external issue needs a reason')
+    from .public_research import validate
+    validate(run,data)
     return data
+
+
+def _channel_reports(run):
+    """Read the current bundle's bindings, keeping superseded history separate."""
+    history=run.get('metadata',{}).get('discovery_external_reports',[])
+    if not history: return []
+    if any(identifier not in run['artifacts'] for identifier in history):
+        raise ValueError('External history contains a missing journal')
+    bundle=run['artifacts'].get('discovery-channels');root=Path(run['root'])
+    if not bundle or bundle['status']!='CURRENT' or state._stale_reasons(run,root,bundle):
+        raise ValueError('External reconciliation bundle is stale or changed')
+    identifiers=[]
+    for ref in bundle['dependencies']:
+        if not ref.startswith('artifact:') or ref.split(':',1)[1] not in history:
+            raise ValueError('External reconciliation has an unregistered journal')
+        identifier=ref.split(':',1)[1];artifact=run['artifacts'][identifier]
+        if artifact['status']!='CURRENT' or state._stale_reasons(run,root,artifact):
+            raise ValueError('External journal is stale or changed')
+        identifiers.append(identifier)
+    return identifiers
+
+
+def historical_channel_refs(run):
+    """Exclude only replaced journal evidence unused by every other record."""
+    try:
+        active=set(_channel_reports(run))
+    except (OSError,ValueError,KeyError,TypeError):
+        return set()
+    if not active: return set()
+    retired={'artifact:'+identifier for identifier in run['metadata']['discovery_external_reports']
+             if identifier not in active and run['artifacts'][identifier]['status']=='STALE'}
+    protected=[kind+':'+identifier for kind,collection in state._COLLECTIONS.items()
+               if kind!='source' for identifier in run[collection]
+               if kind+':'+identifier not in retired]
+    historical=state._dependency_closure(run,retired)-state._dependency_closure(run,protected)
+    return {ref for ref in historical if ref in retired or
+            (ref.startswith('source:') and (state._resolve(run,ref) or {}).get('kind') in ('public','observation'))}
 
 
 def reconcile(run_dir,receipts_path):
@@ -196,21 +254,36 @@ def reconcile(run_dir,receipts_path):
     data=_channel_data(run,path)
     identifier='channel-attempts-'+state._sha(path)[:16]
     dependencies=['source:'+row['source_id'] for row in data['attempts'] if row.get('source_id')]
-    run['artifacts'][identifier]=state._artifact_record(run,identifier,path.relative_to(root).as_posix(),'internal',dependencies)
+    from .public_research import validate
+    dependencies.extend(validate(run,data))
+    before=state._canonical(run)
+    previous_record=run['artifacts'].get(identifier)
+    run['artifacts'][identifier]=state._artifact_record(run,identifier,path.relative_to(root).as_posix(),
+                                                      'internal',dependencies,reuse_current=True)
+    if run['artifacts'][identifier]['status']!='CURRENT': return inspect_channels(run)
     previous=run['metadata'].get('discovery_external_reports',[])
     run['metadata']['discovery_external_reports']=list(dict.fromkeys([*previous,identifier]))
-    run['artifacts']['discovery-channels']=state._artifact_record(run,'discovery-channels',path.relative_to(root).as_posix(),'internal',
-        ['artifact:'+name for name in run['metadata']['discovery_external_reports']])
-    state.save_run(root,run)
+    active=['artifact:'+name for name in run['metadata']['discovery_external_reports']
+            if run['artifacts'][name]['status']=='CURRENT']
+    bundle=run['artifacts'].get('discovery-channels')
+    bundle_path=path.relative_to(root).as_posix()
+    if (previous_record==run['artifacts'][identifier] and bundle and bundle['status']=='CURRENT'
+            and set(bundle['dependencies'])==set(active)):
+        bundle_path=bundle['path']
+    run['artifacts']['discovery-channels']=state._artifact_record(run,'discovery-channels',bundle_path,
+                                                              'internal',active,reuse_current=True)
+    if state._canonical(run)!=before: state.save_run(root,run)
     return inspect_channels(run)
 
 
+@cached('channels.inspect')
+@traced('channels.inspect')
 def inspect_channels(run):
     site=inspect_discovery(run)
     entries=[e for e in site['entries'] if e['destination_status']=='external_pending']
     issues=list(site['issues']);outcomes={};root=Path(run['root'])
     try:
-        for identifier in run.get('metadata',{}).get('discovery_external_reports',[]):
+        for identifier in _channel_reports(run):
             artifact=run['artifacts'][identifier];path=state._safe_path(root,artifact['path'])
             if artifact['status']!='CURRENT' or state._sha(path)!=artifact['sha256']: raise ValueError('External journal is stale or changed')
             for row in _channel_data(run,path)['attempts']: outcomes[row['url']]=row
@@ -222,5 +295,11 @@ def inspect_channels(run):
             else: issues.append('External destination not attempted: '+entry['url'])
     except (OSError,ValueError,TypeError,KeyError) as error:
         issues.append('Invalid external reconciliation: '+str(error)[:240])
-    return {'status':'BLOCKED' if issues else 'PASS','issues':issues,'entries':entries,
+    research={'status':'BLOCKED','issues':[],'topics':[]}
+    try:
+        from .public_research import inspect
+        research=inspect(run);issues.extend(research['issues'])
+    except (OSError,ValueError,TypeError,KeyError) as error:
+        issues.append('Invalid public research: '+str(error)[:240])
+    return {'status':'BLOCKED' if issues else 'PASS','issues':issues,'entries':entries,'public_research':research,
             'scope':'external_attempt_reconciliation_only','identity':'NOT_INFERRED','analysis':'NOT_INFERRED','rights':'NOT_INFERRED'}

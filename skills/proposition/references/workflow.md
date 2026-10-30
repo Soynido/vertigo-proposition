@@ -36,3 +36,9 @@ Références de méthode : [collecte et récit modulaires](https://github.com/il
 Avant chaque passage, utiliser `next-stage RUN_DIR`. Le [contrat de preuves de progression](experience-evidence.md) relie brief, quatre méthodes réellement transmises, scènes rendues, actions conservées et carte client aux gates existants. Aucun pipeline parallèle : une faiblesse locale revient au passage responsable. En mode client seul, les dossiers internes sont exclus explicitement, jamais marqués comme réalisés.
 
 En reprise, préparer seulement les fichiers nécessaires avec `prepare-inputs` selon [la CLI](cli.md). Entrée indisponible : checkpoint rapide, pas d’attente silencieuse ni de nouveau crawl. Exporter une révision neuve ; les finalizers PPTX de l’hôte conservent leurs reçus au lieu de les supprimer pour contourner une collision.
+
+### Recherche publique et reprise ciblée
+
+Dans `discovery.channels`, suivre [les opérations publiques](../../proposition-discovery/references/public-research.md) : Google/recherche réelle, Google Ads, Meta Ads et avis, preuves et replis séparés. Après `company.v1`, l’analyse réconcilie les publics/besoins et réalise seulement les missions de navigation utiles ; elle ne recommence pas tout Discovery. Le modèle V2 et le brief conservent les limites. Les méthodes marketing/recherche ont leurs consommateurs stratégiques ; les quatre méthodes créatives restent inchangées.
+
+Dans `analysis.specialists`, [la passation publics/besoins](../../proposition-strategy/references/audience-handoff.md) raccorde les deux méthodes distribuées aux missions de navigation, puis à `company.v2` et au brief public. `strategy prepare/register/check` utilisent ces étapes existantes. Le résumé public dans `creative-inputs` est conservé dans le paquet du créatif ; le rapport de recherche interne ne le remplace pas.

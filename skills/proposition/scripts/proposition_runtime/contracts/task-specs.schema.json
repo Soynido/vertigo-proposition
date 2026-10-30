@@ -1,0 +1,159 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "task_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "stage_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "maxItems": 6000
+          },
+          "completed_by": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "maxItems": 6000
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "maxItems": 6000
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "maxItems": 6000
+          },
+          "packet": {
+            "enum": [
+              "none",
+              "creative_public",
+              "review_inputs",
+              "private_internal"
+            ]
+          },
+          "isolation": {
+            "enum": [
+              "fresh_public",
+              "continue_public",
+              "independent_review",
+              "coordinator"
+            ]
+          },
+          "audiences": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "public",
+                "client",
+                "sales",
+                "technical",
+                "internal"
+              ]
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "outputs": {
+            "type": "object",
+            "minProperties": 1,
+            "maxProperties": 20,
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                  "minLength": 1
+                },
+                "kind": {
+                  "enum": [
+                    "file",
+                    "tree"
+                  ]
+                },
+                "audience": {
+                  "enum": [
+                    "public",
+                    "client",
+                    "sales",
+                    "technical",
+                    "internal"
+                  ]
+                },
+                "work_prefix": {
+                  "type": "string",
+                  "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                  "minLength": 1
+                },
+                "optional": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "kind",
+                "audience"
+              ]
+            }
+          },
+          "skill": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "task_key",
+          "stage_id",
+          "inputs",
+          "completed_by",
+          "methods",
+          "capabilities",
+          "packet",
+          "isolation",
+          "audiences",
+          "outputs",
+          "skill"
+        ]
+      },
+      "maxItems": 100,
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "tasks"
+  ]
+}

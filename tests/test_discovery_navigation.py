@@ -71,7 +71,7 @@ class NavigationTests(unittest.TestCase):
         self.assertTrue(all(p.get('exploration',{}).get('status')=='complete' for p in views))
 
     def test_missing_capture_cannot_be_a_complete_exploration(self):
-        from playwright.sync_api import Page
+        from playwright.async_api import Page
         with patch.object(Page, 'screenshot', side_effect=TimeoutError('fixture screenshot unavailable')):
             report=discovery.collect(self.base+'/desktop.html', self.out, allow_local=True, max_pages=1)
         self.assertEqual('partial', report['status'])

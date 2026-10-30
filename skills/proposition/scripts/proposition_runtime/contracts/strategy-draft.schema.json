@@ -1,0 +1,322 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "handoff_version": {
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "methods": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "enum": [
+              "product-marketing",
+              "customer-research"
+            ]
+          },
+          "commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "reference_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "mode": {
+            "const": "adapted"
+          },
+          "read_sections": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "maxItems": 100
+          },
+          "adaptation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "applied_to": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "name",
+          "commit",
+          "reference_root",
+          "sha256",
+          "mode",
+          "read_sections",
+          "adaptation",
+          "applied_to"
+        ]
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "audiences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "site_visitor",
+              "vertigo_buyer"
+            ]
+          },
+          "status": {
+            "enum": [
+              "declared",
+              "attributed",
+              "hypothesis"
+            ]
+          },
+          "source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "kind",
+          "status",
+          "source_ids"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 100
+    },
+    "needs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audience_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 100
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "declared",
+              "hypothesis",
+              "unknown"
+            ]
+          },
+          "context": {
+            "type": "string",
+            "minLength": 1
+          },
+          "delta": {
+            "enum": [
+              "new",
+              "corroboration",
+              "reformulation",
+              "baseline_not_compared"
+            ]
+          },
+          "decision": {
+            "enum": [
+              "retained",
+              "excluded",
+              "deferred"
+            ]
+          },
+          "recommendation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "experience_consequence": {
+            "type": "string"
+          },
+          "alternative": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_group": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mission_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 100
+          },
+          "source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 100
+          },
+          "baseline_source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 100
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "audience_ids",
+          "status",
+          "context",
+          "delta",
+          "decision",
+          "recommendation",
+          "alternative",
+          "source_group",
+          "mission_ids",
+          "source_ids"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 100
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "maxItems": 100
+    },
+    "proposed_missions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "need_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 100
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "task": {
+            "type": "string",
+            "minLength": 1
+          },
+          "success": {
+            "type": "string",
+            "minLength": 1
+          },
+          "stop": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 100
+          },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "id",
+          "need_ids",
+          "target",
+          "task",
+          "success",
+          "stop",
+          "source_ids",
+          "depends_on"
+        ]
+      },
+      "maxItems": 100
+    }
+  },
+  "required": [
+    "schema_version",
+    "handoff_version",
+    "methods",
+    "audiences",
+    "needs",
+    "unknowns",
+    "proposed_missions"
+  ]
+}

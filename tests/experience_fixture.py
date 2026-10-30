@@ -20,7 +20,8 @@ def prepare_inputs(run, candidate_ids=None):
     state.add_source(root,'experience-source','observation.txt',kind='public',audience='public')
     proof='source:experience-source'
     families=[]; applications=[]
-    specs=json.loads((state.DATA_ROOT/'upstream-lock.json').read_text())['families']
+    specs=[s for s in json.loads((state.DATA_ROOT/'upstream-lock.json').read_text())['families']
+           if s['id'] in ('claude-seo','impeccable','scroll-craft','apple-design')]
     for spec in specs:
         identifier='method-'+spec['id']
         reference=write_artifact(run,identifier,'methods/'+spec['id']+'.md',
@@ -59,6 +60,11 @@ def prepare_inputs(run, candidate_ids=None):
             'actions':[{'id':'quote','proof':proof,'target':'https://fixture.example/quote','label':'Request a quote'}]}
     source=write_artifact(run,'creative-inputs','creative-inputs.json',inputs)
     source=state.add_artifact(root,'creative-inputs','creative-inputs.json','public',[proof]+[m['reference_ref'] for m in families])
+    if state.load_run(root)['metadata'].get('fixture_strategy'):
+        from strategy_fixture import install_strategy
+        install_strategy(run)
+        source=state.load_run(root)['artifacts']['creative-inputs']
+        inputs=json.loads((root/source['path']).read_text())
     prepare_reading(run, source, families)
     return inputs,source,applications
 

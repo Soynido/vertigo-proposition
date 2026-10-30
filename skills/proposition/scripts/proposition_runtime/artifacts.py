@@ -17,7 +17,8 @@ from urllib.parse import unquote, urlsplit
 
 
 def sha256(path: Path) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    from .state import _sha
+    return _sha(Path(path))
 
 
 def inside(root: Path, relative: str) -> Path:

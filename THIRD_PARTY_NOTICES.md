@@ -2,7 +2,7 @@
 
 Le code original et les méthodes originales de ce dépôt sont sous MIT. La marque et le logo Vertigo ne sont pas accordés par cette licence. Aucun logo officiel, dossier prospect, historique privé ou tarif d'entreprise n'est distribué ; ils sont fournis par un profil local autorisé.
 
-Les distributions de skills tierces ne sont pas copiées dans ce dépôt. Le verrou dans `skills/proposition/scripts/proposition_runtime/data/upstream-lock.json` indique leurs révisions immuables, points d'entrée et licences. Le téléchargement conserve le dépôt complet, sa licence et un inventaire avec empreintes. Leur code n'est pas exécuté pendant l'installation.
+Les distributions de skills tierces ne sont pas copiées dans ce dépôt. Le verrou dans `skills/proposition/scripts/proposition_runtime/data/upstream-lock.json` indique leurs révisions immuables, points d'entrée et licences. Le téléchargement conserve le dépôt complet ou la sélection explicite annoncée ci-dessous, sa licence et un inventaire avec empreintes. Leur code n'est pas exécuté pendant l'installation.
 
 | Famille | Projet et licence annoncée |
 |---|---|
@@ -10,6 +10,9 @@ Les distributions de skills tierces ne sont pas copiées dans ce dépôt. Le ver
 | Impeccable | [pbakaus/impeccable](https://github.com/pbakaus/impeccable), Apache-2.0 |
 | Scroll Craft | [nateherkai/scroll-craft](https://github.com/nateherkai/scroll-craft), MIT |
 | Apple Design | [emilkowalski/skills](https://github.com/emilkowalski/skills), MIT |
+| Recherche marketing | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills/tree/e85f3cbc2e4a79bf33b2a12e9bdd9087d414735b), MIT, copyright Corey Haines ; sélection de `product-marketing` 2.2.0, `customer-research` 2.0.4, leurs dossiers de références complets et `LICENSE` |
+
+La sélection Marketingskills est récupérée par blobs Git dont tailles et empreintes sont confrontées à l'arbre épinglé. Le reçu dit `source_scope=selected_paths`, conserve la liste exacte et n'annonce pas un dépôt complet. Le lien racine `CLAUDE.md` et les autres chemins hors sélection ne sont ni téléchargés ni suivis. Tout lien/submodule dans les sources requises reste refusé ; le mode dépôt complet conserve son refus général. Les références d'entretiens/enquêtes restent disponibles comme sources de méthode, sans autoriser leur exécution, contact, accès privé ou dépense dans le parcours public à URL seule.
 
 Les références éditoriales sont citées aux endroits où elles servent ; une citation ne rend pas leur contenu redistribuable. Les méthodes ici sont rédigées pour ce projet. Aucun skill PDF/PPTX propriétaire d'un autre éditeur n'est embarqué.
 

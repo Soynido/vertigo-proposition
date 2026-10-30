@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "trace_id",
+    "span_id",
+    "parent_span_id",
+    "process_id",
+    "clock_domain_id",
+    "event",
+    "name",
+    "utc",
+    "monotonic_ns",
+    "status",
+    "error_code",
+    "attributes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "span_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parent_span_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "process_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "clock_domain_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "event": {
+      "enum": [
+        "start",
+        "end",
+        "counter"
+      ]
+    },
+    "name": {
+      "enum": [
+        "channels.inspect",
+        "cli.command",
+        "discovery.collect",
+        "discovery.inspect",
+        "evidence.write",
+        "export.font_wait",
+        "export.inspect",
+        "export.pdf",
+        "navigation.capture",
+        "navigation.image_wait",
+        "navigation.scan",
+        "navigation.visit",
+        "reader.json",
+        "research.host",
+        "research.prepare",
+        "research.validate",
+        "strategy.mission",
+        "strategy.prepare",
+        "strategy.read",
+        "strategy.validate",
+        "transaction.commit",
+        "upstream.inspect",
+        "validation.hash",
+        "validation.session_hit"
+      ]
+    },
+    "utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "monotonic_ns": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        null,
+        "SUCCEEDED",
+        "FAILED",
+        "CANCELLED"
+      ]
+    },
+    "error_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "channel": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,80}$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,80}$"
+        },
+        "files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "captures": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "operation": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,80}$"
+        },
+        "command": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,80}$"
+        },
+        "file_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,80}$"
+        },
+        "wait_kind": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,80}$"
+        },
+        "cache_hits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "role": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,80}$"
+        }
+      }
+    }
+  }
+}

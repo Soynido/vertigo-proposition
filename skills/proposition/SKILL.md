@@ -27,3 +27,7 @@ Une demande limitée à une exploration ou à un seul format conserve cette port
 Chaque passation indique : étape, état, entrées et empreintes, décisions et sources, sorties et empreintes, obligations non prouvées, capacités réellement employées, prochain travail. Noter chaque étape selon [ses cinq critères](references/stage-quality.md) et contrôler chacune des [81 obligations](references/acceptance.md). Séparer complétude, qualité, droit de diffusion et publication. Une nouvelle source invalide les jugements et exports dépendants.
 
 Utiliser [la CLI](references/cli.md) pour persister l'état ; ses reçus ne remplacent pas le jugement métier. Lire [le contrat commercial](references/proposal.md) avant brief/histoire/Sales. La présence de fichiers, un score isolé ou une urgence ne constituent pas une preuve finale.
+
+## Exécution et reprise
+
+Lire [les règles de reprise et d'exécution native](references/performance.md) dès la coordination : réserver les tâches prêtes, transmettre leurs paquets figés, constater leur exécution hôte puis adopter leur résultat avant de poursuivre les gates. Ne pas déduire l'exécution de la préparation du paquet.

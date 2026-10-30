@@ -18,6 +18,52 @@ Remplir cette fiche **avant le POC**, dans le dossier de qualification hors du r
 
 Un champ inconnu reste explicite ; résoudre avant l'essai ceux qui empêchent une comparaison interprétable. Le composant qualifié s'intègre au point responsable avec ses preuves et consommateurs ; un prototype parallèle ne prouve pas ce raccordement. Un apport déjà présent dans le témoin n'est pas une découverte du candidat. Le dossier préalable n'est ni une admission ni un PASS autonome.
 
+## Continuité après un essai manuel
+
+Le plan parent reste ouvert jusqu'à une décision explicite pour **toutes ses sous-capacités**. « À conserver » qualifie une portée manuelle ; cela ne signifie pas installé, chargé, consommé ou admis en autonomie. Terminer une réparation de navigation, de collecte ou de montage ferme cette réparation, pas les autres lignes du plan.
+
+Reprendre **la matrice et le checkpoint existants**, hors du dépôt public. Conserver les décisions et preuves antérieures, y compris les exclusions ; ajouter les champs de suivi ci-dessous aux lignes existantes. L'inventaire `scope_ids` reprend tous leurs identifiants dans le périmètre autorisé. Un changement de périmètre conserve dans le plan sa décision d'autorité et les lignes retirées avec leur motif ; une ligne difficile ne disparaît pas du suivi.
+
+| Champ de suivi obligatoire | Contenu |
+|---|---|
+| `owner`, `scope` | Étape responsable et portée précise effectivement testée ; verdict manuel inchangé |
+| `state`, `stage` | `OPEN`, `BLOCKED` ou `CLOSED` ; étape actuelle : `qualification`, `correction`, `contract`, `integration`, `e2e` ou `decision` |
+| `last_evidence` | Dernier reçu utile : `path` relatif à la matrice ou absolu, `sha256` ; `null` si aucune preuve, avec le manque dans la prochaine action |
+| `next_action` | Action concrète restante pour chaque ligne ouverte, y compris une ligne conservée manuellement |
+| `blocker` | Pour `BLOCKED`, condition réelle de reprise ; ni attente fictive ni abandon déclaré terminé |
+| `closure` | Pour `CLOSED`, décision terminale et preuves exactes décrites ci-dessous |
+
+Ajouter ce checkpoint **dans la même matrice**, sans recopier ses décisions dans un registre concurrent :
+
+```json
+{
+  "integration_followup": {
+    "version": 1,
+    "scope_ids": ["P1", "P2"],
+    "parent_status": "OPEN",
+    "active_id": "P1",
+    "next_action": "Vérifier le chargement canonique et le consommateur du brief."
+  }
+}
+```
+
+Chaque objet de `rows` conserve son `id`, son verdict et ses preuves ; son champ `followup` contient les champs du tableau. Garder **une seule ligne active**. Après un correctif voisin, une interruption, une passation ou une compaction, actualiser ce même checkpoint puis reprendre sa prochaine action autorisée. Une nouvelle demande s'ajoute au plan ; seule une instruction explicite de l'utilisateur change la priorité ou arrête le travail. Un blocage réel reste visible avec les autres lignes ouvertes, sans déclencher des essais répétitifs ou une autre capacité à sa place.
+
+Deux clôtures sont possibles :
+
+- `closure.kind: "integrated"` exige `qualification_receipt`, `integration_receipt`, `e2e_receipt` (chacun `{path, sha256}`), plus `route` avec `canonical_file`, `loaded_by`, `consumer`, `acceptance`. Vérifier le contenu des reçus : contrat/ressources figés, distribution réellement accessible, instruction reçue, résultat consommé, démonstration client lorsqu'elle est dans le mandat, puis E2E autonome accepté sur la révision distribuée. Les parties encore non prouvées restent ouvertes au bon stade.
+- `closure.kind: "not_admitted"` exige `reason` et `decision_receipt` (`{path, sha256}`). L'exclusion ou la non-admission motivée ferme une décision dans cette portée ; elle ne fabrique pas une réussite ni n'efface une alternative publique encore prévue au plan. Une intégration différée reste `OPEN`, avec son action restante.
+
+À la reprise et avant de quitter le chantier, exécuter le contrôle de maintenance en lecture seule sur cette matrice :
+
+```bash
+python3 scripts/check_integration.py /chemin/hors-du-repo/matrice.json
+```
+
+Il expose les lignes ouvertes, leur responsable, leur prochaine action et la ligne active ; une ligne omise, sans suite ou une preuve changée invalide le checkpoint. Au moment de déclarer **le plan parent terminé**, ajouter `--close` : toutes les lignes doivent être closes et `parent_status` doit être `COMPLETE`, avec `active_id` et `next_action` à `null`. Un ticket local peut être terminé alors que ce contrôle refuse la clôture parent : rendre ces deux états séparément et poursuivre le travail déjà autorisé.
+
+`IN_PROGRESS` signifie suivi cohérent mais travail restant ; `TRACKING_COMPLETE` signifie décisions comptabilisées, **jamais PASS créatif ou autonome**. Le contrôle vérifie structure, inventaire déclaré et empreintes de reçus réguliers de 64 Mio maximum, sans réseau ni modification. Il ne lit pas sémantiquement les preuves, ne découvre pas un mandat omis de l'inventaire et ne certifie ni autorité, ni vérité d'un reçu, ni goût du client. La revue confronte toujours le périmètre initial, les verdicts et les fichiers exacts. Conserver les preuves déjà suffisantes ; relancer seulement l'essai minimal du manque réel.
+
 ## Deux preuves nécessaires
 
 1. **Qualification ciblée** : tester la capacité sur des sources figées, comparer son apport aux résultats antérieurs, améliorer puis figer le contrat qui fonctionne. Conserver entrées, versions, rendus, défauts et limites. Le test guidé ou l'assemblage manuel reste une preuve de ce périmètre.

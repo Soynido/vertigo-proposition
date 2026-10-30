@@ -184,6 +184,10 @@ class CompositionTests(unittest.TestCase):
     def test_changed_plan_invalidates_the_approval_and_dependent_exports(self):
         prepare_plan(self.run); self.approve(); register_client(self.run)
         self.change_plan(lambda d: d.update(revision='changed-after-pilot'))
-        invalid = state.invalidate_changed(self.root)['invalidated']
-        self.assertIn('artifact:composition-plan-review', invalid)
-        self.assertIn('artifact:client-pdf', invalid)
+        # The transactional registration now invalidates descendants in the same
+        # commit, before an explicit follow-up scan can rediscover them.
+        current = state.load_run(self.root)
+        self.assertEqual('STALE', current['artifacts']['composition-plan-review']['status'])
+        self.assertEqual('STALE', current['artifacts']['client-pdf']['status'])
+        self.assertEqual([], state.invalidate_changed(self.root)['invalidated'])
+        self.assertEqual('STALE', state.load_run(self.root)['artifacts']['client-pdf']['status'])

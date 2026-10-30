@@ -6,7 +6,7 @@ Le skill principal `proposition` contient les procédures, son lanceur Python et
 |---|---|---|
 | SKILL et références | Décisions, sortie attendue et passage au spécialiste utile | Exécution d'un outil ou réussite d'une revue |
 | Runtime embarqué | État, schémas, collecte, artefacts, export et contrats d'approbation | Vérité des faits ou qualité esthétique universelle |
-| Distributions upstream verrouillées | Méthodes et outils des quatre familles sur leurs surfaces utiles | Invocation native si leurs dépendances ne sont pas résolues |
+| Distributions upstream verrouillées | Quatre familles créatives/SEO et sélection des deux méthodes de recherche marketing avec références/licence | Invocation native si leurs dépendances ne sont pas résolues ; admission automatique des modes non qualifiés |
 | Contextes créatif/réviseur séparés | Projection minimale et revue sans héritage privé | Indépendance humaine ou absence universelle de fuite |
 | Adaptateur métier privé | Plan, autorisation, effet et readback | Mandat accordé par installation d'un skill |
 

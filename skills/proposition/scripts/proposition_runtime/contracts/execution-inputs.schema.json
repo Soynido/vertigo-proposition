@@ -1,0 +1,115 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "scope": {
+      "enum": [
+        "internal_execution",
+        "creative_public",
+        "review_inputs"
+      ]
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^task-[0-9a-f]{24}$"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audience": {
+            "enum": [
+              "public",
+              "client",
+              "sales",
+              "technical",
+              "internal"
+            ]
+          }
+        },
+        "required": [
+          "path",
+          "sha256",
+          "size_bytes",
+          "role",
+          "audience"
+        ]
+      },
+      "maxItems": 6000
+    },
+    "record_snapshots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "type": "string"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "value": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "ref",
+          "digest",
+          "value"
+        ]
+      },
+      "maxItems": 20000
+    },
+    "source_record_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "maxProperties": 20000
+    },
+    "required_reads": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "maxItems": 6000
+    }
+  },
+  "required": [
+    "schema_version",
+    "scope",
+    "task_id",
+    "files",
+    "record_snapshots",
+    "source_record_hashes",
+    "required_reads"
+  ]
+}

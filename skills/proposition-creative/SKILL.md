@@ -29,3 +29,7 @@ Avant création, appliquer [les preuves de progression](../proposition/reference
 ## Passation de direction
 
 Livrer les scènes et le reçu prévus par le contrat, avec la [passation de direction](references/direction.md). Le mandat par défaut autorise une sélection autonome après comparaison ; un choix explicitement laissé au client reste ouvert. Archiver les candidats écartés avec les raisons et leurs rendus ; ils ne sont pas transformés en slides obligatoires. Conserver fichiers, empreintes, méthodes réellement lues, limites et droits distincts de la provenance. La signature de l'agence accompagne l'univers du client.
+
+## Exécution et reprise
+
+Respecter [la continuité d'exécution du créateur](../proposition/references/performance.md) : contexte neuf et paquet public figé, lecture préalable des quatre méthodes, exploration inspectée avant sélection, puis développement dans le même contexte. Un nouveau dispatch technique ne remplace pas ce contexte ni sa liberté de composition.

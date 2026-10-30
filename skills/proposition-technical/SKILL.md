@@ -19,3 +19,7 @@ Associer à chaque partie une décision de conception, un comportement attendu, 
 Dossier de reprise : périmètre de la mission, carte parcours/composants, sources et médias, matrice des certitudes, dépendances et accès à obtenir, critères d'acceptation, étapes de réalisation et contrôles. Chaque fait technique pointe vers la source ou la vérification nécessaire. L'identité d'un responsable reste un rôle tant qu'elle n'est pas confirmée.
 
 Le dossier propose la prochaine action utile sans lancer automatiquement codage, intégration, formulaire réel ou déploiement.
+
+## Exécution et reprise
+
+Produire depuis la proposition client stabilisée selon [les dépendances de passation](../proposition/references/performance.md). Conserver les limites et actifs réellement validés ; ne pas reconstruire le résultat client pour satisfaire une tâche interne et ne pas publier depuis un worker.

@@ -35,7 +35,7 @@ cd vertigo-proposition
 python3 scripts/setup.py --workspace /chemin/vers/mon-workspace --browser --with-upstream --with-presentations
 ```
 
-Le workspace doit exister et être distinct du checkout du kit. Le script crée le venv de ce checkout, installe les dépendances verrouillées, copie **tous les skills et leurs ressources** dans `WORKSPACE/.agents/skills`, puis télécharge les quatre distributions open source à leurs révisions verrouillées. Le profil PowerPoint local ajoute python-pptx et teste création, édition et rendu avec LibreOffice/soffice disponible. Sans renderer, ce profil reste bloqué ; sa simple installation ne valide pas le PPTX. Le reçu se trouve dans `WORKSPACE/.vertigo/setup.json`.
+Le workspace doit exister et être distinct du checkout du kit. Le script crée le venv de ce checkout, installe les dépendances verrouillées, copie **tous les skills et leurs ressources** dans `WORKSPACE/.agents/skills`, puis télécharge les cinq distributions open source à leurs révisions verrouillées. Le profil PowerPoint local ajoute python-pptx et teste création, édition et rendu avec LibreOffice/soffice disponible. Sans renderer, ce profil reste bloqué ; sa simple installation ne valide pas le PPTX. Le reçu se trouve dans `WORKSPACE/.vertigo/setup.json`.
 
 Aucun installateur upstream n'est exécuté. Garder le checkout : son Python est référencé par les skills installés. Le mode explicite `--dest CHEMIN` et sa destination historique `~/.codex/skills` restent disponibles. Une mise à jour gérée utilise `--update` et refuse d'écraser des modifications locales.
 
@@ -101,7 +101,7 @@ Dans le parcours complet, les créatifs reçoivent les sources sélectionnées *
 | `proposition-technical` | Transmission de réalisation |
 | `proposition-quality` | Revues localisées, scores et contrôle final |
 
-Les quatre familles complémentaires sont Claude SEO/GEO, Impeccable, Scroll Craft et Apple Design. Télécharger une distribution ne signifie pas l'avoir exécutée : le reçu distingue **native**, **adaptée** et **indisponible/inconnue**. Lire [les licences](THIRD_PARTY_NOTICES.md).
+Les quatre familles de création/revue sont Claude SEO/GEO, Impeccable, Scroll Craft et Apple Design. Le cinquième paquet, Marketingskills, fournit seulement `product-marketing`, `customer-research`, leurs références et la licence, à leur révision verrouillée. Cette sélection vérifiée n'importe pas les liens symboliques ou les autres compétences du dépôt tiers. Télécharger une distribution ne signifie pas l'avoir exécutée ou admise dans toutes ses fonctions : le reçu distingue **native**, **adaptée** et **indisponible/inconnue**. Lire [les licences](THIRD_PARTY_NOTICES.md).
 
 ## Vérifier le moteur
 
@@ -127,3 +127,7 @@ La publication fournie par le moteur est **un test dans un fichier local**, jama
 Le [contrat créatif](skills/proposition-creative/references/creative-contract.md) demande une entrée, une révélation propre au client et une action, réellement rendues, ainsi qu’une composition mobile autonome. Le [contrôle de leurs preuves](skills/proposition/references/experience-evidence.md) complète la conservation des créations ; il ne prétend pas mesurer automatiquement leur beauté. Les quatre méthodes publiques doivent parvenir au créateur. Les critères critiques ne sont pas compensables par la moyenne. Aucun plafond implicite de pages.
 
 Une demande client seule utilise `parameters.delivery_scope: client` : PDF/PPTX client, sans dossiers internes, avec les mêmes contrôles client. Le parcours URL seul reste complet.
+
+### Recherche publique et passation stratégique
+
+Le starter distribue les deux méthodes marketing/recherche avec références et licence, en plus des quatre familles créatives/SEO existantes. Dans Discovery, `discovery research-plan RUN_DIR` prépare les recherches publiques Google/Ads, Meta et avis ; l’agent les exécute avec les outils disponibles et enregistre preuves, portée et replis dans le registre commun. Après le modèle V1, `strategy prepare RUN_DIR` fournit les méthodes épinglées ; `strategy register` et `strategy check` contrôlent leur passation vers les missions, le modèle V2 et le brief. Ces commandes préparent/vérifient le travail de l’agent ; elles ne sont pas des audits exécutés automatiquement. Aucun compte prospect ou fournisseur payant n’est obligatoire. Voir [le contrat de passation](skills/proposition-strategy/references/audience-handoff.md) et [les limites des capacités](skills/proposition-strategy/references/public-analysis.md). La qualification manuelle ne certifie pas encore le fonctionnement autonome de ces ajouts avec deux URL.

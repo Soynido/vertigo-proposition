@@ -1,0 +1,837 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "writer_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "concurrency": {
+          "enum": [
+            1,
+            2,
+            4
+          ]
+        },
+        "panel_scan": {
+          "enum": [
+            "legacy",
+            "batch"
+          ]
+        },
+        "image_wait_policy": {
+          "enum": [
+            "legacy",
+            "terminal_aware"
+          ]
+        },
+        "proof_storage": {
+          "enum": [
+            "expanded",
+            "content_addressed"
+          ]
+        },
+        "max_host_tasks": {
+          "enum": [
+            1,
+            2
+          ]
+        }
+      },
+      "required": [
+        "concurrency",
+        "panel_scan",
+        "image_wait_policy",
+        "proof_storage",
+        "max_host_tasks"
+      ]
+    },
+    "attempts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "attempt_id": {
+            "type": "string",
+            "pattern": "^attempt-[0-9a-f]{32}$"
+          },
+          "task_id": {
+            "type": "string",
+            "pattern": "^task-[0-9a-f]{24}$"
+          },
+          "request_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "state": {
+            "enum": [
+              "CLAIMED",
+              "DISPATCHING",
+              "RUNNING",
+              "SUCCEEDED",
+              "UNKNOWN_OUTCOME",
+              "FAILED",
+              "CANCELLED",
+              "COMMITTED",
+              "REJECTED_STALE"
+            ]
+          },
+          "claimed_at": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_expires_at": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dispatch_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "host_job_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "event_id": {
+                      "type": "string",
+                      "pattern": "^evt-[0-9a-f]{32}$"
+                    },
+                    "attempt_id": {
+                      "type": "string",
+                      "pattern": "^attempt-[0-9a-f]{32}$"
+                    },
+                    "observed_at": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "evidence_ref": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                              "minLength": 1
+                            },
+                            "sha256": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            },
+                            "size_bytes": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          },
+                          "required": [
+                            "path",
+                            "sha256",
+                            "size_bytes"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "kind": {
+                      "const": "dispatch_intent"
+                    },
+                    "payload": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "dispatch_key": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "dispatch_key"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "schema_version",
+                    "event_id",
+                    "attempt_id",
+                    "observed_at",
+                    "evidence_ref",
+                    "kind",
+                    "payload"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "event_id": {
+                      "type": "string",
+                      "pattern": "^evt-[0-9a-f]{32}$"
+                    },
+                    "attempt_id": {
+                      "type": "string",
+                      "pattern": "^attempt-[0-9a-f]{32}$"
+                    },
+                    "observed_at": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "evidence_ref": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                              "minLength": 1
+                            },
+                            "sha256": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            },
+                            "size_bytes": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          },
+                          "required": [
+                            "path",
+                            "sha256",
+                            "size_bytes"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "kind": {
+                      "const": "dispatched"
+                    },
+                    "payload": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "host_job_ref": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "host_job_ref"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "schema_version",
+                    "event_id",
+                    "attempt_id",
+                    "observed_at",
+                    "evidence_ref",
+                    "kind",
+                    "payload"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "event_id": {
+                      "type": "string",
+                      "pattern": "^evt-[0-9a-f]{32}$"
+                    },
+                    "attempt_id": {
+                      "type": "string",
+                      "pattern": "^attempt-[0-9a-f]{32}$"
+                    },
+                    "observed_at": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "evidence_ref": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                              "minLength": 1
+                            },
+                            "sha256": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            },
+                            "size_bytes": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          },
+                          "required": [
+                            "path",
+                            "sha256",
+                            "size_bytes"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "kind": {
+                      "const": "result_ready"
+                    },
+                    "payload": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "result_path": {
+                          "type": "string",
+                          "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                          "minLength": 1
+                        },
+                        "result_sha256": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      },
+                      "required": [
+                        "result_path",
+                        "result_sha256"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "schema_version",
+                    "event_id",
+                    "attempt_id",
+                    "observed_at",
+                    "evidence_ref",
+                    "kind",
+                    "payload"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "event_id": {
+                      "type": "string",
+                      "pattern": "^evt-[0-9a-f]{32}$"
+                    },
+                    "attempt_id": {
+                      "type": "string",
+                      "pattern": "^attempt-[0-9a-f]{32}$"
+                    },
+                    "observed_at": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "evidence_ref": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                              "minLength": 1
+                            },
+                            "sha256": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            },
+                            "size_bytes": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          },
+                          "required": [
+                            "path",
+                            "sha256",
+                            "size_bytes"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "kind": {
+                      "const": "failed"
+                    },
+                    "payload": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "error_code": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        },
+                        "host_terminal_status": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "error_code",
+                        "retryable",
+                        "host_terminal_status"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "schema_version",
+                    "event_id",
+                    "attempt_id",
+                    "observed_at",
+                    "evidence_ref",
+                    "kind",
+                    "payload"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "event_id": {
+                      "type": "string",
+                      "pattern": "^evt-[0-9a-f]{32}$"
+                    },
+                    "attempt_id": {
+                      "type": "string",
+                      "pattern": "^attempt-[0-9a-f]{32}$"
+                    },
+                    "observed_at": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "evidence_ref": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                              "minLength": 1
+                            },
+                            "sha256": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            },
+                            "size_bytes": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          },
+                          "required": [
+                            "path",
+                            "sha256",
+                            "size_bytes"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "kind": {
+                      "const": "cancelled"
+                    },
+                    "payload": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "never_dispatched": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "reason",
+                        "never_dispatched"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "schema_version",
+                    "event_id",
+                    "attempt_id",
+                    "observed_at",
+                    "evidence_ref",
+                    "kind",
+                    "payload"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "event_id": {
+                      "type": "string",
+                      "pattern": "^evt-[0-9a-f]{32}$"
+                    },
+                    "attempt_id": {
+                      "type": "string",
+                      "pattern": "^attempt-[0-9a-f]{32}$"
+                    },
+                    "observed_at": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "evidence_ref": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                              "minLength": 1
+                            },
+                            "sha256": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            },
+                            "size_bytes": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          },
+                          "required": [
+                            "path",
+                            "sha256",
+                            "size_bytes"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "kind": {
+                      "const": "unknown_outcome"
+                    },
+                    "payload": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "error_code": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "last_known_state": {
+                          "enum": [
+                            "DISPATCHING",
+                            "RUNNING"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "error_code",
+                        "last_known_state"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "schema_version",
+                    "event_id",
+                    "attempt_id",
+                    "observed_at",
+                    "evidence_ref",
+                    "kind",
+                    "payload"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "event_id": {
+                      "type": "string",
+                      "pattern": "^evt-[0-9a-f]{32}$"
+                    },
+                    "attempt_id": {
+                      "type": "string",
+                      "pattern": "^attempt-[0-9a-f]{32}$"
+                    },
+                    "observed_at": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "evidence_ref": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                              "minLength": 1
+                            },
+                            "sha256": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            },
+                            "size_bytes": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          },
+                          "required": [
+                            "path",
+                            "sha256",
+                            "size_bytes"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "kind": {
+                      "const": "reconciled"
+                    },
+                    "payload": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "observed_state": {
+                          "enum": [
+                            "RUNNING",
+                            "SUCCEEDED",
+                            "FAILED",
+                            "CANCELLED"
+                          ]
+                        },
+                        "host_job_ref": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "result_path": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                              "minLength": 1
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "result_sha256": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "observed_state",
+                        "host_job_ref",
+                        "result_path",
+                        "result_sha256"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "schema_version",
+                    "event_id",
+                    "attempt_id",
+                    "observed_at",
+                    "evidence_ref",
+                    "kind",
+                    "payload"
+                  ]
+                }
+              ],
+              "$schema": "https://json-schema.org/draft/2020-12/schema"
+            },
+            "maxItems": 256
+          },
+          "result_ref": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "pattern": "^(?!/)(?!.*(?:^|/)[.]{1,2}(?:/|$))(?!.*//)(?!.*[\\\\:])[A-Za-z0-9_. /-]+$",
+                    "minLength": 1
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "size_bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "path",
+                  "sha256",
+                  "size_bytes"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "commit_operation_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "attempt_id",
+          "task_id",
+          "request_hash",
+          "state",
+          "claimed_at",
+          "claim_expires_at",
+          "dispatch_key",
+          "host_job_ref",
+          "events",
+          "result_ref",
+          "commit_operation_id"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "maxProperties": 1024
+    },
+    "receipts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "pattern": "^op-[a-zA-Z0-9_-]{8,80}$"
+          },
+          "payload_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "committed_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "committed_at": {
+            "type": "string",
+            "minLength": 1
+          },
+          "record_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^(source|fact|artifact|evaluation|review|stage_review|checkpoint):[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "maxItems": 20000
+          },
+          "record_hashes_after_commit": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^(source|fact|artifact|evaluation|review|stage_review|checkpoint):[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "required": [
+          "operation_id",
+          "payload_sha256",
+          "committed_revision",
+          "committed_at",
+          "record_refs",
+          "record_hashes_after_commit"
+        ]
+      },
+      "maxProperties": 4096
+    }
+  },
+  "required": [
+    "schema_version",
+    "writer_version",
+    "revision",
+    "config",
+    "attempts",
+    "receipts"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

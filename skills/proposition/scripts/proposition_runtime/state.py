@@ -20,6 +20,8 @@ from urllib.parse import urlsplit
 from uuid import uuid4
 
 from jsonschema import Draft202012Validator
+from .validation import phase, fresh_phase
+from .telemetry import traced
 
 
 RESOURCE_ROOT = Path(__file__).resolve().parent
@@ -54,12 +56,29 @@ def _record_digest(record):
     return _digest(payload)
 
 
+def _contract_version(state, key):
+    """Only an absent key denotes a historical run; bool is not version one."""
+    metadata = state.get('metadata', {})
+    if key not in metadata:
+        return None
+    version = metadata[key]
+    supported = (1,2) if key == 'audience_handoff_contract' else (1,)
+    if type(version) is not int or version not in supported:
+        raise ValueError('Unsupported '+key+' version')
+    return version
+
+
 def _sha(path):
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+    from .telemetry import file_read
+    from .validation import file_hash
+    def compute():
+        file_read('validation.hash', path, path.stat().st_size)
+        digest = hashlib.sha256()
+        with path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+    return file_hash(path,compute)
 
 
 def _identifier(value):
@@ -149,6 +168,7 @@ def _quality_stages(state):
 def _validate_structure(state):
     _schema("run", state)
     _schema("profile", state["profile"])
+    if "execution" in state.get("metadata",{}):_schema("execution",state["metadata"]["execution"])
     for collection, schema in (("sources", "source"), ("facts", "fact"), ("artifacts", "artifact"),
                                ("evaluations", "evaluation"), ("reviews", "quality-review"),
                                ("stage_reviews", "quality-review"),
@@ -167,11 +187,18 @@ def _validate_structure(state):
         raise ValueError("Review lies outside the named stage registry")
 
 
-def init_run(url, run_root, profile=None, *, creative_mandate=None):
+def init_run(url, run_root, profile=None, *, creative_mandate=None, audience_handoff_contract=2, execution_config=None):
     """Create a new run under run_root, which must be outside the checkout."""
     parsed = urlsplit(url)
+    if type(audience_handoff_contract) is not int or audience_handoff_contract not in (1,2):
+        raise ValueError('Unsupported audience_handoff_contract version')
     if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.password:
         raise ValueError("An http(s) URL without credentials is required")
+    from .transactions import execution_metadata
+    execution = execution_metadata({})
+    if execution_config is not None:
+        execution['config'] = deepcopy(execution_config)
+        _schema('execution', execution)
     base = _external_root(run_root)
     selected = {"actor": None, "responsible": None, "responsible_confirmed": False,
                 "required_reviewers": ["review-a", "review-b"], "parameters": {}}
@@ -193,34 +220,109 @@ def init_run(url, run_root, profile=None, *, creative_mandate=None):
              "sources": {}, "facts": {}, "artifacts": {}, "evaluations": {},
              "reviews": {}, "stage_reviews": {}, "checkpoints": {},
              "metadata": {"creative_exploration_contract":contract,"creative_reading_contract":1,
-                          "sales_kit_contract":1}}
+                          "sales_kit_contract":1,"public_research_contract":1,"audience_handoff_contract":audience_handoff_contract}}
+    if execution_config is not None: state['metadata']['execution'] = execution
     save_run(root, state)
-    return state
+    return load_run(root)
 
 
 def load_run(run_dir):
     """Read and structurally validate persisted state; never infer a PASS."""
     root = _external_root(run_dir)
+    from .transactions import working_state
+    workspace=working_state(root)
+    if workspace is not None:return workspace["state"]
     path = _safe_path(root, "state.json")
     try:
-        result = json.loads(path.read_text(encoding="utf-8"))
+        raw = _state_bytes(path)
+        result = json.loads(raw)
     except (OSError, json.JSONDecodeError) as error:
         raise ValueError("Run state cannot be read") from error
     _validate_structure(result)
     if Path(result["root"]) != root or result["id"] != root.name:
         raise ValueError("Run identity does not match its directory")
-    return result
+    from .transactions import Snapshot
+    return Snapshot(result,hashlib.sha256(raw).hexdigest())
 
 
-def save_run(run_dir, state):
+def _state_bytes(path):
+    from .transactions import MAX_STATE_BYTES
+    with path.open("rb") as stream: raw=stream.read(MAX_STATE_BYTES+1)
+    if len(raw)>MAX_STATE_BYTES: raise ValueError("State byte budget reached")
+    return raw
+
+
+def save_run(run_dir, state, *, expected_state_hash=None):
+    from .transactions import run_lock, Conflict, MAX_STATE_BYTES
+    from .validation import invalidate
+    root=_external_root(run_dir);target=_safe_path(root,"state.json",exists=False)
+    expected=expected_state_hash if expected_state_hash is not None else getattr(state,"base_sha256",None)
+    prepared=deepcopy(state)
+    _validate_structure(prepared)
+    for key in ("public_research_contract","audience_handoff_contract"):_contract_version(prepared,key)
+    if len(_canonical(prepared))>MAX_STATE_BYTES:raise ValueError("State byte budget reached")
+    from .transactions import working_state
+    workspace=working_state(root)
+    if workspace is not None:
+        _validate_active_graph(prepared)
+        _invalidate_dependencies(prepared)
+        workspace["state"]=prepared
+        return
+    previous={}
+    if target.exists():
+        raw=_state_bytes(target)
+        if expected is None:raise Conflict('CONFLICT: expected hash or loaded snapshot required')
+        if hashlib.sha256(raw).hexdigest()!=expected:raise Conflict('CONFLICT: stale state snapshot')
+        previous=json.loads(raw)
+    inputs=_prepared_file_inputs(previous,prepared)
+    from .validation import commit_guard
+    guard=commit_guard()
+    with run_lock(root):
+        if target.exists():
+            if expected is None:raise Conflict("CONFLICT: expected hash or loaded snapshot required")
+            if hashlib.sha256(_state_bytes(target)).hexdigest()!=expected:raise Conflict("CONFLICT: stale state snapshot")
+        elif expected is not None:raise Conflict("CONFLICT: state disappeared")
+        from .validation import _identity
+        for path,identity in inputs.items():
+            if _identity(path)!=identity:raise Conflict('CONFLICT: prepared file changed before commit')
+        guard()
+        _save_locked(root,prepared)
+    invalidate()
+
+
+def _prepared_file_inputs(previous, prepared):
+    """Hash changed outputs and their transitive inputs outside the state lock."""
+    from .validation import _identity
+    from .transactions import Conflict
+    records=[]
+    for collection in ('sources','facts','artifacts','evaluations','reviews','stage_reviews','checkpoints'):
+        for key,record in prepared.get(collection,{}).items():
+            if record==previous.get(collection,{}).get(key) or record.get('status')=='STALE':continue
+            records.append(record)
+            records.extend(_resolve(prepared,ref) for ref in _dependency_closure(prepared,record.get('dependencies',[])))
+    files={}
+    for record in records:
+        if not record:raise Conflict('CONFLICT: missing prepared dependency')
+        if record.get('status')=='STALE':raise Conflict('CONFLICT: stale prepared dependency')
+        if not record.get('path') or not record.get('sha256'):continue
+        path=_safe_path(Path(prepared['root']),record['path']);before=_identity(path)
+        if _sha(path)!=record['sha256'] or (record.get('size_bytes') is not None and path.stat().st_size!=record['size_bytes']):
+            raise Conflict('CONFLICT: prepared file content changed')
+        if _identity(path)!=before:raise Conflict('CONFLICT: prepared file changed while hashing')
+        files[path]=before
+    return files
+
+
+@traced('transaction.commit')
+def _save_locked(run_dir, state):
     """Validate then atomically replace state.json, preserving run identity."""
     root = _external_root(run_dir)
-    _validate_structure(state)
     if Path(state["root"]) != root or state["id"] != root.name:
         raise ValueError("State belongs to a different run")
     target = _safe_path(root, "state.json", exists=False)
+    previous={}
     if target.exists():
-        previous = json.loads(target.read_text(encoding="utf-8"))
+        previous = json.loads(_state_bytes(target))
         if previous.get("id") != state["id"]:
             raise ValueError("Cannot replace a different run")
         contract=previous.get('metadata',{}).get('creative_exploration_contract')
@@ -232,8 +334,21 @@ def save_run(run_dir, state):
         kit=previous.get('metadata',{}).get('sales_kit_contract')
         if kit is not None and state.get('metadata',{}).get('sales_kit_contract')!=kit:
             raise ValueError('Initialized sales kit contract cannot be changed or removed')
+        research=previous.get('metadata',{}).get('public_research_contract')
+        if research is not None and state.get('metadata',{}).get('public_research_contract')!=research:
+            raise ValueError('Initialized public research contract cannot be changed or removed')
+        audience=previous.get('metadata',{}).get('audience_handoff_contract')
+        if audience is not None and state.get('metadata',{}).get('audience_handoff_contract')!=audience:
+            raise ValueError('Initialized audience handoff contract cannot be changed or removed')
     payload = deepcopy(state)
+    _validate_active_graph(payload)
+    _invalidate_dependencies(payload)
     payload["updated_at"] = _now()
+    if "execution" in payload.get("metadata",{}):
+        payload["metadata"]["execution"]["revision"]=previous.get("metadata",{}).get("execution",{}).get("revision",0)+1
+        _schema("execution",payload["metadata"]["execution"])
+    from .transactions import MAX_STATE_BYTES
+    if len(_canonical(payload))>MAX_STATE_BYTES:raise ValueError("State byte budget reached")
     descriptor, temporary = tempfile.mkstemp(prefix=".state-", suffix=".json", dir=root)
     try:
         with os.fdopen(descriptor, "wb") as stream:
@@ -251,6 +366,41 @@ def _resolve(state, reference):
         return None
     kind, identifier = reference.split(":", 1)
     return state.get(_COLLECTIONS.get(kind, ""), {}).get(identifier)
+
+
+def _validate_active_graph(state):
+    graph={kind+':'+key:record.get('dependencies',[]) for kind,collection in _COLLECTIONS.items()
+           for key,record in state[collection].items() if record.get('status')!='STALE'}
+    visited=set();active=set()
+    for start in graph:
+        stack=[(start,False)]
+        while stack:
+            ref,finished=stack.pop()
+            if finished:
+                active.remove(ref);visited.add(ref);continue
+            if ref in visited or ref not in graph:continue
+            if ref in active:raise ValueError('Cyclic evidence dependencies are not allowed')
+            active.add(ref);stack.append((ref,True))
+            stack.extend((dep,False) for dep in reversed(graph[ref]))
+
+
+def _invalidate_dependencies(state):
+    """Pure dependency/profile propagation; no file IO inside a commit."""
+    invalidated=[];again=True
+    while again:
+        again=False
+        for kind,collection in _COLLECTIONS.items():
+            for key,record in state[collection].items():
+                if record.get('status')=='STALE':continue
+                deps=record.get('dependencies',[]);hashes=record.get('dependency_hashes',{})
+                stale=bool(record.get('profile_hash') and record['profile_hash']!=_digest(state['profile']))
+                stale=stale or ('dependencies' in record and set(deps)!=set(hashes))
+                for ref in deps:
+                    target=_resolve(state,ref)
+                    if not target or target.get('status')=='STALE' or hashes.get(ref)!=_record_digest(target):stale=True;break
+                if stale:
+                    record['status']='STALE';invalidated.append(kind+':'+key);again=True
+    return invalidated
 
 
 def _dependency_closure(state, references):
@@ -332,7 +482,7 @@ def add_artifact(run_dir, artifact_id, path, audience, dependencies=()):
     return record
 
 
-def _artifact_record(state, artifact_id, path, audience, dependencies=()):
+def _artifact_record(state, artifact_id, path, audience, dependencies=(), *, reuse_current=False):
     from .composition import bind_dependencies
     dependencies=bind_dependencies(state,artifact_id,dependencies)
     root = Path(state["root"])
@@ -340,8 +490,15 @@ def _artifact_record(state, artifact_id, path, audience, dependencies=()):
     record = {"id": _identifier(artifact_id), "path": evidence.relative_to(root).as_posix(),
               "sha256": _sha(evidence), "size_bytes": evidence.stat().st_size,
               "audience": audience, "status": "CURRENT", "public_allowed": False,
-              "approval": None, "recorded_at": _now()}
+              "approval": None}
     _bind(state, record, dependencies)
+    previous = state['artifacts'].get(artifact_id)
+    if reuse_current and previous and previous['status'] in ('CURRENT', 'STALE'):
+        fields = ('id', 'path', 'sha256', 'size_bytes', 'audience', 'profile_hash', 'dependency_hashes')
+        if (all(previous.get(key) == record[key] for key in fields)
+                and set(previous['dependencies']) == set(record['dependencies'])):
+            return deepcopy(previous)
+    record['recorded_at'] = _now()
     _schema("artifact", record)
     return record
 
@@ -473,9 +630,8 @@ def _stale_reasons(state, root, record):
     return reasons
 
 
-def invalidate_changed(run_dir):
-    """Persist STALE transitively; never refresh a hash to hide an old decision."""
-    state = load_run(run_dir)
+def _invalidate_view(state):
+    """Pure in-memory freshness projection; no state or packet writer."""
     root = Path(state["root"])
     invalidated = []
     changed = True
@@ -491,9 +647,14 @@ def invalidate_changed(run_dir):
                     record["status"] = "STALE"
                     invalidated.append(f"{kind}:{identifier}")
                     changed = True
-    if invalidated:
-        save_run(root, state)
-    return {"status": "STALE" if invalidated else "UNCHANGED", "invalidated": invalidated}
+    return invalidated
+
+
+def invalidate_changed(run_dir):
+    """Persist STALE transitively; never refresh a hash to hide an old decision."""
+    state=load_run(run_dir);invalidated=_invalidate_view(state)
+    if invalidated:save_run(run_dir,state)
+    return {"status":"STALE" if invalidated else "UNCHANGED","invalidated":invalidated}
 
 
 def _review_receipt_issues(state, root, review, stage_id=None):
@@ -554,6 +715,10 @@ def _stage_report(state, stage_id):
                 assessment=state['evaluations'].get(requirement['id'])
                 if assessment and 'artifact:discovery-channels' not in _dependency_closure(state,assessment['evidence']):
                     issues.append({'code':'discovery_channels','id':requirement['id'],'message':'Channel assessment must depend on the current external evidence bundle'})
+    if stage_id in {'analysis.specialists','company.v2','brief.public','creative.direction','client.composition','verify.final'}:
+        from .strategy import inspect as inspect_strategy
+        for message in inspect_strategy(state,stage_id)['issues']:
+            issues.append({'code':'audience_handoff','id':stage_id,'message':message})
     if stage_id in {'discovery.channels','company.v1','company.v2','analysis.specialists','brief.public','creative.direction','client.composition','verify.final'}:
         from .history import inspect_history
         for message in inspect_history(state)['issues']:
@@ -604,6 +769,11 @@ def _stage_report(state, stage_id):
             issue('discovery_evidence',stage_id,'Stage review must cover the current Discovery receipt')
         if stage_id=='discovery.channels' and 'discovery-channels' in state['artifacts'] and 'artifact:discovery-channels' not in _dependency_closure(state,review['evidence']):
             issue('discovery_channels',stage_id,'Stage review must cover the current external evidence bundle')
+        consumer={'analysis.specialists':'observation-analysis-map','company.v2':'company-evidence-brief','brief.public':'creative-inputs'}.get(stage_id)
+        handoff_version=state.get('metadata',{}).get('audience_handoff_contract')
+        if type(handoff_version) is int and handoff_version in (1,2) and consumer:
+            if 'artifact:'+consumer not in _dependency_closure(state,review['evidence']):
+                issue('audience_handoff',stage_id,'Stage review must cover its current audience/need consumer')
         criterion_evidence = review.get("criterion_evidence", {})
         if set(criterion_evidence) != {row["id"] for row in stage["criteria"]}:
             issue("missing_criterion_evidence", stage_id, "Every stage criterion needs its own evidence references")
@@ -635,12 +805,14 @@ def _stage_report(state, stage_id):
             "quality_rubric": "candidate-not-human-calibrated"}
 
 
+@phase
 def stage_report(run_dir, stage_id):
     """Evaluate this stage alone; other stage/final reviews need not yet exist."""
     invalidate_changed(run_dir)
     return _stage_report(load_run(run_dir), stage_id)
 
 
+@phase
 def next_stage(run_dir):
     """Return the first unpassed active stage from registered evidence, never sidecars."""
     invalidate_changed(run_dir)
@@ -658,6 +830,14 @@ def next_stage(run_dir):
 
 
 def validate_run(run_dir):
+    try:
+        return _validate_run(run_dir)
+    except (ValueError,OSError) as error:
+        return {'status':'BLOCKED','issues':[{'code':'validation_conflict','message':str(error)}]}
+
+
+@fresh_phase
+def _validate_run(run_dir):
     """Return {status, issues}; no averaging, no default PASS, no external action."""
     try:
         invalidate_changed(run_dir)
@@ -682,6 +862,8 @@ def validate_run(run_dir):
                          if record["stage_id"] == PUBLICATION_STAGE]
     quality_refs = _dependency_closure(state, quality_roots)
     publication_only = _dependency_closure(state, publication_roots) - quality_refs
+    from .discovery_evidence import historical_channel_refs
+    replaced_history = historical_channel_refs(state)
 
     def issue(code, identifier, message):
         issues.append({"code": code, "id": identifier, "message": message})
@@ -693,6 +875,8 @@ def validate_run(run_dir):
     for kind, collection in _COLLECTIONS.items():
         for identifier, record in state[collection].items():
             reference = f"{kind}:{identifier}"
+            if reference in replaced_history:
+                continue
             if (reference in publication_only
                     or (record.get("metadata", {}).get("scope") == "publication" and reference not in quality_refs)):
                 continue

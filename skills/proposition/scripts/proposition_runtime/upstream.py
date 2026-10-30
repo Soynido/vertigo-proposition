@@ -1,4 +1,4 @@
-"""Retrieve complete pinned public source trees as inert, verified cache data.
+"""Retrieve pinned public trees or explicit source selections as inert cache data.
 
 No shell, installer, upstream Python, skill instruction, or build step is run.
 Receipts record transport provenance and local integrity, not signed attestations
@@ -7,6 +7,7 @@ or evidence of a skill's native/adapted execution.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import base64
 import hashlib
 import io
 import json
@@ -18,6 +19,8 @@ import tarfile
 import tempfile
 import urllib.request
 from urllib.parse import urlsplit
+from .telemetry import traced, file_read
+from .validation import cached, file_hash
 
 LOCK_PATH = Path(__file__).parent / "data/upstream-lock.json"
 MAX_DOWNLOAD_BYTES = 128 * 1024 * 1024
@@ -71,9 +74,24 @@ def _families() -> list[dict]:
             raise ValueError("Every upstream must be pinned to a full immutable commit")
         if not item.get("license_files") or not item.get("entrypoints"):
             raise ValueError("License and entrypoint contracts are required")
-        for path in item["license_files"] + item["entrypoints"]:
+        required = item["license_files"] + item["entrypoints"] + item.get("reference_files", [])
+        for path in required:
             _relative(path)
+        selection = item.get("source_paths")
+        if selection is not None:
+            if (not isinstance(selection, list) or not selection or
+                    not all(isinstance(p, str) for p in selection) or len(set(selection)) != len(selection)):
+                raise ValueError("Source selection must be an explicit nonempty path list")
+            for path in selection:
+                _relative(path)
+            if not all(_selected(path, item) for path in required):
+                raise ValueError("Source selection must cover entrypoints, references and licenses")
     return data["families"]
+
+
+def _selected(name: str, spec: dict) -> bool:
+    paths = spec.get("source_paths")
+    return paths is None or any(name == p or name.startswith(p + "/") for p in paths)
 
 
 def _cache_root(cache: str | Path | None) -> Path:
@@ -106,6 +124,10 @@ def _tree(metadata: dict, spec: dict) -> dict[str, dict]:
     files = {}
     for entry in entries:
         name = _relative(entry["path"])
+        # Unselected objects are metadata only: never fetch, follow or materialize them.
+        # Full-tree families retain the strict rejection of every link/submodule.
+        if not _selected(name, spec):
+            continue
         if entry.get("mode") == "120000" or entry.get("type") == "commit":
             raise ValueError("Upstream symlinks and submodules are refused")
         if entry.get("type") == "tree":
@@ -120,29 +142,39 @@ def _tree(metadata: dict, spec: dict) -> dict[str, dict]:
         files[name] = entry
     if len(files) > MAX_FILES or sum(f["size"] for f in files.values()) > MAX_EXPANDED_BYTES:
         raise ValueError("Repository exceeds extraction budgets")
-    for name in spec["entrypoints"] + spec["license_files"]:
+    for name in spec["entrypoints"] + spec["license_files"] + spec.get("reference_files", []):
         if name not in files:
             raise ValueError("Pinned entrypoint or license is absent: " + name)
+    for prefix in spec.get("source_paths", []):
+        if not any(name == prefix or name.startswith(prefix + "/") for name in files):
+            raise ValueError("Selected source path is absent: " + prefix)
     return files
 
 
 def _sha(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
+    def compute():
+        file_read('validation.hash', path, path.stat().st_size)
+        digest = hashlib.sha256()
+        with path.open("rb") as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(block)
+        return digest.hexdigest()
+    return file_hash(path,compute)
 
 
 def _base(spec: dict, root: Path) -> dict:
     destination = root / spec["id"] / spec["commit"]
     return {"id": spec["id"], "repository": spec["repository"], "commit": spec["commit"],
             "license": spec["license"], "entrypoints": spec["entrypoints"],
+            "source_scope": "selected_paths" if spec.get("source_paths") else "complete_tree",
+            "source_paths": spec.get("source_paths"),
             "present": False, "complete": False, "state": "absent", "installed": False,
             "execution_status": "unknown", "native_execution": "not_observed", "adapted_execution": "not_observed",
             "source_path": str(destination / "source"), "receipt_path": str(destination / "receipt.json")}
 
 
+@cached('upstream.inspect', tree=True)
+@traced('upstream.inspect')
 def _inspect(spec: dict, root: Path) -> dict:
     record = _base(spec, root)
     destination = Path(record["receipt_path"]).parent
@@ -162,6 +194,8 @@ def _inspect(spec: dict, root: Path) -> dict:
         files = _tree(json.loads(metadata_path.read_text(encoding="utf-8")), spec)
         if receipt["commit"] != spec["commit"] or receipt["repository"] != spec["repository"]:
             raise ValueError("Cache provenance does not match the lock")
+        if receipt.get("source_paths") != spec.get("source_paths"):
+            raise ValueError("Cache source selection differs from the lock")
         inventory = receipt["inventory"]
         if not isinstance(inventory, list) or {i["path"] for i in inventory} != set(files) or len(inventory) != len(files):
             raise ValueError("Receipt inventory does not match the complete pinned tree")
@@ -172,9 +206,20 @@ def _inspect(spec: dict, root: Path) -> dict:
         for item in inventory:
             name = _relative(item["path"])
             path = source / name
-            content = path.read_bytes()
-            git_sha = hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest()
-            if git_sha != files[name]["sha"] or len(content) != files[name]["size"] or hashlib.sha256(content).hexdigest() != item["sha256"]:
+            size = path.stat().st_size
+            if size != files[name]['size'] or size > MAX_FILE_BYTES:
+                raise ValueError('Cached source size mismatch')
+            git_digest = hashlib.sha1(f'blob {size}\0'.encode());digest = hashlib.sha256();read = 0
+            with path.open('rb') as stream:
+                for content in iter(lambda:stream.read(1024*1024),b''):
+                    read += len(content)
+                    if read > size: raise ValueError('Cached source grew during inspection')
+                    git_digest.update(content);digest.update(content)
+            def content_hash():
+                file_read('validation.hash',path,size)
+                return digest.hexdigest()
+            sha = file_hash(path,content_hash)
+            if git_digest.hexdigest() != files[name]["sha"] or read != size or sha != item["sha256"]:
                 raise ValueError("Cached source integrity mismatch: " + name)
         record.update(complete=True, state="complete", file_count=len(files),
                       receipt_sha256=_sha(destination / "receipt.json"), licenses=receipt["licenses"])
@@ -205,7 +250,8 @@ def _fetch_one(spec: dict, root: Path) -> dict:
         metadata_bytes = _download(metadata_url, MAX_METADATA_BYTES)
         metadata = json.loads(metadata_bytes)
         files = _tree(metadata, spec)
-        archive_bytes = _download(archive_url, MAX_DOWNLOAD_BYTES)
+        selection = spec.get("source_paths")
+        archive_bytes = None if selection else _download(archive_url, MAX_DOWNLOAD_BYTES)
         root.mkdir(parents=True, exist_ok=True)
         _checked(root)
         stage = Path(tempfile.mkdtemp(prefix="." + spec["id"] + "-", dir=root))
@@ -215,53 +261,77 @@ def _fetch_one(spec: dict, root: Path) -> dict:
         seen = set()
         total = 0
         inventory = []
-        with tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r:gz") as archive:
-            for member in archive:
-                raw = member.name.rstrip("/")
-                name = _relative(raw)
-                parts = PurePosixPath(name).parts
-                if parts[0] != expected_prefix:
-                    raise ValueError("Unexpected archive root or pinned revision")
-                if member.issym() or member.islnk() or not (member.isfile() or member.isdir()):
-                    raise ValueError("Archive links and special files are refused")
-                if member.isdir():
-                    continue
-                relative = "/".join(parts[1:])
-                _relative(relative)
-                if relative not in files or relative in seen:
-                    raise ValueError("Archive has unexpected or duplicate files")
-                if member.size > MAX_FILE_BYTES:
-                    raise ValueError("Archive file exceeds the byte budget: " + relative)
-                total += member.size
-                if total > MAX_EXPANDED_BYTES or len(seen) >= MAX_FILES:
-                    raise ValueError("Archive exceeds extraction budgets")
-                stream = archive.extractfile(member)
-                content = stream.read(MAX_FILE_BYTES + 1) if stream else b""
+        blob_sources = []
+        if selection:
+            for relative, entry in sorted(files.items()):
+                url = f"https://api.github.com/repos/{repository}/git/blobs/{entry['sha']}"
+                blob = json.loads(_download(url, min(MAX_DOWNLOAD_BYTES, entry['size'] * 2 + 16384)))
+                if (blob.get("encoding") != "base64" or blob.get("sha") != entry["sha"] or
+                        blob.get("size") != entry["size"] or not isinstance(blob.get("content"), str)):
+                    raise ValueError("Selected blob metadata differs from the pinned tree")
+                content = base64.b64decode(blob["content"].replace("\n", "").replace("\r", ""), validate=True)
                 git_sha = hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest()
-                transform = None
-                if len(content) != member.size:
-                    raise ValueError("Archive file is truncated: " + relative)
-                if git_sha != files[relative]["sha"]:
-                    canonical = content.replace(b"\r\n", b"\n")
-                    canonical_sha = hashlib.sha1(f"blob {len(canonical)}\0".encode() + canonical).hexdigest()
-                    if canonical_sha == files[relative]["sha"] and len(canonical) == files[relative]["size"]:
-                        content, git_sha = canonical, canonical_sha
-                        transform = "crlf_to_exact_git_blob"
-                if len(content) != files[relative]["size"] or git_sha != files[relative]["sha"]:
-                    raise ValueError("Archive blob differs from pinned Git metadata")
+                if len(content) != entry["size"] or git_sha != entry["sha"]:
+                    raise ValueError("Selected blob differs from the pinned tree")
                 output = source / relative
                 output.parent.mkdir(parents=True, exist_ok=True)
                 with output.open("xb") as target:
                     target.write(content)
-                output.chmod(0o600)  # Preserve source mode in inventory, not executable permission.
+                output.chmod(0o600)
                 seen.add(relative)
-                inventory.append({"path": relative, "bytes": len(content), "sha256": hashlib.sha256(content).hexdigest(), "git_blob_sha1": git_sha, "git_mode": files[relative]["mode"], "transport_transform": transform})
+                inventory.append({"path": relative, "bytes": len(content), "sha256": hashlib.sha256(content).hexdigest(),
+                                  "git_blob_sha1": git_sha, "git_mode": entry["mode"], "transport_transform": None})
+                blob_sources.append({"path": relative, "url": url})
+        else:
+            with tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r:gz") as archive:
+                for member in archive:
+                    raw = member.name.rstrip("/")
+                    name = _relative(raw)
+                    parts = PurePosixPath(name).parts
+                    if parts[0] != expected_prefix:
+                        raise ValueError("Unexpected archive root or pinned revision")
+                    if member.issym() or member.islnk() or not (member.isfile() or member.isdir()):
+                        raise ValueError("Archive links and special files are refused")
+                    if member.isdir():
+                        continue
+                    relative = "/".join(parts[1:])
+                    _relative(relative)
+                    if relative not in files or relative in seen:
+                        raise ValueError("Archive has unexpected or duplicate files")
+                    if member.size > MAX_FILE_BYTES:
+                        raise ValueError("Archive file exceeds the byte budget: " + relative)
+                    total += member.size
+                    if total > MAX_EXPANDED_BYTES or len(seen) >= MAX_FILES:
+                        raise ValueError("Archive exceeds extraction budgets")
+                    stream = archive.extractfile(member)
+                    content = stream.read(MAX_FILE_BYTES + 1) if stream else b""
+                    git_sha = hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest()
+                    transform = None
+                    if len(content) != member.size:
+                        raise ValueError("Archive file is truncated: " + relative)
+                    if git_sha != files[relative]["sha"]:
+                        canonical = content.replace(b"\r\n", b"\n")
+                        canonical_sha = hashlib.sha1(f"blob {len(canonical)}\0".encode() + canonical).hexdigest()
+                        if canonical_sha == files[relative]["sha"] and len(canonical) == files[relative]["size"]:
+                            content, git_sha = canonical, canonical_sha
+                            transform = "crlf_to_exact_git_blob"
+                    if len(content) != files[relative]["size"] or git_sha != files[relative]["sha"]:
+                        raise ValueError("Archive blob differs from pinned Git metadata")
+                    output = source / relative
+                    output.parent.mkdir(parents=True, exist_ok=True)
+                    with output.open("xb") as target:
+                        target.write(content)
+                    output.chmod(0o600)  # Preserve source mode in inventory, not executable permission.
+                    seen.add(relative)
+                    inventory.append({"path": relative, "bytes": len(content), "sha256": hashlib.sha256(content).hexdigest(), "git_blob_sha1": git_sha, "git_mode": files[relative]["mode"], "transport_transform": transform})
         if seen != set(files):
             raise ValueError("Archive is missing files from the complete pinned tree")
         notices = [i for i in inventory if re.match(r"(?i)^(license|licence|notice|copying)([._-]|$)", PurePosixPath(i["path"]).name)]
         receipt = {"schema_version": 1, "family": spec["id"], "repository": repository, "commit": commit,
                    "fetched_at": datetime.now(timezone.utc).isoformat(), "metadata_url": metadata_url,
-                   "archive_url": archive_url, "archive_sha256": hashlib.sha256(archive_bytes).hexdigest(),
+                   "archive_url": None if selection else archive_url,
+                   "archive_sha256": None if selection else hashlib.sha256(archive_bytes).hexdigest(),
+                   "source_paths": selection, "blob_sources": blob_sources,
                    "metadata_sha256": hashlib.sha256(metadata_bytes).hexdigest(),
                    "inventory": sorted(inventory, key=lambda i: i["path"]), "licenses": notices,
                    "execution_status": "unknown", "native_execution": "not_observed", "adapted_execution": "not_observed", "installed": False}

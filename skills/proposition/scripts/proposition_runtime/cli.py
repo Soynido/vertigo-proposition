@@ -109,12 +109,16 @@ def parser():
     sub = p.add_subparsers(dest='command', required=True)
     doctor_parser = sub.add_parser('doctor')
     doctor_parser.add_argument('--presentations', action='store_true', help='Test a real local editable/rendered PPTX fixture')
-    s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path); s.add_argument('--creative-mandate', type=Path)
+    s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path); s.add_argument('--creative-mandate', type=Path); s.add_argument('--audience-handoff-contract', type=int, choices=[1,2], default=2); s.add_argument('--execution-config', type=Path)
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
+    s.add_argument('--concurrency',type=int,choices=[1,2,4],default=1)
+    s.add_argument('--proof-storage',choices=['expanded','content_addressed'],default='expanded')
+    s.add_argument('--panel-scan',choices=['legacy','batch'],default='legacy');s.add_argument('--image-wait-policy',choices=['legacy','terminal_aware'],default='legacy')
     s = sub.add_parser('prepare-inputs'); s.add_argument('run_dir', type=Path); s.add_argument('manifest', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--timeout-seconds', type=float, default=5)
     s = sub.add_parser('preprocess'); s.add_argument('run_dir', type=Path); s.add_argument('--mode', choices=['auto','codex','cloudflare'])
+    s = sub.add_parser('strategy'); s.add_argument('operation', choices=['prepare','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path); s.add_argument('--cache', type=Path); s.add_argument('--stage', choices=['analysis.specialists','company.v2','brief.public'],default='brief.public')
     s = sub.add_parser('history'); s.add_argument('operation', choices=['collect','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--urls', nargs='*', default=[]); s.add_argument('--report', type=Path)
-    s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','check','reconcile','channels']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
+    s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','check','reconcile','channels','research-plan']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
     for command in ('validate', 'receipt', 'workbench', 'next-stage', 'check-experience'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path)
         if command == 'check-experience':
@@ -123,6 +127,7 @@ def parser():
             modes.add_argument('--inputs-only', action='store_true', help='Check current inputs and reading receipt before rendering candidates')
             modes.add_argument('--composition-plan-only', action='store_true', help='Check and register the deck plan/pilot before complete outputs exist')
     s = sub.add_parser('measure'); s.add_argument('run_dir', type=Path); s.add_argument('--quota-remaining-percent', type=float); s.add_argument('--quota-source')
+    s = sub.add_parser('metrics'); s.add_argument('run_dir', type=Path); s.add_argument('--format', choices=['json','markdown'], default='json')
     for command in ('source', 'fact', 'plan'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path); s.add_argument('json_file', type=Path)
     s = sub.add_parser('artifact'); s.add_argument('run_dir', type=Path); s.add_argument('id'); s.add_argument('file'); s.add_argument('--audience', required=True, choices=['public','client','sales','technical','internal']); s.add_argument('--depends', nargs='*', default=[])
@@ -139,15 +144,52 @@ def parser():
     s = sub.add_parser('freeze-creatives'); s.add_argument('run_dir', type=Path); s.add_argument('selection', type=Path)
     s = sub.add_parser('check-creatives'); s.add_argument('run_dir', type=Path)
     s = sub.add_parser('layout'); s.add_argument('manifest', type=Path)
+    s = sub.add_parser('apply-batch'); s.add_argument('run_dir',type=Path);s.add_argument('batch',type=Path)
+    s = sub.add_parser('ready-tasks');s.add_argument('run_dir',type=Path);s.add_argument('--capabilities',type=Path,required=True)
+    s = sub.add_parser('claim-task');s.add_argument('run_dir',type=Path);s.add_argument('task_id');s.add_argument('--request',type=Path,required=True)
+    s = sub.add_parser('task-event');s.add_argument('run_dir',type=Path);s.add_argument('event',type=Path)
+    s = sub.add_parser('accept-task-result');s.add_argument('run_dir',type=Path);s.add_argument('result',type=Path)
+    s = sub.add_parser('execution-status');s.add_argument('run_dir',type=Path)
     return p
 
 
 def execute(a):
+    from .validation import phase
+    stable = a.command in ('validate','next-stage','stage-report','receipt') or (a.command=='strategy' and a.operation=='check')
+    return phase(_execute)(a) if stable else _execute(a)
+
+
+def _execute(a):
     c = a.command
+    if c in ('ready-tasks','claim-task','task-event','accept-task-result','execution-status'):
+        from . import execution
+        from .transactions import read_json as read_execution_json
+        if c=='ready-tasks':return execution.ready_tasks(a.run_dir,read_execution_json(a.capabilities))
+        if c=='claim-task':return execution.claim_task(a.run_dir,a.task_id,read_execution_json(a.request))
+        if c=='task-event':return execution.task_event(a.run_dir,read_execution_json(a.event))
+        if c=='accept-task-result':return execution.accept_task_result(a.run_dir,read_execution_json(a.result))
+        return execution.execution_status(a.run_dir)
+    if c=='apply-batch':
+        from .transactions import apply_batch,read_json as read_execution_json
+        return apply_batch(a.run_dir,read_execution_json(a.batch))
+    if c == 'metrics':
+        from .telemetry import metrics
+        return metrics(a.run_dir)
+    if c=='strategy':
+        from . import strategy
+        if a.operation=='prepare': return strategy.prepare(a.run_dir,a.cache)
+        if a.operation=='register':
+            if not a.report: raise ValueError('strategy register requires --report')
+            return strategy.register(a.run_dir,a.report)
+        state.invalidate_changed(a.run_dir)
+        return strategy.inspect(state.load_run(a.run_dir),a.stage)
     if c == 'preprocess':
         from .preprocessing import prepare
         return prepare(a.run_dir,mode=a.mode)
     if c == 'discovery':
+        if a.operation=='research-plan':
+            from .public_research import prepare
+            return prepare(a.run_dir)
         from . import discovery_evidence
         if a.operation in ('register','reconcile'):
             if not a.report: raise ValueError('discovery register/reconcile requires --report')
@@ -177,7 +219,9 @@ def execute(a):
     if c == 'init':
         from .experience import read_mandate_input
         return state.init_run(a.url, a.runs_root, read_json(a.profile) if a.profile else None,
-            creative_mandate=json.loads(read_mandate_input(a.creative_mandate)) if a.creative_mandate else None)
+            creative_mandate=json.loads(read_mandate_input(a.creative_mandate)) if a.creative_mandate else None,
+            audience_handoff_contract=a.audience_handoff_contract,
+            execution_config=read_json(a.execution_config) if a.execution_config else None)
     if c == 'validate': return state.validate_run(a.run_dir)
     if c == 'next-stage': return state.next_stage(a.run_dir)
     if c == 'check-experience':
@@ -204,9 +248,9 @@ def execute(a):
         from .discovery import collect, continue_collect
         if a.frontier:
             if a.url: raise ValueError('Use the prior report URL when continuing; do not supply a replacement URL')
-            return continue_collect(a.frontier,a.output,allow_local=a.allow_local_fixture,max_pages=a.max_pages)
+            return continue_collect(a.frontier,a.output,allow_local=a.allow_local_fixture,max_pages=a.max_pages,panel_scan=a.panel_scan,image_wait_policy=a.image_wait_policy,proof_storage=a.proof_storage,concurrency=a.concurrency)
         if not a.url: raise ValueError('A URL or --frontier prior report is required')
-        return collect(a.url, a.output, allow_local=a.allow_local_fixture, max_pages=a.max_pages)
+        return collect(a.url, a.output, allow_local=a.allow_local_fixture, max_pages=a.max_pages,panel_scan=a.panel_scan,image_wait_policy=a.image_wait_policy,proof_storage=a.proof_storage,concurrency=a.concurrency)
     if c in ('export','inspect'):
         from .artifacts import export_pdf, inspect_pdf
         return export_pdf(a.source,a.output,audience=a.audience) if c == 'export' else inspect_pdf(a.pdf,a.output,audience=a.audience,max_pages=a.max_pages)
@@ -231,11 +275,27 @@ def execute(a):
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
-        result = execute(args)
+        if getattr(args,'run_dir',None) is not None and args.command not in ('metrics','ready-tasks','execution-status'):
+            from .telemetry import TraceRecorder
+            with TraceRecorder(args.run_dir) as trace:
+                with trace.span('cli.command', command=args.command):
+                    result = execute(args)
+        else:
+            result = execute(args)
     except (ValueError, OSError, KeyError, TypeError, json.JSONDecodeError) as error:
+        if args.command in ('apply-batch','ready-tasks','claim-task','task-event','accept-task-result','execution-status') and getattr(error,'code',None) in (3,4):
+            print(json.dumps({'status':{3:'CONFLICT',4:'BUSY'}[error.code],'message':str(error)},ensure_ascii=False))
+            return error.code
         print(json.dumps({'status':'ERROR','message':str(error)},ensure_ascii=False))
         return 1
-    print(json.dumps(result,ensure_ascii=False,indent=2,default=str))
+    if args.command == 'metrics' and args.format == 'markdown':
+        print('# Mesures locales\n\nCouverture : '+result['coverage']+'\n\nTemps hôte et tokens : inconnus.\n\n```json\n'+json.dumps(result,ensure_ascii=False,indent=2)+'\n```')
+    else:
+        print(json.dumps(result,ensure_ascii=False,indent=2,default=str))
+    if args.command=='ready-tasks':return 0
+    if args.command in ('claim-task','task-event','accept-task-result'):
+        if result.get('status')=='UNKNOWN_OUTCOME':return 5
+        if result.get('status')=='REJECTED_STALE':return 3
     return 2 if str(result.get('status', '')).upper() in ('FAIL','BLOCKED','STALE','PARTIAL','UNAVAILABLE') else 0
 
 
