@@ -66,7 +66,7 @@ def install_repo(source: Path, destination: Path, *, update: bool = False) -> di
             target = staging / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source / "skills" / relative, target)
-        config = {"runtime_python": sys.executable, "installation_version": 1}
+        config = {"runtime_python": sys.executable, "installation_version": 1,"source_checkout":str(source)}
         (staging / "proposition/installation.json").write_text(json.dumps(config, indent=2) + "\n")
         destination.mkdir(parents=True, exist_ok=True)
         # Backups are retained until every skill and the new manifest are durable.

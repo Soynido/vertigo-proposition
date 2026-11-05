@@ -12,9 +12,9 @@ Dans le checkout de développement, utiliser `.venv/bin/python` (`.venv\Scripts\
 
 | Besoin | Sous-commande après le lanceur Python |
 |---|---|
-| Capacités | `doctor` |
+| Capacités | `doctor --delivery-format web` ; `doctor --delivery-format documents [--presentations]` |
 | Distributions upstream | `upstream status` ; `upstream fetch [--family NAME] [--cache DIR]` |
-| Run | `init URL [--runs-root DIR] [--profile FILE] [--creative-mandate FILE] [--audience-handoff-contract 1|2]` (défaut `2`, épinglé au run) ; `validate RUN_DIR` |
+| Run | `init URL [--runs-root DIR] [--profile FILE] [--creative-mandate FILE] [--audience-handoff-contract 1|2] [--delivery-format web|documents]` (défaut `2`, épinglé au run) ; `validate RUN_DIR` |
 | Collecte | `collect URL --output DIR [--allow-local-fixture] [--max-pages N] [--panel-scan legacy|batch] [--image-wait-policy legacy|terminal_aware] [--proof-storage expanded|content_addressed]` ; mêmes options en reprise, défauts `legacy` et `expanded`, réglages effectifs dans le rapport |
 | Preuves Discovery | `discovery register RUN_DIR --report FILE` ; `discovery check RUN_DIR` — fichier 2.0 et preuves déjà dans le run, intégrité/complétude rendue, pas note de qualité |
 | Issues externes | `discovery reconcile RUN_DIR --report JOURNAL` ; `discovery channels RUN_DIR` — jointure des tentatives sans officialité/analyse/droits implicites |
@@ -44,13 +44,31 @@ L'export imprime une source passive et ses ressources locales ; il n'autorise pa
 
 `layout MANIFEST_JSON` calcule les surfaces à partir de rectangles de placement déclarés (`pages`, `placements` avec `page`, `kind`, `rect`, `source_id`). Sa portée est géométrique : les masques complexes et chevauchements restent bloqués tant que leur surface visible n'est pas établie ; la qualité, les droits et la fidélité ne sont pas déduits du ratio.
 
-La revue d'étape fournit cinq notes explicites, un rôle de réviseur, ses preuves et un reçu d'indépendance lié au même run et au même passage. Les critères/ancres sont dans `data/stages.json` embarqué. `stage-report` calcule l'état à partir des obligations et de cette revue ; il ne génère pas une note à la place du réviseur. Les deux revues globales finales restent requises en plus des treize rapports d'étape.
+La revue d'étape fournit cinq notes explicites, un rôle de réviseur, ses preuves et un reçu d'indépendance lié au même run et au même passage. Les critères/ancres sont dans `data/stages.json` embarqué. `stage-report` calcule l'état à partir des obligations et de cette revue ; il ne génère pas une note à la place du réviseur. Les deux revues globales finales restent requises en plus des rapports d’étape applicables.
+
+## Parcours web
+
+Lire [le contrat web](web-delivery.md) et `contracts/web-plan.schema.json`. Le starter choisit explicitement web ; une ancienne initialisation sans format/profil reste documentaire.
+
+| Opération | Commande après le lanceur |
+|---|---|
+| Installation de publication (une fois) | `publication-setup WORKSPACE --owner RESPONSABLE [--org ID] [--credential-ref vercel_cli ou env:VARIABLE]` |
+| Accès actuels sans écriture | `web preflight RUN [--policy POLITIQUE_PRIVEE]` |
+| Chronomètre complet depuis init | `web budget RUN` |
+| Projection publique évaluée | `web release RUN` |
+| Film H.264 inchangé | `web media-index RUN --source FILM --output INDEX` |
+| Plan avant homepage | `web plan RUN --source SITE_DIR --plan PLAN.json` ; correction explicite `--supersedes SHA256 --reason RAISON` |
+| Build exact | `web build RUN --source SITE_DIR --plan PLAN.json` |
+| Preuves navigateur | `web inspect RUN` (deux moteurs par défaut) |
+| Preview puis contrôle public | `web publish RUN [--policy POLITIQUE_PRIVEE]` ; `web verify RUN [--policy POLITIQUE_PRIVEE]` |
+
+`inspect` ne note pas la créativité. `publish` ne crée aucun projet et n’autorise aucun changement de domaine. Une issue inconnue reste distincte ; relire son reçu avant de répéter. `verify` refait le readback des octets publics et réutilise les preuves navigateur seulement si elles restent valides ; la première heure vérifiée ne change pas. Le dépassement reste `FAIL_TIMING`, indépendamment du statut mécanique.
 
 ## Progression et portée
 
-Avant la fabrication complète du deck, `check-experience RUN_DIR --composition-plan-only` vérifie la carte K01–K08, le plan visuel et le pilote inspecté, puis enregistre `composition-plan-review` lié aux entrées courantes. Ce mode ne demande aucun PDF final ; les sorties complètes déclarées doivent encore être inexistantes. Lire [le format préalable](experience-evidence.md#plan-de-composition-préalable). Les flags `--inputs-only` et `--composition-plan-only` sont exclusifs : le premier précède la création du site, le second précède la déclinaison du deck. Leur PASS est mécanique, sans note esthétique.
+En documents, avant la fabrication complète du deck, `check-experience RUN_DIR --composition-plan-only` vérifie la carte K01–K08, le plan visuel et le pilote inspecté, puis enregistre `composition-plan-review` lié aux entrées courantes. Ce mode ne demande aucun PDF final ; les sorties complètes déclarées doivent encore être inexistantes. Lire [le format préalable](experience-evidence.md#plan-de-composition-préalable). Les flags `--inputs-only` et `--composition-plan-only` sont exclusifs : le premier précède la création du site, le second précède la déclinaison du deck. Leur PASS est mécanique, sans note esthétique.
 
-`next-stage RUN_DIR` indique le premier passage applicable non validé. `check-experience RUN_DIR --inputs-only` vérifie les inputs et le reçu de lecture avant les rendus, sans qualifier la création. `check-experience RUN_DIR` vérifie ensuite lecture préalable, exploration, sélection et développement ; `--stage client.composition` inclut la carte de récit et les pages du PDF. Le défaut d'un nouveau run demande au moins deux mondes centraux avant sélection. `--creative-mandate` s'emploie seulement avec une instruction externe de nombre ou de direction déjà choisie, vérifiée et liée dès l'initialisation. Lire [les champs attendus](experience-evidence.md) avant de créer les artefacts. `freeze-creatives` refuse le gel sans ces preuves. `inspect --help` expose `--max-pages` pour une limite explicitement demandée ; aucune limite par défaut. Ces contrôles ne produisent pas une note esthétique.
+`next-stage RUN_DIR` indique le premier passage applicable non validé. `check-experience RUN_DIR --inputs-only` vérifie les inputs et le reçu de lecture avant les rendus, sans qualifier la création. `check-experience RUN_DIR` vérifie ensuite lecture préalable, exploration, sélection et développement ; `--stage client.composition` inclut la carte de récit et les pages du PDF en documents ; le profil web contrôle son plan et ses preuves HTML. Le défaut d'un nouveau run demande au moins deux mondes centraux avant sélection. `--creative-mandate` s'emploie seulement avec une instruction externe de nombre ou de direction déjà choisie, vérifiée et liée dès l'initialisation. Lire [les champs attendus](experience-evidence.md) avant de créer les artefacts. `freeze-creatives` refuse le gel sans ces preuves. `inspect --help` expose `--max-pages` pour une limite explicitement demandée ; aucune limite par défaut. Ces contrôles ne produisent pas une note esthétique.
 
 ## Exécution native et mesures
 

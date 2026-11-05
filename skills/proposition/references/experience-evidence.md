@@ -4,7 +4,7 @@ Ce format est consommé par le moteur ; il ne constitue pas une deuxième procé
 
 ## Périmètre et progression
 
-Profil : `parameters.delivery_scope` vaut `full` par défaut ou `client` pour PDF/PPTX client seuls. Aucune limite de pages implicite. Pour une limite demandée explicitement, transmettre `--max-pages N` à l’inspection du PDF et consigner ce périmètre dans le reçu de revue.
+Profil documentaire : `parameters.delivery_scope` vaut `full` par défaut ou `client` pour PDF/PPTX client seuls. Le format `web` conserve les preuves créatives communes et emploie [son plan/build/inspection](web-delivery.md) pour la composition et la remise, sans réactiver les fichiers documentaires. Aucune limite de pages implicite en documents ; une limite explicite est consignée et transmise à l'inspection.
 
 Avant de changer d’étape :
 

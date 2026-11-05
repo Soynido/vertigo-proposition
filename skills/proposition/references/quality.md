@@ -1,5 +1,7 @@
 # Décision de qualité et de remise
 
+Lire le format enregistré. Les critères de fond restent communs ; en `web`, [le contrat du format](web-delivery.md) remplace les preuves de pages/PPTX par le vrai build, ses états, actions et vérification publique. En `documents`, les contrôles de structure, édition et fidélité PDF/PPTX restent intacts. Aucun score moteur ou accès public ne vaut qualité créative.
+
 Les barèmes suivants sont **candidats**, sans calibration humaine. Ils structurent un jugement, pas une garantie créative. Évaluer chaque critère à 0, 1 ou 2 avec observation localisée : 0 = défaut majeur, 1 = résultat partiel, 2 = critère démontré. Les ancrages spécifiques sont ci-dessous.
 
 | Revue direction | 0 | 1 | 2 |

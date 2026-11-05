@@ -8,7 +8,11 @@ license: MIT
 
 Recevoir brief public, observations, créations inspectées et histoire. Lire [le contrat de montage](../proposition-story/references/argument.md) puis [la composition](references/composition.md). Un propriétaire maintient la source HTML/CSS canonique et les médias locaux.
 
-## Composer depuis l'argument
+## Format web
+
+Si le run est `web`, suivre [le contrat web](../proposition/references/web-delivery.md), avec les mêmes fonctions commerciales et le contexte créatif continu. Enregistrer `web plan` avant d'écrire la homepage ; adapter les modules reçus ou justifier un mécanisme spécifique, construire le vrai HTML et conserver intentions/médias/actions. `web build` puis `web inspect` contrôlent la révision exacte ; les deux revues client jugent ses scènes et son argument. Le coordinateur publie et vérifie ensuite via la politique privée. Aucun PDF/PPTX, catalogue de slides ou dossier interne n'est requis par ce format. Les sections suivantes décrivent `documents`.
+
+## Composer les documents depuis l'argument
 
 Préparer `client-story-map` : titres-conclusions, preuves, scènes, bénéfices envisagés, travail de Vertigo et transitions. Le récit conduit de l'identité reconnue à une opportunité étayée, sa réponse visible, la mission et la prochaine décision. Choisir nombre de pages, cadrages et rythme selon cette marque. Les moments ouverture/révélation/action qualifient la création du site ; ils ne deviennent pas trois slides obligatoires par piste.
 

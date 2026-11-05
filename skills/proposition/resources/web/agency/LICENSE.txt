@@ -1,0 +1,11 @@
+The Poppins font files are distributed under the SIL Open Font License in
+OFL-Poppins.txt. That license applies to those fonts, not to VERTIGO trademarks.
+
+The VERTIGO wordmark graphic and agency reference media identify VERTIGO in
+proposals prepared through this workflow, as authorized by its owner. They are
+not covered by the repository's MIT software license. No trademark ownership,
+third-party portfolio rights, or right to represent agency media as a prospect's
+own products, premises or results is granted by their inclusion.
+
+No proprietary Didot font file is included. The wordmark is a native raster
+of the owner-selected agency identity, not a general-purpose font.

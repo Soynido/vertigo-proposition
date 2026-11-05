@@ -8,6 +8,8 @@ license: MIT
 
 L'URL suffit pour commencer. Rechercher le contexte au lieu de réclamer un brief déjà rédigé. Lire [la couverture](references/coverage.md) pour les menus, les canaux et la représentation de l'entreprise.
 
+Lire le format enregistré. En `web`, appliquer aussi [la passation de matière](../proposition/references/web-delivery.md#sources-et-matière-disponible) : identifier images et vrais films, leurs pages/URL et observations utiles ; récupérer seulement les fichiers utiles dans le run, vérifier contenu/décodage et conserver octets/empreintes/transformations/droits. Le worker rend fichiers et inventaire comme candidats ; le coordinateur les adopte et enregistre leurs références publiques avant le brief. Une vidéo inaccessible n'est pas remplacée silencieusement par son poster. Les limites du collecteur se complètent dans son registre avec les outils de l'hôte, sans nouveau pipeline.
+
 ## Entrée et travail
 
 Recevoir l'URL, les contraintes connues et l'état de collecte encore valide. Utiliser le navigateur rendu du moteur installé lorsqu'il est disponible ; conserver un reçu exact de son usage. Sur desktop puis mobile, ouvrir tous les menus et sous-menus, scroller les contenus révélés et documenter les destinations, états et erreurs. Consigner aussi les réseaux, documents, médias et parcours reliés à l'entreprise.

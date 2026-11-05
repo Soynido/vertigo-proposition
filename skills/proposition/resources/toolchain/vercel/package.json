@@ -1,0 +1,10 @@
+{
+  "name": "vertigo-proposition-publication-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Installation-only pinned CLI for static preview deployment",
+  "license": "MIT",
+  "dependencies": {
+    "vercel": "65.11.0"
+  }
+}

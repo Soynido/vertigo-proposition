@@ -47,7 +47,8 @@ def measure(run_dir, *, quota=None, source=None):
     return result
 
 
-def doctor(*, check_presentations=False):
+def doctor(*, check_presentations=False, delivery_format='documents'):
+    if delivery_format not in ('web','documents'):raise ValueError('Unknown delivery format')
     dependencies = {}
     for name in ('jsonschema', 'playwright', 'pypdf', 'pypdfium2', 'Pillow'):
         try:
@@ -55,6 +56,8 @@ def doctor(*, check_presentations=False):
         except importlib.metadata.PackageNotFoundError:
             dependencies[name] = None
     browser = {'status': 'UNAVAILABLE'}
+    browsers={'chromium':browser}
+    if delivery_format=='web':browsers['webkit']={'status':'UNAVAILABLE'}
     try:
         from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
@@ -62,19 +65,28 @@ def doctor(*, check_presentations=False):
             try:
                 instance, channel = launch_browser(p)
                 browser = {'status': 'AVAILABLE', 'version': instance.version, 'channel': channel}
+                browsers['chromium']=browser
                 instance.close()
             except Exception:
                 pass
+            if delivery_format=='web':
+                try:
+                    instance=p.webkit.launch(headless=True)
+                    browsers['webkit']={'status':'AVAILABLE','version':instance.version}
+                    instance.close()
+                except Exception:
+                    pass
     except ImportError:
         pass
     from . import presentation_probe
     presentation = presentation_probe.probe() if check_presentations else {
         'status': 'NOT_TESTED', 'tools': presentation_probe.inventory(), 'client_fidelity': 'NOT_RUN'}
-    ready = all(dependencies.values()) and browser['status'] == 'AVAILABLE'
+    ready = all(dependencies.values()) and all(v['status']=='AVAILABLE' for v in browsers.values())
     if check_presentations: ready = ready and presentation['status'] == 'PASS'
     return {'status': 'PASS' if ready else 'BLOCKED',
             'scope': 'local_runtime_only', 'python': platform.python_version(), 'dependencies': dependencies,
-            'browser': browser, 'contracts': state.CONTRACT_ROOT.is_dir(), 'registry': state.DATA_ROOT.is_dir(),
+            'browser': browser, 'browsers':browsers, 'delivery_format':delivery_format,
+            'contracts': state.CONTRACT_ROOT.is_dir(), 'registry': state.DATA_ROOT.is_dir(),
             'creative_quality': 'NOT_RUN', 'fresh_agent_contexts': 'HOST_REQUIRED', 'image_editing': 'HOST_REQUIRED',
             'sites': 'ADAPTER_NOT_CONFIGURED', 'private_connector': 'ADAPTER_NOT_CONFIGURED',
             'live_publication': 'NOT_RUN', 'slash_command': 'HOST_DEPENDENT',
@@ -109,7 +121,12 @@ def parser():
     sub = p.add_subparsers(dest='command', required=True)
     doctor_parser = sub.add_parser('doctor')
     doctor_parser.add_argument('--presentations', action='store_true', help='Test a real local editable/rendered PPTX fixture')
+    doctor_parser.add_argument('--delivery-format',choices=['web','documents'],default='documents')
+    s=sub.add_parser('publication-setup');s.add_argument('workspace',type=Path)
+    s.add_argument('--owner',required=True);s.add_argument('--org')
+    s.add_argument('--credential-ref',default='vercel_cli',help='Private CLI login or env:VARIABLE reference, never an inline token')
     s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path); s.add_argument('--creative-mandate', type=Path); s.add_argument('--audience-handoff-contract', type=int, choices=[1,2], default=2); s.add_argument('--execution-config', type=Path)
+    s.add_argument('--delivery-format', choices=['web', 'documents'], help='Explicit format; omitted keeps the profile or legacy documents')
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
     s.add_argument('--concurrency',type=int,choices=[1,2,4],default=1)
     s.add_argument('--proof-storage',choices=['expanded','content_addressed'],default='expanded')
@@ -150,6 +167,14 @@ def parser():
     s = sub.add_parser('task-event');s.add_argument('run_dir',type=Path);s.add_argument('event',type=Path)
     s = sub.add_parser('accept-task-result');s.add_argument('run_dir',type=Path);s.add_argument('result',type=Path)
     s = sub.add_parser('execution-status');s.add_argument('run_dir',type=Path)
+    s = sub.add_parser('web');s.add_argument('operation',choices=['preflight','budget','release','media-index','plan','build','inspect','publish','verify']);s.add_argument('run_dir',type=Path)
+    s.add_argument('--source',type=Path);s.add_argument('--plan',type=Path)
+    s.add_argument('--output',type=Path,help='Run-local unchanged-film index destination; media-index only')
+    s.add_argument('--supersedes',help='Exact predecessor SHA256 for an explicit experience-plan correction')
+    s.add_argument('--reason',help='Reason for the experience-plan correction; no silent reselection')
+    s.add_argument('--policy',type=Path,help='Private workspace publication policy; contains credential references only')
+    s.add_argument('--browser',choices=['chromium','webkit'],action='append',help='Default: both engines; a partial probe does not qualify the missing engine')
+    s.add_argument('--retry',action='store_true',help='Keep the previous inspection and create a new attempt')
     return p
 
 
@@ -161,6 +186,64 @@ def execute(a):
 
 def _execute(a):
     c = a.command
+    if c=='publication-setup':
+        from .web_setup import configure_publication
+        result=configure_publication(a.workspace,a.owner,a.org,credential_ref=a.credential_ref)
+        return {key:result[key] for key in ('status','phase','authority','project_name','project_id',
+            'policy_path','per_run_target','prospect_publication') if key in result}
+    if c == 'web':
+        from . import web
+        if a.operation=='preflight':
+            from .web_publication import preflight_run
+            if a.source or a.output or a.plan or a.browser or a.retry or a.supersedes or a.reason:
+                raise ValueError('web preflight checks the installed policy only, without writes')
+            return preflight_run(a.run_dir,a.policy)
+        if a.operation=='plan':
+            if not a.source or not a.plan or a.output or a.policy or a.browser or a.retry:
+                raise ValueError('web plan requires --source and --plan before writing the homepage')
+            return web.plan_run(a.run_dir,a.source,a.plan,supersedes=a.supersedes,reason=a.reason)
+        if a.supersedes or a.reason:raise ValueError('Plan revision arguments belong to web plan only')
+        if a.operation=='budget':
+            from .web_timing import budget
+            if a.source or a.output or a.plan or a.policy or a.browser or a.retry:
+                raise ValueError('web budget is a read-only complete run clock')
+            return budget(state.load_run(a.run_dir))
+        if a.operation=='release':
+            from .web_inputs import prepare_release
+            if a.source or a.output or a.plan or a.policy or a.browser or a.retry:
+                raise ValueError('web release uses the assessed canonical public input allowlist')
+            row=prepare_release(a.run_dir)
+            return {'status':'PREPARED','scope':'creative_inputs_only_not_external_publication',
+                'authority':'verified_public_source_projection','path':row['path'],'sha256':row['sha256']}
+        if a.operation=='media-index':
+            if not a.source or not a.output or a.plan or a.policy or a.browser or a.retry:
+                raise ValueError('web media-index requires only --source and --output within the run')
+            run=state.load_run(a.run_dir);root=Path(run['root'])
+            if state.delivery_format(run)!='web':raise ValueError('web media-index requires a web run')
+            source=state._safe_path(root,a.source);output=state._safe_path(root,a.output,exists=False)
+            return web.index_film(source,output)
+        if a.output:raise ValueError('--output belongs to web media-index only')
+        if a.operation in ('publish','verify'):
+            from . import web_publication
+            if a.source or a.plan or a.browser or a.retry:
+                raise ValueError('Publication consumes the accepted registered build and browser checks')
+            policy=a.policy or state.load_run(a.run_dir)['profile']['parameters'].get('publication_policy')
+            if not policy:
+                raise ValueError('The private workspace publication policy is not configured')
+            result=(web_publication.publish_run if a.operation=='publish' else web_publication.verify_run)(a.run_dir,policy)
+            return {key:result[key] for key in ('status','scope','url','build_id','run_id','authority','authentication_used','timing','delivery_status') if key in result}
+        if a.operation=='build':
+            if not a.source or not a.plan or a.browser or a.retry or a.policy:
+                raise ValueError('web build requires --source and --plan; browser options belong to inspect')
+            result=web.build_run(a.run_dir,a.source,a.plan)
+            return {key:result[key] for key in ('status','scope','creative_quality','build_id','manifest_path','run_id') if key in result}
+        if a.source or a.plan or a.policy:
+            raise ValueError('web inspect consumes the registered exact build, not replacement inputs')
+        result=web.inspect_run(a.run_dir,browsers=tuple(a.browser or ['chromium','webkit']),retry=a.retry)
+        row=state.load_run(a.run_dir)['artifacts']['web-inspection']
+        return {key:result[key] for key in ('status','scope','creative_quality','build_id','run_id')} | {
+            'report_path':str(a.run_dir/row['path']), 'capture_count':len(result['captures']),
+            'issue_count':len(result['issues']),'issues':result['issues'][:3]}
     if c in ('ready-tasks','claim-task','task-event','accept-task-result','execution-status'):
         from . import execution
         from .transactions import read_json as read_execution_json
@@ -200,7 +283,7 @@ def _execute(a):
     if c in ('freeze-creatives', 'check-creatives'):
         from .preservation import freeze_creatives, inspect_preservation
         return freeze_creatives(a.run_dir, read_json(a.selection)) if c == 'freeze-creatives' else inspect_preservation(state.load_run(a.run_dir))
-    if c == 'doctor': return doctor(check_presentations=a.presentations)
+    if c == 'doctor': return doctor(check_presentations=a.presentations,delivery_format=a.delivery_format)
     if c == 'history':
         from . import history
         if a.operation == 'collect': return history.collect(a.run_dir,a.urls)
@@ -221,7 +304,8 @@ def _execute(a):
         return state.init_run(a.url, a.runs_root, read_json(a.profile) if a.profile else None,
             creative_mandate=json.loads(read_mandate_input(a.creative_mandate)) if a.creative_mandate else None,
             audience_handoff_contract=a.audience_handoff_contract,
-            execution_config=read_json(a.execution_config) if a.execution_config else None)
+            execution_config=read_json(a.execution_config) if a.execution_config else None,
+            delivery_format=a.delivery_format)
     if c == 'validate': return state.validate_run(a.run_dir)
     if c == 'next-stage': return state.next_stage(a.run_dir)
     if c == 'check-experience':
@@ -278,7 +362,7 @@ def main(argv=None):
         if getattr(args,'run_dir',None) is not None and args.command not in ('metrics','ready-tasks','execution-status'):
             from .telemetry import TraceRecorder
             with TraceRecorder(args.run_dir) as trace:
-                with trace.span('cli.command', command=args.command):
+                with trace.span('cli.command', command=args.command,**({'operation':args.operation} if hasattr(args,'operation') else {})):
                     result = execute(args)
         else:
             result = execute(args)
@@ -296,6 +380,7 @@ def main(argv=None):
     if args.command in ('claim-task','task-event','accept-task-result'):
         if result.get('status')=='UNKNOWN_OUTCOME':return 5
         if result.get('status')=='REJECTED_STALE':return 3
+    if args.command in ('web','publication-setup') and result.get('status')=='UNKNOWN_OUTCOME':return 5
     return 2 if str(result.get('status', '')).upper() in ('FAIL','BLOCKED','STALE','PARTIAL','UNAVAILABLE') else 0
 
 

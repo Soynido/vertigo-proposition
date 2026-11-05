@@ -92,7 +92,7 @@ Remplacer les deux valeurs, sans ajouter de capsule, nombre de directions, plan 
 
 ## Après le test
 
-- [ ] Vérifier chaque nouvelle exigence dans les fichiers et traces exacts ; vérifier aussi les fonctions antérieures susceptibles de régresser. Pour une présentation, inspecter toutes les pages du PDF et les slides du PPTX, l'histoire, les preuves, le niveau créatif, la conservation des scènes et l'édition réelle selon les contrats applicables.
+- [ ] Vérifier chaque nouvelle exigence dans les fichiers et traces exacts ; vérifier aussi les fonctions antérieures susceptibles de régresser. En web, inspecter les HTML exacts, tous leurs états/pages, médias et actions, puis le lien public anonyme et la durée complète. En documents, inspecter toutes les pages du PDF et les slides du PPTX, l'histoire, les preuves, le niveau créatif, la conservation des scènes et l'édition réelle selon les contrats applicables.
 - [ ] Juger la qualité indépendamment des notes auteur, avec défauts localisés et critères critiques non compensables. Un E2E autonome peut être de mauvaise qualité ; une conformité mécanique ne démontre pas le WOW.
 - [ ] Consigner URL repo/site, commit/arbre, installation et hashes des contrats, entrée initiale exacte, contexte/isolation, interventions éventuelles, étapes et verdicts, fichiers/hashes, défauts, limites et décision. Les sources client et reçus privés restent hors du dépôt public.
 - [ ] Toute aide ou correction passe dans les instructions/ressources/code canoniques appropriés, puis le comportement affecté est vérifié. La promotion du delta intégré exige un nouveau run neutre sur ce delta ; ne pas transformer le run accompagné en témoin autonome.

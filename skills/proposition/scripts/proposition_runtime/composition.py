@@ -12,12 +12,47 @@ OUTPUTS = {'client-source': '.html', 'presentation-catalog': '.json',
 CLIENT_INPUTS = tuple('artifact:'+x for x in
     ('client-source', 'presentation-catalog', 'client-pdf', 'client-pptx',
      'client-story-map', 'client-story', 'composition-plan-review'))
+WEB_CLIENT_INPUTS = tuple('artifact:'+x for x in
+    ('web-plan','web-build','web-inspection','web-sources',
+     'creative-inputs','creative-experience','creative-exploration','creative-reading'))
 DERIVATIVES = {'sales-source', 'sales-pdf', 'sales-playbook', 'follow-up-register',
                'technical-source', 'technical-pdf', 'technical-handoff', 'client-context'}
 
 
 def enabled(run):
     return run.get('metadata', {}).get('sales_kit_contract') == 1
+
+
+def client_inputs(run):
+    return WEB_CLIENT_INPUTS if state.delivery_format(run)=='web' else CLIENT_INPUTS
+
+
+def commercial_details(run, by_id):
+    """The same commercial obligations apply to web and documentary plans."""
+    from .experience import _text
+    dependencies=set()
+    try:
+        _text(by_id['K03']['mechanism'], 'shown approach mechanism')
+        _text(by_id['K06']['effect'], 'conditional visitor/business effect')
+        for lever in ('acquisition','conversion'):
+            measure=by_id['K06']['measurement'][lever]
+            _text(measure['indicator'],lever+' indicator')
+            if measure['data_status']=='available':
+                _public_proof(run,measure['proof']);dependencies.add(measure['proof'])
+            elif measure['data_status'] in ('unknown','not_applicable'):
+                _text(measure['reason'],lever+' measurement limit')
+            else:
+                raise ValueError('Measurement must separate available, unknown and not_applicable')
+        mission=by_id['K07']['mission'];_text(mission['scope'],'agency realization scope')
+        for field in ('included','excluded','conditions'):
+            values=mission[field]
+            if not isinstance(values,list) or not values:
+                raise ValueError('Agency mission needs explicit '+field)
+            for value in values:_text(value,'mission '+field)
+        _text(by_id['K08']['decision'],'next client agreement')
+    except (KeyError,TypeError) as error:
+        raise ValueError('Missing commercial mechanism, measurement, mission or decision') from error
+    return dependencies
 
 
 def _current(run, reference):
@@ -39,6 +74,10 @@ def _public_proof(run, reference):
             raise ValueError('Composition facts need explicit public allowance')
         for identifier in record['source_ids']:
             _public_proof(run, 'source:'+identifier)
+    elif reference.startswith('source:') and record.get('kind')=='public':
+        # Internal storage of a public capture is not permission to copy its
+        # raw file, but it remains valid provenance for a reviewed public claim.
+        return
     elif record.get('audience') not in ('public', 'client') or record.get('kind') in ('private', 'generated'):
         raise ValueError('Composition proof must be public, never private or generated')
 
@@ -76,25 +115,7 @@ def _plan(run):
             raise ValueError('A commercial visual must be in the public project packet')
         dependencies.add(row['visual_ref'])
     by_id = {row['id']: row for row in coverage}
-    _text(by_id['K03']['mechanism'], 'shown approach mechanism')
-    _text(by_id['K06']['effect'], 'conditional visitor/business effect')
-    for lever in ('acquisition', 'conversion'):
-        measure = by_id['K06']['measurement'][lever]
-        _text(measure['indicator'], lever+' indicator')
-        if measure['data_status'] == 'available':
-            _public_proof(run, measure['proof']); dependencies.add(measure['proof'])
-        elif measure['data_status'] in ('unknown', 'not_applicable'):
-            _text(measure['reason'], lever+' measurement limit')
-        else:
-            raise ValueError('Measurement must separate available, unknown and not_applicable')
-    mission = by_id['K07']['mission']
-    _text(mission['scope'], 'agency realization scope')
-    for field in ('included', 'excluded', 'conditions'):
-        values = mission[field]
-        if not isinstance(values, list) or not values:
-            raise ValueError('Agency mission needs explicit '+field)
-        for value in values: _text(value, 'mission '+field)
-    _text(by_id['K08']['decision'], 'next client agreement')
+    dependencies.update(commercial_details(run, by_id))
     passages = plan['visual_plan']
     if len(passages) != 3 or {row['role'] for row in passages} != {
             'opening', 'proof_to_proposal', 'proposal_to_decision'}:
