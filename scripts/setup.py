@@ -26,7 +26,9 @@ def workspace_entry(workspace,host,update):
         'When a task gives the Vertigo Proposition repository URL followed by a prospect URL, '
         f'read `{skill}` and follow its installed contracts. The standard delivery is web; '
         'honor an explicit documents request when initializing a new run. '
-        'Read `.vertigo/setup.json` for the installed launcher and `.vertigo/profile.json` for private configuration. '
+        f'Read `.vertigo/setup-{host}.json` for the installed launcher (legacy fallback `.vertigo/setup.json`) and `.vertigo/profile.json` for private configuration. '
+        'For a Codex workspace with native_observer.enabled, read the principal skill reference '
+        '`references/native-startup.md` before init: the calling lane opens its own view; the identified native worker continues without recursive bootstrap. '
         'Keep runs outside the source checkout. Do not modify or push to the distribution repository.\n'+STARTER_END)
     if STARTER_BEGIN in previous or STARTER_END in previous:
         if previous.count(STARTER_BEGIN)!=1 or previous.count(STARTER_END)!=1:
@@ -65,10 +67,15 @@ def main():
     parser.add_argument('--vercel-org',help='Optional Vercel organization; otherwise use the CLI selected organization')
     parser.add_argument('--vercel-credential-ref',help='Private credential reference: vercel_cli or env:VARIABLE; never a token value')
     parser.add_argument('--with-upstream', action='store_true', help='Fetch pinned open source skill distributions without executing them')
+    parser.add_argument('--with-native-observer',action='store_true',help='Explicit Codex Desktop native transport and same-lane observer setup')
+    parser.add_argument('--native-model');parser.add_argument('--native-effort',choices=['low','medium','high','xhigh','max','ultra'])
     parser.add_argument('--with-presentations', action='store_true', help='Install the locked python-pptx profile and test authoring, editing and rendering')
     parser.add_argument('--with-system-deps', action='store_true', help='Explicitly install Linux browser/LibreOffice packages; requires root, never invokes sudo')
     parser.add_argument('--update', action='store_true')
     a = parser.parse_args()
+    if a.with_native_observer and (not a.workspace or a.host!='codex' or not a.native_model or not a.native_effort):
+        parser.error('--with-native-observer requires a Codex workspace and explicitly selected --native-model / --native-effort')
+    if (a.native_model or a.native_effort) and not a.with_native_observer:parser.error('Native model settings require --with-native-observer')
     if a.with_publication and (not a.workspace or not a.owner or a.delivery_format!='web'):
         parser.error('--with-publication requires a web workspace and its explicit --owner')
     if a.vercel_org and not a.with_publication:parser.error('--vercel-org requires --with-publication')
@@ -109,6 +116,9 @@ def main():
               'launcher': str(launcher), 'host_capabilities': 'NOT_VERIFIED_BY_INSTALLER',
               'prospect_e2e': 'NOT_RUN', 'profile': 'presentations' if a.with_presentations else 'core',
               'required_mcp': [], 'source_write_access_required': False}
+    previous_setup=workspace/('.vertigo/setup-'+a.host+'.json') if workspace else None
+    report['native_observer']=(json.loads(previous_setup.read_text()).get('native_observer',{'enabled':False})
+        if a.update and previous_setup and previous_setup.is_file() else {'enabled':False})
     for key, revision in (('source_commit', 'HEAD'), ('source_tree', 'HEAD^{tree}')):
         try:
             resolved = subprocess.run(['git','-C',str(root),'rev-parse',revision],
@@ -165,6 +175,13 @@ def main():
         phase = 'upstream'
         if a.with_upstream:
             subprocess.run([str(python),str(launcher),'upstream','fetch'],check=True)
+        if a.with_native_observer:
+            phase='native_transport'
+            checked=subprocess.run([str(python),str(launcher),'native','setup'],capture_output=True,text=True,check=True,timeout=210)
+            transport=json.loads(checked.stdout)
+            if transport.get('status')!='AVAILABLE':raise ValueError('Native transport installation is not confirmed')
+            report['native_observer']={'enabled':True,'model':a.native_model,'effort':a.native_effort,
+                'execution':'owned_app_server','scope':'production_execution_tree_not_separate_desktop_turn','transport':transport}
         if a.with_publication:
             phase='publication_setup'
             command=[str(python),str(launcher),'publication-setup',str(workspace),'--owner',a.owner]

@@ -27,7 +27,7 @@ FORM_GUARD = """(() => {
 async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
                   seeds=None, seen_urls=None, known_urls=None, continuation=None,
                   previous_captured=None, pending_states=None, panel_scan='legacy',
-                  image_wait_policy='legacy', proof_storage='expanded'):
+                  image_wait_policy='legacy', proof_storage='expanded',excluded_urls=None):
     if type(concurrency) is not int or concurrency not in (1,2,4):
         raise ValueError('concurrency must be 1, 2 or 4 active visits')
     if panel_scan not in ('legacy','batch') or image_wait_policy not in ('legacy','terminal_aware'):
@@ -74,9 +74,12 @@ async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
         report["continuation"] = continuation
     seen = set(seen_urls or [])
     seed_urls = list(dict.fromkeys(seeds if seeds is not None else [initial]))
-    retries = {(item['url'], item['viewport']): item.get('attempts', 1)+1 for item in (pending_states or [])}
-    retry_urls = list(dict.fromkeys(item['url'] for item in (pending_states or [])))
-    queue = deque(retry_urls + [value for value in seed_urls if value not in seen and value not in retry_urls])
+    excluded=set(excluded_urls or [])
+    retries = {(item['url'], item['viewport']): item.get('attempts', 1)+1 for item in (pending_states or [])
+               if item.get('attempts',1)<2 and item['url'] not in excluded}
+    retry_urls = list(dict.fromkeys(url for url,_ in retries))
+    queue = deque(retry_urls + [value for value in seed_urls if value not in seen and value not in retry_urls
+        and value not in excluded and (value==initial or d.destination_kind(value)=='page')])
     queued = set(known_urls or []) | seen | set(seed_urls)
     socials: dict[str, dict] = {}
     assets: dict[str, dict] = {}
@@ -109,7 +112,7 @@ async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
                 candidate(socials, normalized, source_id, "visible_link")
             elif d._origin(normalized) == d._origin(initial) and normalized not in queued:
                 queued.add(normalized)
-                queue.append(normalized)
+                if d.destination_kind(normalized)=='page' and normalized not in excluded:queue.append(normalized)
         for item in snapshot["assets"]:
             if not item["url"]:
                 continue
@@ -329,7 +332,10 @@ async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
          'unresolved':p.get('exploration',{}).get('unresolved',['navigation_unavailable'])}
         for p in report['pages'] if p['status'] in {'partial','error','unavailable'}]
     report['coverage']['pending_states'].extend(item for item in (pending_states or [])
-        if item['url'] not in report['coverage']['attempted_urls'])
+        if (item['url'],item['viewport']) not in {(p['requested_url'],p['viewport']) for p in report['pages']})
+    report['coverage']['destinations']=[{'url':url,'kind':d.destination_kind(url),
+        'type_verified':False,'classification_basis':'url_suffix_hint' if d.destination_kind(url)!='page' else 'html_candidate',
+        'scope':'other_entity' if url in excluded else 'required_or_resource'} for url in sorted(queued)]
     report["coverage"]["known_frontier_exhausted"] = not queue
     report['coverage']['rendered_scope_complete'] = not queue and not report['coverage']['pending_states']
     report["coverage"]["cumulative_captured_urls"] = sorted(set(previous_captured or []) | set(report["coverage"]["captured_urls"]))

@@ -2,7 +2,7 @@
 
 `measure` conserve le temps depuis création et les relevés de quota historiques. `metrics RUN_DIR` lit les traces locales sans modifier l’état métier. La durée d’un test ou le quota partagé ne constitue pas le coût d’un run prospect.
 
-Les commandes sur un run produisent des traces techniques sous `telemetry/`, sauf la lecture `metrics` elle-même. Les spans connus enregistrent début/fin, horloge monotone et issue technique. Une commande réussie peut retourner un gate métier bloqué : aucun PASS métier n’est déduit du temps mesuré. Les lecteurs et validateurs instrumentés donnent leurs compteurs réels ; les phases non instrumentées restent inconnues.
+Les commandes sur un run produisent des traces techniques sous `telemetry/`, sauf la lecture `metrics` elle-même. Les spans connus enregistrent début/fin, horloge monotone et issue technique ; `business_status` conserve séparément le statut métier retourné lorsqu'il est connu. Une commande réussie peut retourner un gate métier bloqué : aucun PASS métier n’est déduit du temps mesuré. Les lecteurs et validateurs instrumentés donnent leurs compteurs réels ; les phases non instrumentées restent inconnues.
 
 Un journal par processus ; aucune soustraction entre domaines d’horloge distincts. Le travail cumulé utilise les feuilles ; l’union instrumentée et les attentes ne comptent pas deux fois un parent et son enfant. Plusieurs domaines ou une trace incomplète empêchent une union globale exacte. Les tokens et temps hôte non exposés restent `null`.
 
@@ -29,6 +29,8 @@ Pour un nouveau run, `init URL --execution-config CONFIG.json` accepte un objet 
 En web, les nouveaux runs sans réglage explicite figent concurrence `2`, `max_host_tasks:2`, présélection `batch`, attente `terminal_aware` et preuves `content_addressed`. Les anciens runs et documents gardent leurs réglages. Lancer au plus deux tâches indépendantes et un prospect en qualification à la fois. `web budget` garde le temps depuis init : objectif 600 secondes, plafond 1 200, sans remise à zéro ; les temps du tour hôte avant/après restent à mesurer.
 
 ## Coordinateur et tâches natives
+
+L'observateur natif Desktop, lorsqu'il est explicitement installé, démarre via [l'entrée canonique](native-startup.md) avant init. Il observe le contexte de production qu'il possède et ses descendants ; il ne prétend pas s'attacher à un autre tour Desktop. Seuls les agents réels ont des lignes ouvrables. Les commandes déterministes restent dans leur activité, sans rôle supplémentaire. L'ouverture acceptée dans la lane et le rendu réel sont distincts ; aucune lecture humaine n'est requise pour lancer.
 
 Cette voie orchestre les mêmes étapes et gates. Le runtime prépare, réserve et adopte ; l'hôte exécute réellement. Il ne lance aucun modèle externe ni fournisseur payant à la place de l'hôte. Si l'hôte n'expose pas les capacités nécessaires, déclarer la limite ; ne pas inventer un sous-agent, une indépendance ou un résultat. Les commandes de domaine historiques restent utilisables par le coordinateur, avec les mêmes exigences de fraîcheur et d'isolement ; ne pas combiner leurs écritures avec celles d'un worker pour une même tâche.
 

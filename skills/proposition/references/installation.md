@@ -4,6 +4,8 @@ Le dépôt public est une distribution, pas le workspace prospect. Aucun droit d
 
 ## Préparer une fois Codex ou Claude Code
 
+Pour le suivi natif **Codex Desktop** dans la lane, ajouter explicitement à l'installation `--with-native-observer --native-model MODELE_CHOISI --native-effort EFFORT_CHOISI`. Ce réglage se fait une fois ; le futur prompt reste les deux URL. Il installe le transport Codex verrouillé dans un cache isolé et conserve l'abonnement connecté, sans remplacer le CLI global ni modifier son authentification. La lane doit disposer de `open_in_codex` pour son onglet ; cela n'en fait pas un MCP obligatoire pour le parcours Cloud ou Claude sans cet observateur. Un modèle indisponible bloque au lieu d'être remplacé. Lire [le démarrage natif](native-startup.md) pour la portée réelle de la trace et la distinction entre lanceur Desktop et arbre de production.
+
 Créer ou sélectionner son propre workspace privé. Dans Codex Cloud, préparer un environnement personnel. Si l'interface demande un dépôt, sélectionner son propre dépôt privé (un README suffit), autoriser la connexion GitHub sur ce dépôt et actualiser la liste. Ne pas créer une copie sous le compte de Vertigo ni coller une URL dans « Repository name ». L'accès au kit public se fait par téléchargement, sans invitation de collaborateur.
 
 Activer le réseau nécessaire aux sites prospect, médias/CDN, recherche publique, méthodes et à `api.vercel.com`/Vercel. Le preset de gestionnaires de paquets ne couvre pas toute la recherche. Dans l'interface Cloud actuelle, vérifier l'accès Internet public et les destinations autorisées, puis publier l'environnement. Une permission réseau ne fournit pas des identifiants.

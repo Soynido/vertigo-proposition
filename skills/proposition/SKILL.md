@@ -10,10 +10,10 @@ Construire une proposition d'agence propre à l'entreprise, depuis son URL. L'UR
 
 ## Format et première commande
 
-Après installation, deux URL seules déclenchent le parcours **web** : proposition commerciale interactive, sources éditables et lien public Vercel vérifié. Retrouver le profil et le launcher dans `.vertigo/setup.json`, puis initialiser immédiatement :
+Après installation, deux URL seules déclenchent le parcours **web** : proposition commerciale interactive, sources éditables et lien public Vercel vérifié. Retrouver le profil et le launcher dans `.vertigo/setup.json`. Si l'installation Codex active `native_observer.enabled`, appliquer d'abord [le démarrage et l'ouverture dans cette lane](references/native-startup.md) : le lanceur ouvre sa vue puis attend le contexte de production ; le worker identifié poursuit sans démarrage récursif. Initialiser ensuite dans le contexte qui exécute effectivement le workflow :
 
 ```bash
-python3 MAIN_SKILL_DIR/scripts/proposition.py init URL_SITE --profile WORKSPACE/.vertigo/profile.json --delivery-format web
+python3 MAIN_SKILL_DIR/scripts/proposition.py init URL_SITE --profile WORKSPACE/.vertigo/profile.json --delivery-format web --runs-root WORKSPACE/outputs/runs
 ```
 
 Résoudre ces chemins depuis l'installation réelle. Une demande documentaire explicite choisit `--delivery-format documents`. Le format est immuable ; un run historique sans champ de format reste documentaire. Lire [le contrat web](references/web-delivery.md) pour le web ; les obligations PDF/PPTX et dossiers internes ci-dessous concernent seulement `documents`. Le web est un parcours complet de ce format, sans exception de mandat créatif inventée.

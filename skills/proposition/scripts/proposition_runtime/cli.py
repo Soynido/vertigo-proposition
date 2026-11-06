@@ -119,6 +119,9 @@ def workbench(run_dir):
 def parser():
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest='command', required=True)
+    s=sub.add_parser('native');s.add_argument('operation',choices=['setup','context','prepare','serve','opened','status','stop','close-view'])
+    s.add_argument('--workspace',type=Path);s.add_argument('--session',type=Path);s.add_argument('--receipt',type=Path)
+    s.add_argument('--repo-url');s.add_argument('--site-url');s.add_argument('--model');s.add_argument('--effort');s.add_argument('--wait',type=float,default=0)
     doctor_parser = sub.add_parser('doctor')
     doctor_parser.add_argument('--presentations', action='store_true', help='Test a real local editable/rendered PPTX fixture')
     doctor_parser.add_argument('--delivery-format',choices=['web','documents'],default='documents')
@@ -128,14 +131,15 @@ def parser():
     s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path); s.add_argument('--creative-mandate', type=Path); s.add_argument('--audience-handoff-contract', type=int, choices=[1,2], default=2); s.add_argument('--execution-config', type=Path)
     s.add_argument('--delivery-format', choices=['web', 'documents'], help='Explicit format; omitted keeps the profile or legacy documents')
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
-    s.add_argument('--concurrency',type=int,choices=[1,2,4],default=1)
-    s.add_argument('--proof-storage',choices=['expanded','content_addressed'],default='expanded')
-    s.add_argument('--panel-scan',choices=['legacy','batch'],default='legacy');s.add_argument('--image-wait-policy',choices=['legacy','terminal_aware'],default='legacy')
+    s.add_argument('--run-dir',type=Path)
+    s.add_argument('--concurrency',type=int,choices=[1,2,4])
+    s.add_argument('--proof-storage',choices=['expanded','content_addressed'])
+    s.add_argument('--panel-scan',choices=['legacy','batch']);s.add_argument('--image-wait-policy',choices=['legacy','terminal_aware'])
     s = sub.add_parser('prepare-inputs'); s.add_argument('run_dir', type=Path); s.add_argument('manifest', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--timeout-seconds', type=float, default=5)
     s = sub.add_parser('preprocess'); s.add_argument('run_dir', type=Path); s.add_argument('--mode', choices=['auto','codex','cloudflare'])
     s = sub.add_parser('strategy'); s.add_argument('operation', choices=['prepare','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path); s.add_argument('--cache', type=Path); s.add_argument('--stage', choices=['analysis.specialists','company.v2','brief.public'],default='brief.public')
     s = sub.add_parser('history'); s.add_argument('operation', choices=['collect','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--urls', nargs='*', default=[]); s.add_argument('--report', type=Path)
-    s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','check','reconcile','channels','research-plan']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
+    s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','supplement','scope','check','reconcile','channels','research-plan']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
     for command in ('validate', 'receipt', 'workbench', 'next-stage', 'check-experience'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path)
         if command == 'check-experience':
@@ -186,6 +190,32 @@ def execute(a):
 
 def _execute(a):
     c = a.command
+    if c=='native':
+        import os
+        from . import native_session as native
+        caller=os.environ.get('CODEX_THREAD_ID')
+        if a.operation=='setup':
+            from .native_setup import ensure_codex_cli
+            return {'status':'AVAILABLE','executable':ensure_codex_cli(),'scope':'isolated_transport_not_host_qualification'}
+        if a.operation in ('context','prepare'):
+            if not a.workspace:raise ValueError('Native startup requires the installed workspace')
+            if a.operation=='context':return {'status':'WORKER' if native.is_worker(a.workspace,caller) else 'LAUNCHER'}
+            setup=native.workspace_setup(a.workspace);config=setup.get('native_observer',{})
+            if not a.repo_url or not a.site_url:raise ValueError('Native preparation requires exactly the repository and prospect URLs')
+            return native.prepare(a.workspace,a.repo_url+'\n'+a.site_url,
+                model=a.model or config.get('model'),effort=a.effort or config.get('effort'),caller=caller)
+        if not a.session:raise ValueError('Native operation requires its session path')
+        if a.operation=='serve':return native.serve(a.session)
+        if a.operation=='opened':
+            if not a.receipt:raise ValueError('Actual panel-opening receipt is required')
+            return native.register_open(a.session,a.receipt,caller)
+        if a.operation=='status':return native.status(a.session,wait=a.wait)
+        if a.operation=='stop':return native.request_stop(a.session,caller)
+        if a.operation=='close-view':
+            if read_json(a.session/'request.json')['owner_thread_id']!=caller:raise ValueError('View belongs to another lane')
+            if not (a.session/'result.json').exists():raise ValueError('Do not close the view while execution is active')
+            from .publication import write_json
+            write_json(a.session/'close-view.json',{'requested':True});return {'status':'VIEW_CLOSE_REQUESTED'}
     if c=='publication-setup':
         from .web_setup import configure_publication
         result=configure_publication(a.workspace,a.owner,a.org,credential_ref=a.credential_ref)
@@ -274,9 +304,10 @@ def _execute(a):
             from .public_research import prepare
             return prepare(a.run_dir)
         from . import discovery_evidence
-        if a.operation in ('register','reconcile'):
+        if a.operation in ('register','reconcile','scope','supplement'):
             if not a.report: raise ValueError('discovery register/reconcile requires --report')
-            return getattr(discovery_evidence,a.operation)(a.run_dir, a.report)
+            method={'scope':'register_scope','supplement':'register_supplement'}.get(a.operation,a.operation)
+            return getattr(discovery_evidence,method)(a.run_dir, a.report)
         state.invalidate_changed(a.run_dir)
         inspect=discovery_evidence.inspect_channels if a.operation=='channels' else discovery_evidence.inspect_discovery
         return inspect(state.load_run(a.run_dir))
@@ -330,11 +361,22 @@ def _execute(a):
     if c == 'context-packet': return state.build_context_packet(a.run_dir, a.output, a.files)
     if c == 'collect':
         from .discovery import collect, continue_collect
+        from .transactions import execution_metadata
+        config={'concurrency':1,'panel_scan':'legacy','image_wait_policy':'legacy','proof_storage':'expanded'}
+        excluded=None
+        if a.run_dir:
+            run=state.load_run(a.run_dir);config.update({k:v for k,v in execution_metadata(run)['config'].items() if k in config})
+            source=read_json(a.frontier)['input_url'] if a.frontier else a.url
+            if source!=run['url']:raise ValueError('Collection must use the run URL')
+            state._safe_path(Path(run['root']),str(a.output.absolute().relative_to(Path(run['root']))),exists=False)
+            from .discovery_evidence import current_exclusions
+            excluded=list(current_exclusions(run))
+        config={k:getattr(a,k) if getattr(a,k) is not None else v for k,v in config.items()}
         if a.frontier:
             if a.url: raise ValueError('Use the prior report URL when continuing; do not supply a replacement URL')
-            return continue_collect(a.frontier,a.output,allow_local=a.allow_local_fixture,max_pages=a.max_pages,panel_scan=a.panel_scan,image_wait_policy=a.image_wait_policy,proof_storage=a.proof_storage,concurrency=a.concurrency)
+            return continue_collect(a.frontier,a.output,allow_local=a.allow_local_fixture,max_pages=a.max_pages,excluded_urls=excluded,**config)
         if not a.url: raise ValueError('A URL or --frontier prior report is required')
-        return collect(a.url, a.output, allow_local=a.allow_local_fixture, max_pages=a.max_pages,panel_scan=a.panel_scan,image_wait_policy=a.image_wait_policy,proof_storage=a.proof_storage,concurrency=a.concurrency)
+        return collect(a.url, a.output, allow_local=a.allow_local_fixture, max_pages=a.max_pages,excluded_urls=excluded,**config)
     if c in ('export','inspect'):
         from .artifacts import export_pdf, inspect_pdf
         return export_pdf(a.source,a.output,audience=a.audience) if c == 'export' else inspect_pdf(a.pdf,a.output,audience=a.audience,max_pages=a.max_pages)
@@ -362,8 +404,9 @@ def main(argv=None):
         if getattr(args,'run_dir',None) is not None and args.command not in ('metrics','ready-tasks','execution-status'):
             from .telemetry import TraceRecorder
             with TraceRecorder(args.run_dir) as trace:
-                with trace.span('cli.command', command=args.command,**({'operation':args.operation} if hasattr(args,'operation') else {})):
+                with trace.span('cli.command', command=args.command,**({'operation':args.operation} if hasattr(args,'operation') else {})) as observation:
                     result = execute(args)
+                    if isinstance(result,dict) and isinstance(result.get('status'),str):observation['business_status']=result['status'].upper()
         else:
             result = execute(args)
     except (ValueError, OSError, KeyError, TypeError, json.JSONDecodeError) as error:

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>VERTIGO · activité des agents</title>
+<link rel="stylesheet" href="./assets/preview.css">
+<link rel="stylesheet" href="./src/agent-setup/style.css">
+</head>
+<body>
+<div id="vertigo-motion-preview" class="viz-dotted-background">
+  <div class="vm-preview-tools">
+    <span class="vm-caption">Connexion locale · aucune donnée de démonstration</span>
+    <div class="vm-preview-actions"><button id="vm-configure" type="button" class="btn btn-ghost"><i data-lucide="sliders-horizontal" aria-hidden="true"></i> Configurer</button><button id="vm-reanimate" type="button" class="btn btn-ghost"><i data-lucide="rotate-ccw" aria-hidden="true"></i> Réanimer</button></div>
+  </div>
+  <section id="vertigo-motion" aria-label="Trace animée d’un workflow VERTIGO">
+    <header class="vm-header">
+      <strong>Trace</strong><span class="vm-divider"></span>
+      <span class="vm-title">Préparer une proposition</span>
+      <span class="vm-status" data-state="paused"><span></span><b>En pause</b></span>
+    </header>
+    <div class="vm-metrics" aria-label="Indicateurs de démonstration">
+      <div><span>Durée</span><strong data-metric="duration">0s</strong></div>
+      <div><span>Coût</span><strong data-metric="cost">—</strong></div>
+      <div><span>Appels IA</span><strong data-metric="ai">—</strong></div>
+      <div><span data-tooltip="Nombre de commandes CLI observées uniquement">Outils</span><strong data-metric="tools">0</strong></div>
+      <div><span>Incidents</span><strong data-metric="errors">0</strong></div>
+    </div>
+    <div class="vm-table" role="group" aria-label="Agents réels et durées sur une même ligne de temps">
+      <div class="vm-axis-row">
+        <span class="vm-axis-label"><i data-lucide="list-tree" aria-hidden="true"></i> Agents <b data-count>0</b></span>
+        <div class="vm-axis"><div class="vm-ticks"></div><output class="vm-now">0:00</output><input type="range" min="0" max="7680" step="1" value="0" aria-label="Parcourir l’exécution dans le temps"></div>
+      </div>
+      <div class="vm-root-row"></div>
+      <div class="vm-viewport"><div class="vm-grid"></div><div class="vm-stack"></div><div class="vm-playhead"></div></div>
+    </div>
+    <footer class="vm-footer">
+      <div class="vm-transport">
+        <button type="button" class="vm-icon-button cursor-interaction" data-action="play" aria-label="Lire l’animation"><i data-lucide="play" aria-hidden="true"></i></button>
+        <button type="button" class="vm-icon-button cursor-interaction" data-action="restart" aria-label="Rejouer depuis le début"><i data-lucide="rotate-ccw" aria-hidden="true"></i></button>
+        <label class="vm-speed"><span class="vm-sr">Vitesse de lecture</span><select aria-label="Vitesse de lecture" disabled><option value="1" selected>Direct · 1×</option></select></label>
+        <span class="vm-follow">Suivi de l’exécution</span>
+      </div>
+      <div class="vm-wait" hidden><span><i data-lucide="hourglass" aria-hidden="true"></i><strong>À vous</strong><span class="vm-wait-text"> · vérifier avant la remise.</span></span><div><button type="button" data-action="adjust" class="vm-small-button cursor-interaction">Ajuster</button><button type="button" data-action="approve" class="vm-approve cursor-interaction"><i data-lucide="check" aria-hidden="true"></i> Valider</button></div></div>
+      <div class="vm-done" hidden><button type="button" data-action="restart" class="vm-done-replay cursor-interaction" aria-label="Rejouer la démonstration"><i data-lucide="circle-check" aria-hidden="true"></i><strong>Proposition prête</strong><span class="vm-done-text"> · 12 étapes · 6 outils</span><span class="vm-replay-hint">Rejouer</span></button></div>
+    </footer>
+    <div class="vm-adjust" hidden><label for="vm-feedback">Que souhaitez-vous ajuster ?</label><textarea id="vm-feedback" rows="2" placeholder="Ex. : raccourcir la présentation des pistes."></textarea><div><span class="vm-local">Simulation locale</span><button type="button" data-action="cancel-adjust" class="vm-small-button cursor-interaction">Annuler</button><button type="button" data-action="send-adjust" class="vm-approve cursor-interaction">Enregistrer l’ajustement</button></div><p class="vm-feedback-message" role="status"></p></div>
+    <aside class="vm-detail" hidden aria-label="Réglages de l’agent sélectionné">
+      <div class="vs-heading"><button type="button" data-action="close-detail" class="vs-back cursor-interaction"><i data-lucide="chevron-left" aria-hidden="true"></i> Retour au suivi</button><span class="vs-state">Réglages proposés</span></div>
+      <div class="vs-titlebar"><strong></strong><span class="vs-subtitle">Personnaliser son travail</span></div>
+      <p class="vs-description"></p>
+      <div class="vs-editor">
+        <div class="vs-role-row"><div><label for="vs-role">Agent à personnaliser</label><select id="vs-role" class="vs-role"></select></div><p class="vs-context"></p></div>
+        <div class="vs-guidance"><p>Tout est prérempli. Modifiez seulement ce qui compte pour vous.</p><button type="button" data-setup-action="advanced" class="vs-text-button cursor-interaction" aria-expanded="false"><i data-lucide="sliders-horizontal" aria-hidden="true"></i><span>Voir tous les réglages</span></button></div>
+        <div class="vs-mobile-category"><label for="vs-category-mobile">Réglages à afficher</label><select id="vs-category-mobile" class="vs-category-mobile"></select></div>
+        <div class="vs-config-layout"><nav class="vs-nav" aria-label="Catégories de réglages"></nav><div class="vs-content"><h3 class="vs-section-title">Mission</h3><div class="vs-fields"></div>
+        <div class="vs-application" hidden><div class="vs-application-grid">
+          <div class="vs-target-wrap"><label for="vs-target">Quelles étapes sont concernées ?</label><select id="vs-target" class="vs-target"></select></div>
+          <div><label for="vs-scope">Pour quels dossiers ?</label><select id="vs-scope" class="vs-scope"><option>Ce dossier</option><option>Futurs dossiers</option></select></div>
+          <div class="vs-wide"><label for="vs-when">Quand utiliser ces consignes ?</label><select id="vs-when" class="vs-when"><option value="À la prochaine exécution">Au prochain lancement</option><option value="Préparer une relance après vérification">Demander à reprendre le travail</option></select></div>
+          <div class="vs-wide"><label for="vs-reason">Une précision pour Codex</label><input type="text" id="vs-reason" class="vs-reason" maxlength="240" placeholder="Facultatif : ce qui motive ce changement."></div>
+        </div></div></div></div>
+        <section class="vs-review" hidden aria-label="Récapitulatif de la demande"><h3 class="vs-diff-count">Ce que Codex recevra</h3><div class="vs-diff"></div><p class="vs-review-timing"><i data-lucide="info" aria-hidden="true"></i> Le travail en cours garde ses consignes. Codex vérifiera comment prendre en compte votre demande.</p></section>
+        <div class="vs-buttons"><button type="button" data-setup-action="reset" class="vs-button vs-button-quiet cursor-interaction" hidden>Rétablir les valeurs de départ</button><button type="button" data-setup-action="edit" class="vs-button vs-button-quiet cursor-interaction" hidden><i data-lucide="chevron-left" aria-hidden="true"></i> Modifier</button><button type="button" data-setup-action="save" class="vs-button vs-button-quiet cursor-interaction">Garder pour plus tard</button><button type="button" data-setup-action="next" class="vs-button vs-button-primary cursor-interaction">Vérifier ma demande<i data-lucide="arrow-right" aria-hidden="true"></i></button><button type="button" data-setup-action="send" class="vs-button vs-button-primary cursor-interaction" hidden><i data-lucide="arrow-up-right" aria-hidden="true"></i> Transmettre à Codex</button></div>
+        <output class="vs-notice" role="status" aria-live="polite"></output>
+        <p class="vs-footnote">Maquette · ces réglages sont proposés à titre d’exemple. Aucun agent réel n’est modifié depuis cet aperçu.</p>
+      </div>
+    </aside>
+    <p class="vm-sr vm-announcement" role="status" aria-live="polite"></p>
+  </section>
+</div>
+
+
+<script src="./assets/vendor/lucide.js"></script>
+<script src="./assets/vendor/floating-ui-core.js"></script>
+<script src="./assets/vendor/floating-ui-dom.js"></script>
+<script src="./assets/runtime-core.js"></script>
+<script src="./assets/runtime-adapter.js"></script>
+<script src="./src/agent-setup/app.js"></script>
+<script src="./assets/preview-tooltip.js"></script>
+<script src="./assets/initialize.js"></script>
+</body>
+</html>

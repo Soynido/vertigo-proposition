@@ -45,6 +45,17 @@ class TelemetryTests(unittest.TestCase):
         self.assertIsNone(result['tokens_used'])
         self.assertIsNone(result['account_tokens_remaining'])
 
+    def test_cli_preserves_blocked_business_outcome_beside_technical_success(self):
+        from proposition_runtime import state
+        run=state.init_run('https://fixture.example/',self.root/'runs')
+        launcher=Path(__file__).resolve().parents[1]/'skills/proposition/scripts/proposition.py'
+        result=subprocess.run([sys.executable,str(launcher),'discovery','check',run['root']],capture_output=True,text=True,timeout=10)
+        self.assertEqual(2,result.returncode)
+        events=[json.loads(line) for p in (Path(run['root'])/'telemetry').glob('*.jsonl') for line in p.read_text().splitlines()]
+        end=next(e for e in events if e['event']=='end' and e['name']=='cli.command')
+        self.assertEqual('SUCCEEDED',end['status'])
+        self.assertEqual('BLOCKED',end['attributes'].get('business_status'))
+
     def test_forbidden_attributes_are_not_recorded(self):
         with telemetry.TraceRecorder(self.root) as trace:
             with self.assertRaises(ValueError):

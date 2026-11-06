@@ -22,6 +22,7 @@ MAX_RUN_BYTES = 64 * 1024 * 1024
 MAX_METRIC_EVENTS = 20000
 ATTRIBUTES = {'count', 'bytes', 'files', 'captures', 'cache_hits', 'channel',
               'wait_kind', 'role', 'version', 'operation', 'command', 'file_id'}
+ATTRIBUTES.add('business_status')
 NAMES = {'cli.command', 'validation.hash', 'reader.json', 'upstream.inspect',
          'research.prepare', 'research.validate', 'research.host', 'strategy.prepare',
          'strategy.validate', 'strategy.read', 'strategy.mission', 'channels.inspect',
@@ -142,13 +143,17 @@ class TraceRecorder:
         self._event('start', name, identifier, parent, attributes)
         token = _parent.set(identifier)
         status = 'SUCCEEDED'; error = None
+        outcome={}
         try:
-            yield
+            yield outcome
         except BaseException as failure:
             status = 'CANCELLED' if type(failure).__name__ in ('CancelledError','KeyboardInterrupt','SystemExit') else 'FAILED'
             error = type(failure).__name__[:64]
             raise
         finally:
+            business=outcome.get('business_status')
+            if business in {'PASS','FAIL','BLOCKED','STALE','PARTIAL','UNAVAILABLE','UNKNOWN_OUTCOME','ERROR','CURRENT','READY','COLLECTED','FRONTIER_EXHAUSTED'}:
+                attributes={**attributes,'business_status':business}
             self._event('end', name, identifier, parent, attributes, status, error)
             _parent.reset(token)
 

@@ -14,10 +14,10 @@ URL_DU_PROSPECT
 ```
 
 1. Retrouver `.vertigo/setup.json` et le `proposition/SKILL.md` réellement installé dans le workspace ; relever sa révision et ses empreintes. Ne pas réinstaller ou modifier les ressources pendant un test. Si l’environnement n’est pas préparé, appliquer une fois le [starter](skills/proposition/references/installation.md), sans demander un brief prospect ni des droits d’écriture sur notre dépôt.
-2. Dans un nouvel essai standard, la première commande d’initialisation est :
+2. Si l'installation Codex active l'observateur natif, appliquer d'abord [le démarrage dans la lane](skills/proposition/references/native-startup.md). Le lanceur ouvre lui-même son onglet ; le contexte de production identifié poursuit les contrats, sans démarrage récursif. La commande d’initialisation est ensuite :
 
 ```bash
-python3 MAIN_SKILL_DIR/scripts/proposition.py init URL_DU_PROSPECT --profile WORKSPACE/.vertigo/profile.json --delivery-format web
+python3 MAIN_SKILL_DIR/scripts/proposition.py init URL_DU_PROSPECT --profile WORKSPACE/.vertigo/profile.json --delivery-format web --runs-root WORKSPACE/outputs/runs
 ```
 
 `MAIN_SKILL_DIR` est le dossier installé du skill principal ; `WORKSPACE` est l’espace propre du collaborateur. Le launcher retrouve le Python installé. Une demande documentaire explicite utilise `--delivery-format documents`. Le format d’un run existant ne change pas ; les anciens runs sans format restent documentaires.

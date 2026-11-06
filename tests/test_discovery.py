@@ -224,6 +224,17 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual("NOT_RUN", result["semantic_analysis"])
         self.assertFalse(FixtureHandler.requests_seen)
 
+    def test_exhausted_state_does_not_block_other_frontier_work(self):
+        discovery=importlib.import_module('proposition_runtime.discovery')
+        collect(self.base+'/',self.output,allow_local=True,max_pages=1)
+        path=self.output/'discovery.json';prior=json.loads(path.read_text())
+        prior['coverage']['pending_states']=[{'url':self.base+'/','viewport':'mobile','attempts':2,'unresolved':['fixture_timeout']}]
+        path.write_text(json.dumps(prior))
+        resumed=discovery.continue_collect(path,self.output.parent/'next',allow_local=True,max_pages=1)
+        self.assertTrue(resumed['coverage']['attempted_urls'])
+        self.assertNotIn(self.base+'/',resumed['coverage']['attempted_urls'])
+        self.assertIn(prior['coverage']['pending_states'][0],resumed['coverage']['pending_states'])
+
 
 if __name__ == "__main__":
     unittest.main()

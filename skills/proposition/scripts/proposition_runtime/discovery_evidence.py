@@ -126,6 +126,63 @@ def register(run_dir, report_path):
     return inspect_discovery(run)
 
 
+def _scope_data(run,path,entries):
+    from .transactions import read_json
+    data=read_json(path);client=data.get('client_entity')
+    if data.get('version')!=1 or not isinstance(client,str) or not client.strip() or len(client)>200:
+        raise ValueError('Scope needs the sourced client entity')
+    rows=data.get('destinations')
+    if not isinstance(rows,list) or len(rows)>500:raise ValueError('Invalid bounded destination scope')
+    def text(source):
+        p=state._safe_path(Path(run['root']),source['path'])
+        if source['status']!='COLLECTED' or p.stat().st_size>2*1024*1024 or state._sha(p)!=source['sha256']:
+            raise ValueError('Scope source is stale or exceeds its budget')
+        return p.read_text()
+    if not any(client.casefold() in text(s).casefold() for s in run['sources'].values()
+               if s.get('locator')==run['url']):raise ValueError('Client entity absent from prospect primary evidence')
+    result={}
+    for row in rows:
+        address=row.get('url');sid=row.get('source_id');entity=row.get('entity_name');quote=row.get('quote')
+        source=run['sources'].get(sid)
+        linked=any(e['url']==address and (e.get('source_id','').removeprefix('source:')==sid
+            or 'source:'+str(sid) in e.get('source_ids',[])) for e in entries)
+        if (row.get('kind')!='other_entity' or address==run['url'] or address in result or not linked or not source
+                or not isinstance(entity,str) or not entity.strip() or entity.casefold()==client.casefold()
+                or not isinstance(quote,str) or not quote.strip() or quote not in text(source)
+                or entity.casefold() not in quote.casefold() or not isinstance(row.get('reason'),str) or len(row['reason'].strip())<12):
+            raise ValueError('Other-entity scope requires a bound primary quote and explicit justification')
+        result[address]=row
+    return result
+
+
+def register_scope(run_dir,path):
+    state.invalidate_changed(run_dir);run=state.load_run(run_dir);root=Path(run['root']);path=_local(root,path)
+    entries=inspect_discovery(run)['entries'];rows=_scope_data(run,path,entries)
+    dependencies=['artifact:site-discovery',*['source:'+r['source_id'] for r in rows.values()]]
+    run['artifacts']['discovery-scope']=state._artifact_record(run,'discovery-scope',path.relative_to(root).as_posix(),
+        'internal',dependencies,reuse_current=True)
+    state.save_run(root,run);return inspect_discovery(run)
+
+
+def register_supplement(run_dir,path):
+    run=state.load_run(run_dir);path=_local(Path(run['root']),path);data,_=_validate(run,path)
+    if data.get('backend')!='host-browser' or not data.get('continuation',{}).get('previous_report_sha256'):
+        raise ValueError('Host supplement must bind the prior physical report and its browser evidence')
+    return register(run_dir,path)
+
+
+def current_exclusions(run,entries=None):
+    row=run['artifacts'].get('discovery-scope')
+    if not row:return {}
+    root=Path(run['root']);path=state._safe_path(root,row['path'])
+    if row['status']!='CURRENT' or state._stale_reasons(run,root,row):raise ValueError('Destination scope is stale')
+    if entries is None:
+        entries=[]
+        for identifier in run.get('metadata',{}).get('discovery_reports',[]):
+            data,_=_validate(run,state._safe_path(root,run['artifacts'][identifier]['path']));entries.extend(data['link_entries'])
+    return _scope_data(run,path,entries)
+
+
 @cached('discovery.inspect')
 @traced('discovery.inspect')
 def inspect_discovery(run):
@@ -155,7 +212,12 @@ def inspect_discovery(run):
                            if not any(e['url']==c['url'] for e in data['link_entries']))
         if not last: raise ValueError('No registered Discovery batch')
         known.update(e['url'] for e in entries if _origin(e['url']) in origins)
+        from .discovery import destination_kind
+        def kind(url):
+            return 'page' if any(pages.get((url,v),{}).get('status')=='captured' for v in ('desktop','mobile')) else destination_kind(url)
+        excluded=current_exclusions(run,entries)
         for url in known|{run['url']}:
+            if url!=run['url'] and (kind(url)!='page' or url in excluded):continue
             for view in ('desktop','mobile'):
                 page=pages.get((url,view))
                 if page is None: issues.append(f'Unattempted destination/viewport: {url} {view}');continue
@@ -173,7 +235,10 @@ def inspect_discovery(run):
                     issues.append(f'Incomplete navigation: {url} {view}')
         for entry in entries:
             views=[pages.get((entry['url'],v)) for v in ('desktop','mobile')]
-            entry['destination_status']='attempted' if all(views) else 'external_pending' if _origin(entry['url']) not in origins else 'pending'
+            entry['destination_kind']=kind(entry['url'])
+            entry['destination_status']=('scoped_other_entity' if entry['url'] in excluded else
+                'resource_pending' if entry['destination_kind']!='page' else
+                'attempted' if all(views) else 'external_pending' if _origin(entry['url']) not in origins else 'pending')
     except (OSError,ValueError,KeyError,TypeError) as error:
         issues.append('Invalid Discovery receipt: '+str(error)[:240])
     return {'status':'BLOCKED' if issues else 'PASS','issues':issues,'scope':'navigation_evidence_only',
@@ -280,7 +345,7 @@ def reconcile(run_dir,receipts_path):
 @traced('channels.inspect')
 def inspect_channels(run):
     site=inspect_discovery(run)
-    entries=[e for e in site['entries'] if e['destination_status']=='external_pending']
+    entries=[e for e in site['entries'] if e['destination_status'] in ('external_pending','resource_pending')]
     issues=list(site['issues']);outcomes={};root=Path(run['root'])
     try:
         for identifier in _channel_reports(run):

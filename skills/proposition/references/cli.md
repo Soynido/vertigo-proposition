@@ -1,5 +1,7 @@
 # CLI du skill principal
 
+Si l'observateur natif est installé, appliquer [son entrée](native-startup.md) avant `init` : `native context/prepare/opened/status/stop/close-view`. Le transport s'installe uniquement avec `native setup` pendant le setup explicite. `native serve` est le service interne détenu par la session, pas un second lancement manuel. Pour le périmètre et les compléments Discovery : `discovery scope RUN --report JSON` et `discovery supplement RUN --report JSON` suivent [le contrat de navigation](../../proposition-discovery/references/navigation-evidence.md).
+
 `MAIN_SKILL_DIR` est le dossier du SKILL principal réellement installé, résolu par sa localisation ; ce n'est pas le répertoire de travail. Toujours passer par l'interpréteur :
 
 ```text
@@ -15,14 +17,14 @@ Dans le checkout de développement, utiliser `.venv/bin/python` (`.venv\Scripts\
 | Capacités | `doctor --delivery-format web` ; `doctor --delivery-format documents [--presentations]` |
 | Distributions upstream | `upstream status` ; `upstream fetch [--family NAME] [--cache DIR]` |
 | Run | `init URL [--runs-root DIR] [--profile FILE] [--creative-mandate FILE] [--audience-handoff-contract 1|2] [--delivery-format web|documents]` (défaut `2`, épinglé au run) ; `validate RUN_DIR` |
-| Collecte | `collect URL --output DIR [--allow-local-fixture] [--max-pages N] [--panel-scan legacy|batch] [--image-wait-policy legacy|terminal_aware] [--proof-storage expanded|content_addressed]` ; mêmes options en reprise, défauts `legacy` et `expanded`, réglages effectifs dans le rapport |
+| Collecte | `collect URL --run-dir RUN_DIR --output DIR [--allow-local-fixture] [--max-pages N]` ; réglages figés du run, options explicites conservées ; hors run, défauts historiques. Mêmes options en reprise. |
 | Preuves Discovery | `discovery register RUN_DIR --report FILE` ; `discovery check RUN_DIR` — fichier 2.0 et preuves déjà dans le run, intégrité/complétude rendue, pas note de qualité |
 | Issues externes | `discovery reconcile RUN_DIR --report JOURNAL` ; `discovery channels RUN_DIR` — jointure des tentatives sans officialité/analyse/droits implicites |
 | Plan de recherche publique | `discovery research-plan RUN_DIR` — prépare une mission hôte pour les quatre topics ; n’exécute aucune recherche |
 | Passation stratégique | `strategy prepare RUN_DIR [--cache DIR]` ; `strategy register RUN_DIR --report FILE` ; `strategy check RUN_DIR [--stage analysis.specialists\|company.v2\|brief.public]` — préparation puis contrôles de preuves et dépendances |
 | Historique optionnel | `history collect RUN_DIR [--urls URL]` ; `history register RUN_DIR --report FILE` ; `history check RUN_DIR` — récupération, pas analyse visuelle implicite |
 | Reprise locale bornée | `prepare-inputs RUN_DIR MANIFEST --output NEW_LOCAL_DIR [--timeout-seconds 5]` — manifeste `{inputs:[{id,path,sha256}]}`, seules entrées nécessaires, chemins relatifs au run |
-| Continuer la couverture | `collect --frontier PREVIOUS_DISCOVERY_JSON --output NEW_DIR [--max-pages N]` — vérifie les preuves précédentes, reprend les destinations et états manquants dans un lot neuf ; une reprise au plus du même état échoué |
+| Continuer la couverture | `collect --frontier PREVIOUS_DISCOVERY_JSON --run-dir RUN_DIR --output NEW_DIR [--max-pages N]` — preuves précédentes vérifiées, états épuisés conservés sans bloquer les autres travaux |
 | Source / fait | `source RUN_DIR JSON_FILE` ; `fact RUN_DIR JSON_FILE` |
 | Artefact | `artifact RUN_DIR ID FILE --audience public|client|sales|technical|internal [--depends REF...]` |
 | Évaluation | `evaluate RUN_DIR REQUIREMENT_ID JSON_FILE` |

@@ -48,6 +48,8 @@ class SetupTests(unittest.TestCase):
             if 'publication-setup' in command:
                 return subprocess.CompletedProcess(command,0,stdout=json.dumps({'status':'READY',
                     'authority':'explicit_installation_only','per_run_target':'preview'}),stderr='')
+            if 'native' in command and 'setup' in command:
+                return subprocess.CompletedProcess(command,0,stdout=json.dumps({'status':'AVAILABLE','scope':'isolated_transport_not_host_qualification'}),stderr='')
             # Dependency downloads and apt require network/admin, exercised by the
             # separate real installation probe, not by this filesystem test.
             return subprocess.CompletedProcess(command, 0, stdout='', stderr='')
@@ -83,6 +85,24 @@ class SetupTests(unittest.TestCase):
         commands=[c for c in self.commands if 'playwright' in c and 'install' in c]
         self.assertEqual(len(commands),1)
         self.assertEqual(commands[0][-2:],['chromium','webkit'])
+
+    def test_native_observer_is_explicit_and_installed_entry_requires_same_lane_open(self):
+        code,result=self.invoke_supported('--workspace',self.workspace,'--with-native-observer',
+            '--native-model','gpt-6-sol','--native-effort','xhigh')
+        self.assertEqual(0,code,result)
+        self.assertTrue(result['native_observer']['enabled'])
+        self.assertEqual('gpt-6-sol',result['native_observer']['model'])
+        self.assertIn('native-startup.md',(self.workspace/'AGENTS.md').read_text())
+        self.assertEqual(1,len([c for c in self.commands if 'native' in c and 'setup' in c]))
+
+    def test_installed_native_inventory_can_read_its_own_protected_skills(self):
+        code,result=self.invoke_supported('--workspace',self.workspace)
+        self.assertEqual(0,code,result)
+        scripts=self.workspace/'.agents/skills/proposition/scripts'
+        program="import sys;sys.path.insert(0,sys.argv[1]);from proposition_runtime.native_session import input_inventory;print(len(input_inventory(sys.argv[2])))"
+        checked=subprocess.run([sys.executable,'-c',program,str(scripts),str(self.workspace)],capture_output=True,text=True,timeout=10)
+        self.assertEqual(0,checked.returncode,checked.stderr)
+        self.assertGreater(int(checked.stdout),100)
 
     def test_publication_setup_is_explicit_once_and_requires_a_workspace_owner(self):
         code,result=self.invoke_supported('--workspace',self.workspace,'--owner','fixture-owner','--with-publication')
