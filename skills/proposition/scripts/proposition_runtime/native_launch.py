@@ -90,9 +90,11 @@ class NativeLaunch:
                     'inputs':self.inputs,'prompt_sha256':hashlib.sha256(self.prompt.encode()).hexdigest()}
             self._write(record)
             result=self.host.request('thread/start',{'cwd':str(self.workspace),'model':self.model,
-                'approvalPolicy':'never','sandbox':'workspace-write',
-                'config':{'model_reasoning_effort':self.effort,'sandbox_workspace_write':{'network_access':True}},
+                # Preserve the user's effective host policy, including managed
+                # restrictions. The observer grants no execution permissions.
+                'config':{'model_reasoning_effort':self.effort},
                 'ephemeral':True},timeout=timeout)
+            result_policy={'approval_policy':result.get('approvalPolicy'),'sandbox':result.get('sandbox')}
             thread=result['thread'];record['thread_id']=thread['id'];self._write(record)
             if result.get('model')!=self.model or result.get('reasoningEffort')!=self.effort:
                 raise ValueError('Host resolved a different model or effort')
@@ -110,6 +112,7 @@ class NativeLaunch:
                 'model':self.model,'effort':self.effort},timeout=timeout)
             receipt={'status':'RUNNING','thread_id':thread['id'],'turn_id':result['turn']['id'],
                 'model':self.model,'effort':self.effort,'prompt_sha256':record['prompt_sha256'],
+                'execution_policy':result_policy,
                 'instruction_sources':sorted(instructions),'ui_ready_at':self.observer.ui_ready_at,
                 'panel_open':{'threadId':self.lane_id,'status':self.panel_open['status']}}
             record.update(state='RUNNING',receipt=receipt);self._write(record)

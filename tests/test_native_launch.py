@@ -29,7 +29,10 @@ for line in sys.stdin:
  elif m=='account/read':result={'account':{'type':'chatgpt'}}
  elif m=='model/list':result={'data':[{'id':'gpt-6-sol','model':'gpt-6-sol','supportedReasoningEfforts':[{'reasoningEffort':'xhigh'}]}],'nextCursor':None}
  elif m=='thread/start':
-  result={'thread':{'id':'owned','status':{'type':'idle'}},'model':p['model'],'reasoningEffort':p['config']['model_reasoning_effort'],'instructionSources':[str(base/'AGENTS.md')]}
+  mode=p.get('sandbox','danger-full-access')
+  result={'thread':{'id':'owned','status':{'type':'idle'}},'model':p['model'],'reasoningEffort':p['config']['model_reasoning_effort'],'instructionSources':[str(base/'AGENTS.md')],
+          'approvalPolicy':p.get('approvalPolicy','on-request'),
+          'sandbox':{'type':'dangerFullAccess'} if mode=='danger-full-access' else {'type':'workspaceWrite'}}
   if (base/'extra-instructions').exists():result['instructionSources'].append(str(base/'unexpected.md'))
   if (base/'change-input').exists():(base/'AGENTS.md').write_text('Changed during host setup')
  elif m=='turn/start':
@@ -94,6 +97,18 @@ class NativeLaunchTests(unittest.TestCase):
         self.assertEqual('gpt-6-sol',turn['model']);self.assertEqual('xhigh',turn['effort'])
         replay=self.launch.start();self.assertEqual(result,replay)
         self.assertEqual(1,len([c for c in self.calls() if c['method']=='turn/start']))
+
+    def test_launch_does_not_replace_the_hosts_existing_execution_permissions(self):
+        self.launch.start()
+        params=next(c['params'] for c in self.calls() if c['method']=='thread/start')
+        self.assertNotIn('sandbox',params)
+        self.assertNotIn('approvalPolicy',params)
+        self.assertNotIn('sandbox_workspace_write',params.get('config',{}))
+
+    def test_receipt_exposes_the_execution_policy_actually_resolved_by_the_host(self):
+        result=self.launch.start()
+        self.assertEqual({'approval_policy':'on-request','sandbox':{'type':'dangerFullAccess'}},
+                         result.get('execution_policy'))
 
     def test_input_changed_during_host_preparation_never_reaches_a_turn(self):
         (self.base/'change-input').touch()

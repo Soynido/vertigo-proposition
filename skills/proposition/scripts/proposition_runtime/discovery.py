@@ -120,12 +120,10 @@ def _output_directory(value: str | Path) -> Path:
     if any(p.is_symlink() for p in (path, *path.parents)):
         raise ValueError("Output directory and ancestors must not be symbolic links")
     resolved = path.resolve()
-    package = Path(__file__).resolve().parent
-    protected = {package}
-    protected.update(parent for parent in package.parents
-                     if (parent / '.git').exists() or (parent / 'SKILL.md').is_file())
-    if any(resolved == boundary or boundary in resolved.parents for boundary in protected):
-        raise ValueError('Collected evidence must remain outside the checkout, skill and runtime package')
+    # Use the same source/installed-kit boundary as init. A consumer's own
+    # Git repository is a legitimate run destination, not the distribution.
+    from .state import _external_root
+    _external_root(resolved)
     path.mkdir(parents=True, exist_ok=True)
     if (path / "discovery.json").exists():
         raise ValueError("Use a fresh output directory; existing discovery evidence is immutable")

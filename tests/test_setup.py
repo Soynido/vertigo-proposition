@@ -164,6 +164,21 @@ class SetupTests(unittest.TestCase):
             self.assertEqual(result.returncode,0,result.stdout+result.stderr)
             root=Path(json.loads(result.stdout)['root'])
             self.assertTrue(root.is_relative_to(self.workspace/'outputs'))
+            # Init and collection must share a boundary in a consumer Git repo.
+            capture = root / 'discovery/site'
+            probe = ('import sys; from pathlib import Path; '
+                     'sys.path.insert(0,sys.argv[1]); '
+                     'from proposition_runtime.discovery import _output_directory; '
+                     'print(_output_directory(Path(sys.argv[2])))')
+            collect_command=[sys.executable,'-c',probe,str(launcher.parent),str(capture)]
+            result=subprocess.run(collect_command,capture_output=True,text=True,timeout=10)
+            self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+            self.assertTrue(capture.is_dir())
+            for protected in [self.source/'forbidden-capture',launcher.parents[2]/'forbidden-capture']:
+                collect_command[-1]=str(protected)
+                result=subprocess.run(collect_command,capture_output=True,text=True,timeout=10)
+                self.assertNotEqual(result.returncode,0)
+                self.assertFalse(protected.exists())
             command[command.index('--runs-root')+1]=str(self.source/'forbidden')
             result=subprocess.run(command,capture_output=True,text=True,timeout=10)
             self.assertNotEqual(result.returncode,0)
