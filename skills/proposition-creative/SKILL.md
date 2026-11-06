@@ -11,6 +11,7 @@ Recevoir seulement le brief public issu de [la passation stratégique](../propos
 ## Lancement
 
 Le [contrat créatif](references/creative-contract.md) est l'unique procédure de création : le lire dans sa version installée, puis reprendre **sa capsule de dispatch** dans la tâche transmise au créateur. Ajouter le paquet public, son manifeste, le format, les signes confirmés, les recommandations retenues et les libertés de conception. La présence du fichier ou son seul chargement automatique ne reproduit pas le couple contrat + dispatch employé dans les essais.
+Dans le paquet d'exécution, ce SKILL.md reste le contexte du coordinateur ; `native-task.json` assigne au créateur sa phase actuelle et la capsule du contrat créatif figé. La capsule couvre la séquence entière, tandis que seule la phase assignée est à produire maintenant.
 
 Le format `web` est l'extension de livraison décrite dans [le contrat web](../proposition/references/web-delivery.md), pas une autre méthode de concepts. Après les mondes inspectés, sélection et développement statique, conserver ce même contexte jusqu'au plan d'expérience puis au vrai HTML/CSS/JS. Lire les ressources moteur lorsqu'elles sont appliquées ; l'habillage agence reste séparé du prospect. Le plan lie preuve, concept, médias, progression, interaction et action ; l'enregistrer avant la homepage. Comparer ensuite l'expérience réelle aux intentions gelées, avec mobile et mouvement réduit. Une capture aplatie ou une animation seulement décrite ne remplace pas le comportement demandé.
 

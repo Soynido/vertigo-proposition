@@ -452,6 +452,33 @@ def _freeze_packet(root,directory,run,plan,spec):
         for ref in plan['input_hashes']:
             snapshots.append({'ref':ref,'digest':plan['input_hashes'][ref],'value':deepcopy(state._resolve(run,ref))})
     native={'task_key':plan['task_key'],'input_parameters':plan['input_parameters'],'inputs':[d for d in files if d['role']=='input'],'instructions':[d for d in files if d['role']=='instruction'],'methods':[{'family':s['id'],'commit':s['commit'],'reference_root':str(directory/'upstreams'/s['id']/s['commit']/'source'),'entrypoints':[str(directory/'upstreams'/s['id']/s['commit']/'source'/e) for e in s['entrypoints']]} for s,_ in roots],'output_destinations':plan['output_destinations'],'isolation':plan['isolation'],'execution':'HOST_REQUIRED_NOT_ATTESTED'}
+    if kind=='creative_public':
+        contract=directory/'canonical/proposition-creative/references/creative-contract.md'
+        descriptor=next((d for d in files if d['path']==contract.relative_to(root).as_posix() and d['role']=='instruction'),None)
+        if descriptor is None or not contract.is_file():
+            raise ValueError('Creative packet requires its frozen creative contract')
+        content=contract.read_text(encoding='utf-8')
+        marker='## Capsule de dispatch réutilisable'
+        if content.count(marker)!=1:raise ValueError('Frozen creative contract has no unique dispatch capsule')
+        section=content.split(marker,1)[1].split('\n## ',1)[0]
+        capsule=' '.join(line.lstrip('> ').strip() for line in section.splitlines() if line.strip())
+        if not capsule:raise ValueError('Frozen creative contract has an empty dispatch capsule')
+        phase={'creative.direction.prepare':('prepare','Lire le brief public, le contrat créatif figé et les méthodes ; produire uniquement creative-reading. Ne pas rendre de scènes à cette phase.'),
+               'creative.direction.explore':('explore','Explorer les mondes du même besoin, rendre et inspecter une scène centrale par monde, comparer les scènes exactes puis motiver la sélection ; produire creative-exploration et ses matériaux.'),
+               'creative.direction.develop':('develop','Développer les seules directions retenues : ouverture, révélation, action, mobile autonome et intention d’expérience ; produire creative-experience et ses matériaux.'),
+               'client.composition.plan':('web_plan','Dans le même contexte créatif, établir le plan web avant tout HTML à partir des directions et scènes retenues ; produire web-plan.'),
+               'client.composition.build':('web_build','Transposer le plan et les scènes retenues en HTML/CSS/JS scrollable, inspecter interactions et mobile ; produire web-source et web-material sans refaire une sélection.')}.get(plan['task_key'])
+        if phase is None:raise ValueError('Creative packet has no creator phase task')
+        input_row=run['artifacts'].get('creative-inputs')
+        frozen_input=directory/'files'/input_row['path'] if input_row else None
+        if frozen_input is None or not frozen_input.is_file():raise ValueError('Creative packet requires frozen creative-inputs')
+        opportunity=transactions.read_json(frozen_input).get('opportunity')
+        if not isinstance(opportunity,dict):raise ValueError('Frozen creative inputs lack the business opportunity')
+        native['task']={'role':'Créateur de la proposition pour cette entreprise','phase':phase[0],
+                        'instruction':phase[1],'business_objective':opportunity,
+                        'creative_contract':{'path':descriptor['path'],'sha256':descriptor['sha256']},
+                        'dispatch_capsule':capsule,
+                        'skill_context':'Le SKILL.md décrit la coordination ; la présente tâche assigne uniquement la phase du créateur.'}
     if state.delivery_format(run)=='web' and kind in ('creative_public','review_inputs'):
         from .web_inputs import public_records
         native['public_evidence']=public_records(run)
@@ -493,6 +520,7 @@ def _freeze_packet(root,directory,run,plan,spec):
     native_path=directory/'native-task.json';_write_frozen(native_path,native);files.append(_descriptor(root,native_path,'native-task','internal' if private else 'public'))
     role_entry=(directory/'canonical'/spec['skill']/'SKILL.md').relative_to(root).as_posix()
     required_reads=[d['path'] for d in files if d['role'] in ('input','native-task','schema') or d['path']==role_entry]
+    if kind=='creative_public':required_reads.append(native['task']['creative_contract']['path'])
     for method in native['methods']:
         required_reads.extend(Path(p).relative_to(root).as_posix() for p in method['entrypoints'])
     manifest={'schema_version':'1.0','scope':'internal_execution' if private else kind,'task_id':plan['task_id'],'files':files,'required_reads':sorted(set(required_reads)),'record_snapshots':snapshots,'source_record_hashes':plan['input_hashes']}
