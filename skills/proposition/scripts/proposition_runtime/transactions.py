@@ -92,7 +92,8 @@ def contract_hashes():
     from . import state
     root=state.RESOURCE_ROOT.parents[2]
     return {p.relative_to(root).as_posix():state._sha(p) for p in sorted(root.rglob('*'))
-            if p.is_file() and '__pycache__' not in p.parts and p.suffix in ('.py','.json','.md','.txt')}
+            if p.is_file() and '__pycache__' not in p.parts and
+            (p.suffix in ('.py','.json','.md','.txt') or p.is_relative_to(root/'proposition/resources'))}
 
 
 def execution_metadata(run):

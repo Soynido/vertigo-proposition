@@ -6,6 +6,8 @@ license: MIT
 
 # Préparer la vente de la mission d'agence
 
+Ce dérivé interne appartient au parcours `documents` ou à une demande interne explicite. Le mode `web` standard n'exige pas de playbook/PDF Sales pour sa remise ; ne pas en produire pour fermer un passage exclu. Son argument commercial client reste obligatoire selon [le contrat web](../proposition/references/web-delivery.md).
+
 **Vendeur : l'agence. Acheteur : le prospect étudié. Offre : la mission proposée dans le projet final.** Les produits du prospect sont le contexte de sa communication, pas l'offre que ce playbook doit vendre. Lire [la passation commerciale](references/playbook.md).
 
 Recevoir le projet client stabilisé et ses preuves, puis le contexte commercial privé seulement s'il est disponible et autorisé. En son absence, produire une base interne conditionnelle, avec les procédures inconnues visibles. Aucun contact, résultat ou règle interne inventé.

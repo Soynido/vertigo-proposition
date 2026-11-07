@@ -4,6 +4,18 @@ from .telemetry import traced
 from .navigation import (CONTROLS, OVERLAYS, CLOSE, INFO, OPEN, IMAGES, PANEL_INFO,
                          PANEL_GEOMETRY, IMAGE_OBSERVER, IMAGE_STATUS)
 
+async def render_ready(page):
+    """A loader covering the viewport cannot count as the inspected site."""
+    script="""() => {
+      const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.visibility!=='hidden'&&s.display!=='none'&&+s.opacity>.01};
+      const blocking=[...document.querySelectorAll('[id*="loader" i],[class*="loader" i],[aria-busy="true"],[role="progressbar"]')].some(e=>{const r=e.getBoundingClientRect();return visible(e)&&r.width>innerWidth*.5&&r.height>innerHeight*.5});
+      return !blocking && document.body && (document.body.innerText.trim().length>0 || [...document.querySelectorAll('img,canvas,video,svg')].some(visible));
+    }"""
+    try:
+        await page.wait_for_function(script,timeout=8000)
+        return True
+    except Exception:return False
+
 @traced('navigation.scan')
 async def panel_candidates(page, scope, mode):
     if mode not in ('legacy', 'batch'):

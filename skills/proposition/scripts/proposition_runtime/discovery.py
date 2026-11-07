@@ -120,12 +120,10 @@ def _output_directory(value: str | Path) -> Path:
     if any(p.is_symlink() for p in (path, *path.parents)):
         raise ValueError("Output directory and ancestors must not be symbolic links")
     resolved = path.resolve()
-    package = Path(__file__).resolve().parent
-    protected = {package}
-    protected.update(parent for parent in package.parents
-                     if (parent / '.git').exists() or (parent / 'SKILL.md').is_file())
-    if any(resolved == boundary or boundary in resolved.parents for boundary in protected):
-        raise ValueError('Collected evidence must remain outside the checkout, skill and runtime package')
+    # Use the same source/installed-kit boundary as init. A consumer's own
+    # Git repository is a legitimate run destination, not the distribution.
+    from .state import _external_root
+    _external_root(resolved)
     path.mkdir(parents=True, exist_ok=True)
     if (path / "discovery.json").exists():
         raise ValueError("Use a fresh output directory; existing discovery evidence is immutable")
@@ -181,38 +179,47 @@ def _sync(coroutine_factory, async_name):
     raise RuntimeError(f"An event loop is active; await {async_name} instead")
 
 
+def destination_kind(url):
+    """Suffix is a routing hint, not a verified MIME type or reuse right."""
+    from urllib.parse import unquote
+    suffix=Path(unquote(urlsplit(url).path)).suffix.lower()
+    if suffix in {'.pdf','.doc','.docx','.ppt','.pptx','.xls','.xlsx'}:return 'document'
+    if suffix in {'.mp4','.webm','.mov','.m4v','.mp3','.wav','.jpg','.jpeg','.png','.gif','.webp','.avif','.svg','.woff','.woff2'}:return 'media'
+    return 'page'
+
+
 def collect(url: str, output_dir: str | Path, *, allow_local=False, max_pages=None,
-            panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1) -> dict:
+            panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1,excluded_urls=None) -> dict:
     """Sync wrapper; unique URL budget, fresh desktop/mobile contexts, no nested loop."""
     return _sync(lambda: acollect(url, output_dir, allow_local=allow_local, max_pages=max_pages,
                 panel_scan=panel_scan, image_wait_policy=image_wait_policy,
-                proof_storage=proof_storage, concurrency=concurrency), 'acollect')
+                proof_storage=proof_storage, concurrency=concurrency,excluded_urls=excluded_urls), 'acollect')
 
 
 async def acollect(url: str, output_dir: str | Path, *, allow_local=False, max_pages=None,
-                   panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1) -> dict:
+                   panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1,excluded_urls=None) -> dict:
     """Native async public collector. Cancellation writes partial proof, then propagates."""
     from .async_discovery import collect as run
     return await run(url, output_dir, allow_local=allow_local, max_pages=max_pages,
                      panel_scan=panel_scan, image_wait_policy=image_wait_policy,
-                     proof_storage=proof_storage, concurrency=concurrency)
+                     proof_storage=proof_storage, concurrency=concurrency,excluded_urls=excluded_urls)
 
 
 def continue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_local=False, max_pages=None,
-                     panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1) -> dict:
+                     panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1,excluded_urls=None) -> dict:
     """Sync continuation wrapper. Prior proofs are validated before any DNS/network."""
     return _sync(lambda: acontinue_collect(prior_report, output_dir, allow_local=allow_local, max_pages=max_pages,
                  panel_scan=panel_scan, image_wait_policy=image_wait_policy,
-                 proof_storage=proof_storage, concurrency=concurrency), 'acontinue_collect')
+                 proof_storage=proof_storage, concurrency=concurrency,excluded_urls=excluded_urls), 'acontinue_collect')
 
 
 async def acontinue_collect(prior_report: str | Path, output_dir: str | Path, *, allow_local=False, max_pages=None,
-                           panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1) -> dict:
+                           panel_scan='legacy', image_wait_policy='legacy', proof_storage='expanded', concurrency=1,excluded_urls=None) -> dict:
     from .async_discovery import collect as run
     initial, inputs = _continuation_inputs(prior_report, allow_local=allow_local)
     return await run(initial, output_dir, allow_local=allow_local, max_pages=max_pages,
                      panel_scan=panel_scan, image_wait_policy=image_wait_policy,
-                     proof_storage=proof_storage, concurrency=concurrency, **inputs)
+                     proof_storage=proof_storage, concurrency=concurrency,excluded_urls=excluded_urls, **inputs)
 
 
 def _continuation_inputs(prior_report, *, allow_local):
@@ -268,8 +275,8 @@ def _continuation_inputs(prior_report, *, allow_local):
                     or _url(item.get("url", ""), allow_local=allow_local, resolve=False) != item["url"]
                     or _origin(item["url"]) != _origin(initial)):
                 raise ValueError("Invalid pending navigation obligation")
-            if item.get("attempts", 1) >= 2:
-                raise ValueError("Pending state retry budget exhausted; use an evidenced host supplement or checkpoint")
+            if type(item.get('attempts',1)) is not int or not 1<=item.get('attempts',1)<=2:
+                raise ValueError('Invalid pending-state attempt count')
         ancestors = prior.get("continuation", {}).get("ancestor_report_hashes", [])
         if not isinstance(ancestors, list) or any(not isinstance(h, str) or not re.fullmatch(r"[0-9a-f]{64}", h) for h in ancestors):
             raise ValueError("Invalid continuation hash lineage")

@@ -1,5 +1,7 @@
 # Livraison éditable et contexte compilé
 
+Ce contrat s'applique au format `documents`. Le format standard `web` livre le lien vérifié, HTML/CSS/JS et médias éditables, sources/crédits et manifeste selon [son contrat](web-delivery.md) ; il n'exige pas les PDF/PPTX ci-dessous. Une reprise documentaire historique conserve intégralement ces obligations.
+
 Ce contrat précise les sorties attendues de l'agent. Il n'annonce pas un nouvel exporteur embarqué : la CLI `export` existante produit du PDF depuis HTML/CSS. La création et le contrôle PPTX utilisent les capacités réellement disponibles de l'hôte ou un outil autorisé, dont les opérations et limites sont consignées. Une capacité absente laisse cette sortie requise `BLOCKED` ou son contrôle `NOT_RUN`, jamais PASS.
 
 ## Paquet de la présentation client

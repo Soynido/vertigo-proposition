@@ -41,6 +41,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "delivery_format": {"enum": ["web", "documents"]},
+        "target_at": {"type":"string", "format":"date-time"},
+        "deadline_at": {"type":"string", "format":"date-time"},
         "attempt_limit": {
           "const": 2
         },

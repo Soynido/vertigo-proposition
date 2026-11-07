@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "observed_at": "2026-11-05T21:58:27.868443+00:00",
+  "purpose": "Agency framing only; the client concept and identity remain free",
+  "files": [
+    {
+      "path": "vertigo-wordmark.png",
+      "kind": "agency_logotype_graphic",
+      "source": "https://vertigo-website-v2.vercel.app/",
+      "method": "Native retina raster of the observed Didot Regular400 wordmark and browser letter spacing; proprietary font not redistributed",
+      "sha256": "340cdb91fe4589cf3a34f2e6e0dd3051d787364eab0742b2ce1e46be9549b295",
+      "size_bytes": 7530,
+      "font_weight": 400,
+      "source_font_redistributed": false,
+      "rights": "Owner-authorized VERTIGO identity graphic for this workflow; see LICENSE.txt"
+    },
+    {
+      "path": "poppins-latin-400-normal.woff2",
+      "source": "https://vertigo-website-v2.vercel.app/fonts/poppins-latin-400-normal.woff2",
+      "kind": "font",
+      "rights": "SIL Open Font License; see OFL-Poppins.txt",
+      "sha256": "7d93459d86585bfcdbb7e0376056226adb25821ee54b96236fe2123e9560929f",
+      "size_bytes": 7884
+    },
+    {
+      "path": "poppins-latin-500-normal.woff2",
+      "source": "https://vertigo-website-v2.vercel.app/fonts/poppins-latin-500-normal.woff2",
+      "kind": "font",
+      "rights": "SIL Open Font License; see OFL-Poppins.txt",
+      "sha256": "cd36de204aca2d5fa263a731f7c20009b5e3d754ba1f1e03c33e93a48f3e7446",
+      "size_bytes": 7748
+    },
+    {
+      "path": "poppins-latin-700-normal.woff2",
+      "source": "https://vertigo-website-v2.vercel.app/fonts/poppins-latin-700-normal.woff2",
+      "kind": "font",
+      "rights": "SIL Open Font License; see OFL-Poppins.txt",
+      "sha256": "9338e65fc077355c7a87ae0d64cc101e23b9bf8ad78ae65f0f319c857311b526",
+      "size_bytes": 7816
+    },
+    {
+      "path": "OFL-Poppins.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/OFL.txt",
+      "kind": "font_license",
+      "rights": "SIL Open Font License; see OFL-Poppins.txt",
+      "sha256": "6be04893d770899a015649c7aa3b582f871b272f8747a92b78b17c3e5c8b2573",
+      "size_bytes": 4385
+    },
+    {
+      "path": "studio-opening-poster.webp",
+      "source": "https://vertigo-website-v2.vercel.app/media/brand-opening-r1/poster.webp",
+      "kind": "agency_studio_poster",
+      "rights": "Agency portfolio reference; never represent as the prospect or relicense third-party subject matter",
+      "sha256": "49d5d41d072817e2c4f1c8ee3f94a18a3fc0be83a1cecf4794e2effe303e9b74",
+      "size_bytes": 447448
+    },
+    {
+      "path": "agency.css",
+      "kind": "agency_frame_code_or_terms",
+      "sha256": "6b258835b9c04ab0c64d30b6ffc1c322039648cd7b7d2b72caffd8c8e54324db",
+      "size_bytes": 1880,
+      "rights": "MIT for agency.css; separate asset terms and font license apply"
+    },
+    {
+      "path": "README.md",
+      "kind": "agency_frame_code_or_terms",
+      "sha256": "20e4c71207b48d2d5e22786aebd15d81df631d08af4285a39b70584a729b62b3",
+      "size_bytes": 1884,
+      "rights": "MIT for agency.css; separate asset terms and font license apply"
+    },
+    {
+      "path": "LICENSE.txt",
+      "kind": "agency_frame_code_or_terms",
+      "sha256": "82ad34c2539bfb5879853ea205cdd4209a2f1006114f62605f9644592ab1916b",
+      "size_bytes": 679,
+      "rights": "MIT for agency.css; separate asset terms and font license apply"
+    }
+  ],
+  "studio_references": [
+    {
+      "url": "https://vertigo-website-v2.vercel.app/",
+      "role": "Agency approach and portfolio; not a prospect claim"
+    },
+    {
+      "url": "https://gpromer.vercel.app/fr#top",
+      "role": "Public studio scroll/motion reference; not a universal scene design"
+    }
+  ],
+  "limits": [
+    "No proprietary font distributed",
+    "Poster is a still; it does not claim a film decoded or a customer result",
+    "Do not take prospect facts or scene designs from the agency references",
+    "Outlined transcription was rejected for thinner hairlines; the retained native raster is checked visually"
+  ],
+  "agency_contact": {
+    "target": "mailto:contact@studiovertigo.io",
+    "source": "https://vertigo-website-v2.vercel.app/",
+    "observed_at": "2026-11-05T22:00:43.700729+00:00"
+  }
+}

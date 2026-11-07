@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "scope": "portable first-party mechanisms; no reference client media, content, selectors or scene geometry",
+  "license": "LICENSE.txt",
+  "sources": [
+    {
+      "project": "GProMer — supplied technical snapshot",
+      "observed_head": "d48e523bd6a619de05f2fcf1ba22d585d6f5f903",
+      "file": "src/lib/animation/scroll-frames.ts",
+      "sha256": "7f4b27ef8773000bcf8ac75dfc2d331859faef733306ce846757b5c3bfc3f7e7",
+      "consumer": "scroll-frames.mjs",
+      "adaptations": "ES modules, bounded HTTP reader, encoded-packet budget, abort cleanup and observable buffer counters"
+    },
+    {
+      "project": "GProMer — supplied technical snapshot",
+      "observed_head": "d48e523bd6a619de05f2fcf1ba22d585d6f5f903",
+      "file": "scripts/index-scroll-films.mjs",
+      "sha256": "1a47ff7ac3bf9ad368de48f63970c0e7e6f81155ef1c3806c47e99e98079efa1",
+      "consumer": "proposition_runtime/web_media.py",
+      "adaptations": "Explicit source/output, PATH ffprobe, bounded probe output, source integrity and idempotent output; no client catalogue"
+    },
+    {
+      "project": "Vertigo — supplied technical snapshot",
+      "observed_head": "0c9c98cc612bf0825f5d0112bb2380778b20718a",
+      "file": "src/lib/homepage/lifecycle.mjs",
+      "sha256": "1bbbba6736321ccf6d5b1a598fe10311bc99c83c20667866610d756f9df226e1",
+      "consumer": "motion.mjs",
+      "adaptations": "Neutral lifecycle scope plus native-scroll Web Animations driver; no reference-specific choreography"
+    }
+  ],
+  "qualification": "Component fixtures only until the candidate's exact neutral client runs are accepted. No visual equivalence, total RAM, throughput or commercial effect inferred."
+}

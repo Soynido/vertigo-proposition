@@ -23,6 +23,8 @@ Modèle V2 et contradictions ; constats reliés aux sources ; brief public disti
 
 Le lecteur suivant doit pouvoir développer une proposition sans réinterpréter un audit brut ou accéder à un historique privé.
 
+Pour le format `web`, suivre [la projection créative](../proposition/references/web-delivery.md) : transmettre publics/besoins et statuts, observations/propositions, contre-argument, actions prouvées et les seuls médias utiles dans `creative-inputs.media_refs`. `supporting_public_refs` nomme les compléments publics autorisés. Après le gate du brief, le coordinateur appelle `web release` ; cette projection vérifiée ne constitue pas une approbation humaine ni un droit de diffusion. Les faits et implications retenus changent le brief, sans choisir le monde visuel à la place du créateur.
+
 ## Exécution et reprise
 
 Appliquer [les dépendances et reçus natifs](../proposition/references/performance.md) : brouillon de compréhension, missions réelles, puis réconciliation et consommateurs. Lire les deux méthodes séquentiellement ; une hypothèse préparée ne devient pas une observation exécutée. Conserver les réserves V2 jusqu'au brief.

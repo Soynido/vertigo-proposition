@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "format": "web",
+  "requirements": {
+    "R02": "Provide the public web proposal and editable HTML/CSS/JS sources, separate from private evidence",
+    "R03": "Respect the declared web delivery scope and authorized timing budget",
+    "R17": "Distinguish authentic, transformed and synthetic media without an arbitrary synthetic surface quota",
+    "R34": "Bind the exact deployment build and destination to the workspace publication authority; never invent human approval",
+    "R38": "Inspect all final web sections, scenes and meaningful transition states",
+    "R44": "Measure complete elapsed time against the explicitly authorized target and ceiling",
+    "R57": "Verify the active web build, readable content and portable editable sources"
+  },
+  "stages": {
+    "export.documents": {
+      "label": "Build and inspect the exact active web bundle",
+      "expected_evidence": [
+        "web-build",
+        "web-inspection",
+        "web-sources"
+      ],
+      "criteria": [
+        {
+          "id": "audiences",
+          "observable": "Only authorized public files enter the deployed bundle",
+          "evidence": [
+            "web-build"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: Only authorized public files enter the deployed bundle",
+            "1": "Partial with an unresolved weakness: Only authorized public files enter the deployed bundle",
+            "2": "Demonstrated with current inspectable evidence: Only authorized public files enter the deployed bundle"
+          }
+        },
+        {
+          "id": "editable",
+          "observable": "HTML/CSS/JavaScript sources and media are portable",
+          "evidence": [
+            "web-build"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: HTML/CSS/JavaScript sources and media are portable",
+            "1": "Partial with an unresolved weakness: HTML/CSS/JavaScript sources and media are portable",
+            "2": "Demonstrated with current inspectable evidence: HTML/CSS/JavaScript sources and media are portable"
+          }
+        },
+        {
+          "id": "text",
+          "observable": "Content and actions remain readable in the actual browser",
+          "evidence": [
+            "web-inspection"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: Content and actions remain readable in the actual browser",
+            "1": "Partial with an unresolved weakness: Content and actions remain readable in the actual browser",
+            "2": "Demonstrated with current inspectable evidence: Content and actions remain readable in the actual browser"
+          }
+        },
+        {
+          "id": "render",
+          "observable": "All scenes and transitions are actually inspected on desktop and mobile",
+          "evidence": [
+            "web-inspection"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: All scenes and transitions are actually inspected on desktop and mobile",
+            "1": "Partial with an unresolved weakness: All scenes and transitions are actually inspected on desktop and mobile",
+            "2": "Demonstrated with current inspectable evidence: All scenes and transitions are actually inspected on desktop and mobile"
+          }
+        },
+        {
+          "id": "portable",
+          "observable": "The frozen build serves without localhost or missing dependencies",
+          "evidence": [
+            "web-build",
+            "web-inspection"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: The frozen build serves without localhost or missing dependencies",
+            "1": "Partial with an unresolved weakness: The frozen build serves without localhost or missing dependencies",
+            "2": "Demonstrated with current inspectable evidence: The frozen build serves without localhost or missing dependencies"
+          }
+        }
+      ]
+    },
+    "client.composition": {
+      "label": "Compose the commercial web proposal",
+      "expected_evidence": [
+        "web-plan",
+        "web-build",
+        "web-inspection"
+      ],
+      "criteria": [
+        {
+          "id": "story",
+          "observable": "The web narrative demonstrates K01-K08 and a concrete Vertigo decision",
+          "evidence": [
+            "web-plan",
+            "web-inspection"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: The web narrative demonstrates K01-K08 and a concrete Vertigo decision",
+            "1": "Partial with an unresolved weakness: The web narrative demonstrates K01-K08 and a concrete Vertigo decision",
+            "2": "Demonstrated with current inspectable evidence: The web narrative demonstrates K01-K08 and a concrete Vertigo decision"
+          }
+        },
+        {
+          "id": "language",
+          "observable": "The prospect can understand natural client-specific copy",
+          "evidence": [
+            "web-inspection"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: The prospect can understand natural client-specific copy",
+            "1": "Partial with an unresolved weakness: The prospect can understand natural client-specific copy",
+            "2": "Demonstrated with current inspectable evidence: The prospect can understand natural client-specific copy"
+          }
+        },
+        {
+          "id": "balance",
+          "observable": "Content, space and movement serve understanding rather than a surface ratio",
+          "evidence": [
+            "web-inspection"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: Content, space and movement serve understanding rather than a surface ratio",
+            "1": "Partial with an unresolved weakness: Content, space and movement serve understanding rather than a surface ratio",
+            "2": "Demonstrated with current inspectable evidence: Content, space and movement serve understanding rather than a surface ratio"
+          }
+        },
+        {
+          "id": "demonstration",
+          "observable": "The selected concept is preserved in an interactive prospect experience",
+          "evidence": [
+            "web-plan",
+            "web-build"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: The selected concept is preserved in an interactive prospect experience",
+            "1": "Partial with an unresolved weakness: The selected concept is preserved in an interactive prospect experience",
+            "2": "Demonstrated with current inspectable evidence: The selected concept is preserved in an interactive prospect experience"
+          }
+        },
+        {
+          "id": "privacy",
+          "observable": "Agency framing, prospect content and private evidence remain separated",
+          "evidence": [
+            "web-build"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: Agency framing, prospect content and private evidence remain separated",
+            "1": "Partial with an unresolved weakness: Agency framing, prospect content and private evidence remain separated",
+            "2": "Demonstrated with current inspectable evidence: Agency framing, prospect content and private evidence remain separated"
+          }
+        }
+      ]
+    },
+    "verify.final": {
+      "label": "Verify the exact final web proposal",
+      "expected_evidence": [
+        "web-plan",
+        "web-build",
+        "web-inspection",
+        "web-sources"
+      ],
+      "criteria": [
+        {
+          "id": "all_pages",
+          "observable": "Every section, scene, action and required state is reviewed",
+          "evidence": [
+            "web-inspection"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: Every section, scene, action and required state is reviewed",
+            "1": "Partial with an unresolved weakness: Every section, scene, action and required state is reviewed",
+            "2": "Demonstrated with current inspectable evidence: Every section, scene, action and required state is reviewed"
+          }
+        },
+        {
+          "id": "version",
+          "observable": "Build, concept, assets and reviews identify the same revision",
+          "evidence": [
+            "web-build"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: Build, concept, assets and reviews identify the same revision",
+            "1": "Partial with an unresolved weakness: Build, concept, assets and reviews identify the same revision",
+            "2": "Demonstrated with current inspectable evidence: Build, concept, assets and reviews identify the same revision"
+          }
+        },
+        {
+          "id": "content",
+          "observable": "Identity, sources and factual claims are reconciled",
+          "evidence": [
+            "web-plan",
+            "web-sources"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: Identity, sources and factual claims are reconciled",
+            "1": "Partial with an unresolved weakness: Identity, sources and factual claims are reconciled",
+            "2": "Demonstrated with current inspectable evidence: Identity, sources and factual claims are reconciled"
+          }
+        },
+        {
+          "id": "safety",
+          "observable": "No private content, unapproved media or foreign-client content enters delivery",
+          "evidence": [
+            "web-build"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: No private content, unapproved media or foreign-client content enters delivery",
+            "1": "Partial with an unresolved weakness: No private content, unapproved media or foreign-client content enters delivery",
+            "2": "Demonstrated with current inspectable evidence: No private content, unapproved media or foreign-client content enters delivery"
+          }
+        },
+        {
+          "id": "gates",
+          "observable": "All applicable web requirements and both independent reviews are current",
+          "evidence": [
+            "web-inspection"
+          ],
+          "anchors": {
+            "0": "Missing or contradicted: All applicable web requirements and both independent reviews are current",
+            "1": "Partial with an unresolved weakness: All applicable web requirements and both independent reviews are current",
+            "2": "Demonstrated with current inspectable evidence: All applicable web requirements and both independent reviews are current"
+          }
+        }
+      ]
+    }
+  }
+}

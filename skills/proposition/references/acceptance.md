@@ -1,5 +1,7 @@
 # Preuves d’acceptation par obligation
 
+Lire le registre effectif du run : `requirements.json` plus les adaptations autorisées de `data/web-format.json` lorsque le format est `web`. Les identifiants et seuils restent stables. Les preuves PDF/PPTX de la table ci-dessous concernent `documents` ; en web, utiliser [plan/build/inspection et remise publique](web-delivery.md), pas des cases documentaires faussement réalisées.
+
 Ce guide précise une preuve minimale générique pour chacun des identifiants stables du registre embarqué. Il ne copie pas une matrice privée et ne fournit aucune valeur de profil privé. Lire l’exigence et son applicabilité dans `scripts/proposition_runtime/data/requirements.json` depuis le dossier du skill principal ; si une valeur/configuration manque, conserver son absence, sans inventer de défaut privé ni obtenir un PASS par l’existence d’un fichier.
 
 Pour chaque obligation : identifiant, applicabilité motivée, état, observation, fichier/zone précise, empreintes d’entrée/sortie, défaut et correction, date du recontrôle. Une preuve ci-dessous est un minimum à contextualiser, pas un mot-clé à trouver. L’étape reçoit aussi son propre rapport à cinq critères ; cette note ne compense aucune case obligatoire non prouvée.

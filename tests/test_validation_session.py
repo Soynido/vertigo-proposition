@@ -95,7 +95,8 @@ class ValidationSessionTests(unittest.TestCase):
                     state.validate_run(self.root)
         file_id = sha256(str(path.absolute()).encode()).hexdigest()
         events = [json.loads(x) for x in next((self.root/'telemetry').glob('*.jsonl')).read_text().splitlines()]
-        self.assertEqual(2, sum(e['name']=='validation.hash' and e['attributes'].get('file_id')==file_id for e in events))
+        # Aggregated telemetry must still prove two real reads across phases.
+        self.assertEqual(2, sum(e['attributes']['count'] for e in events if e['name']=='validation.hash' and e['attributes'].get('file_id')==file_id))
 
     def test_artifact_hashes_participate_in_the_same_stable_phase(self):
         from proposition_runtime.artifacts import sha256

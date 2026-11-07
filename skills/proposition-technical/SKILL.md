@@ -6,6 +6,8 @@ license: MIT
 
 # Transmettre le projet à réaliser
 
+Ce dossier interne appartient au parcours `documents` ou à une demande interne explicite. La remise `web` contient déjà HTML/CSS/JS, actifs, sources/crédits et manifeste ; elle n'exige pas un PDF technique. Ne pas réactiver les dossiers documentaires pour fermer un run web. Lire [le contrat du format](../proposition/references/web-delivery.md).
+
 Recevoir le projet final, sa source éditable, ses décisions et les sources techniques encore valides. Lire [le contrat de reprise](references/handoff.md). Dériver la transmission de cette révision ; ne pas relancer toute la recherche sans manque nommé.
 
 Le paquet reçu contient les empreintes courantes de la source client, carte, catalogue et PDF/PPTX. Relier chaque partie à ses pages/zones et à la mission effectivement proposée. Enregistrer `technical-handoff`, puis `technical-source`/`technical-pdf`, avec les dépendances client ; une nouvelle révision périme les dérivés concernés. Le manifeste final inventorie les pièces sans devenir leur entrée, pour éviter un cycle de dépendances.

@@ -47,7 +47,8 @@ def measure(run_dir, *, quota=None, source=None):
     return result
 
 
-def doctor(*, check_presentations=False):
+def doctor(*, check_presentations=False, delivery_format='documents'):
+    if delivery_format not in ('web','documents'):raise ValueError('Unknown delivery format')
     dependencies = {}
     for name in ('jsonschema', 'playwright', 'pypdf', 'pypdfium2', 'Pillow'):
         try:
@@ -55,6 +56,8 @@ def doctor(*, check_presentations=False):
         except importlib.metadata.PackageNotFoundError:
             dependencies[name] = None
     browser = {'status': 'UNAVAILABLE'}
+    browsers={'chromium':browser}
+    if delivery_format=='web':browsers['webkit']={'status':'UNAVAILABLE'}
     try:
         from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
@@ -62,19 +65,28 @@ def doctor(*, check_presentations=False):
             try:
                 instance, channel = launch_browser(p)
                 browser = {'status': 'AVAILABLE', 'version': instance.version, 'channel': channel}
+                browsers['chromium']=browser
                 instance.close()
             except Exception:
                 pass
+            if delivery_format=='web':
+                try:
+                    instance=p.webkit.launch(headless=True)
+                    browsers['webkit']={'status':'AVAILABLE','version':instance.version}
+                    instance.close()
+                except Exception:
+                    pass
     except ImportError:
         pass
     from . import presentation_probe
     presentation = presentation_probe.probe() if check_presentations else {
         'status': 'NOT_TESTED', 'tools': presentation_probe.inventory(), 'client_fidelity': 'NOT_RUN'}
-    ready = all(dependencies.values()) and browser['status'] == 'AVAILABLE'
+    ready = all(dependencies.values()) and all(v['status']=='AVAILABLE' for v in browsers.values())
     if check_presentations: ready = ready and presentation['status'] == 'PASS'
     return {'status': 'PASS' if ready else 'BLOCKED',
             'scope': 'local_runtime_only', 'python': platform.python_version(), 'dependencies': dependencies,
-            'browser': browser, 'contracts': state.CONTRACT_ROOT.is_dir(), 'registry': state.DATA_ROOT.is_dir(),
+            'browser': browser, 'browsers':browsers, 'delivery_format':delivery_format,
+            'contracts': state.CONTRACT_ROOT.is_dir(), 'registry': state.DATA_ROOT.is_dir(),
             'creative_quality': 'NOT_RUN', 'fresh_agent_contexts': 'HOST_REQUIRED', 'image_editing': 'HOST_REQUIRED',
             'sites': 'ADAPTER_NOT_CONFIGURED', 'private_connector': 'ADAPTER_NOT_CONFIGURED',
             'live_publication': 'NOT_RUN', 'slash_command': 'HOST_DEPENDENT',
@@ -107,18 +119,29 @@ def workbench(run_dir):
 def parser():
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest='command', required=True)
+    s=sub.add_parser('native');s.add_argument('operation',choices=['setup','context','prepare','serve','opened','status','stop','close-view','reconcile'])
+    s.add_argument('--workspace',type=Path);s.add_argument('--session',type=Path);s.add_argument('--receipt',type=Path)
+    s.add_argument('--repo-url');s.add_argument('--site-url');s.add_argument('--model');s.add_argument('--effort');s.add_argument('--wait',type=float,default=0)
     doctor_parser = sub.add_parser('doctor')
     doctor_parser.add_argument('--presentations', action='store_true', help='Test a real local editable/rendered PPTX fixture')
+    doctor_parser.add_argument('--delivery-format',choices=['web','documents'],default='documents')
+    s=sub.add_parser('publication-setup');s.add_argument('workspace',type=Path)
+    s.add_argument('--owner',required=True);s.add_argument('--org')
+    s.add_argument('--credential-ref',default='vercel_cli',help='Private CLI login or env:VARIABLE reference, never an inline token')
     s = sub.add_parser('init'); s.add_argument('url'); s.add_argument('--runs-root', type=Path, default=default_runs()); s.add_argument('--profile', type=Path); s.add_argument('--creative-mandate', type=Path); s.add_argument('--audience-handoff-contract', type=int, choices=[1,2], default=2); s.add_argument('--execution-config', type=Path)
+    s.add_argument('--delivery-format', choices=['web', 'documents'], help='Explicit format; omitted keeps the profile or legacy documents')
     s = sub.add_parser('collect'); s.add_argument('url', nargs='?'); s.add_argument('--output', required=True, type=Path); s.add_argument('--allow-local-fixture', action='store_true'); s.add_argument('--max-pages', type=int); s.add_argument('--frontier', type=Path)
-    s.add_argument('--concurrency',type=int,choices=[1,2,4],default=1)
-    s.add_argument('--proof-storage',choices=['expanded','content_addressed'],default='expanded')
-    s.add_argument('--panel-scan',choices=['legacy','batch'],default='legacy');s.add_argument('--image-wait-policy',choices=['legacy','terminal_aware'],default='legacy')
+    s.add_argument('--run-dir',type=Path)
+    s.add_argument('--concurrency',type=int,choices=[1,2,4])
+    s.add_argument('--proof-storage',choices=['expanded','content_addressed'])
+    s.add_argument('--panel-scan',choices=['legacy','batch']);s.add_argument('--image-wait-policy',choices=['legacy','terminal_aware'])
+    s.add_argument('--full-output',action='store_true',help='Print the full report instead of its bounded file receipt')
     s = sub.add_parser('prepare-inputs'); s.add_argument('run_dir', type=Path); s.add_argument('manifest', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--timeout-seconds', type=float, default=5)
     s = sub.add_parser('preprocess'); s.add_argument('run_dir', type=Path); s.add_argument('--mode', choices=['auto','codex','cloudflare'])
     s = sub.add_parser('strategy'); s.add_argument('operation', choices=['prepare','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path); s.add_argument('--cache', type=Path); s.add_argument('--stage', choices=['analysis.specialists','company.v2','brief.public'],default='brief.public')
     s = sub.add_parser('history'); s.add_argument('operation', choices=['collect','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--urls', nargs='*', default=[]); s.add_argument('--report', type=Path)
-    s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','check','reconcile','channels','research-plan']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
+    s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','supplement','scope','check','reconcile','channels','research-plan']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
+    s.add_argument('--full-output',action='store_true',help='Print the complete inventory explicitly; default output is bounded')
     for command in ('validate', 'receipt', 'workbench', 'next-stage', 'check-experience'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path)
         if command == 'check-experience':
@@ -150,17 +173,109 @@ def parser():
     s = sub.add_parser('task-event');s.add_argument('run_dir',type=Path);s.add_argument('event',type=Path)
     s = sub.add_parser('accept-task-result');s.add_argument('run_dir',type=Path);s.add_argument('result',type=Path)
     s = sub.add_parser('execution-status');s.add_argument('run_dir',type=Path)
+    s = sub.add_parser('web');s.add_argument('operation',choices=['preflight','budget','release','media-index','plan','build','inspect','publish','verify']);s.add_argument('run_dir',type=Path)
+    s.add_argument('--source',type=Path);s.add_argument('--plan',type=Path)
+    s.add_argument('--output',type=Path,help='Run-local unchanged-film index destination; media-index only')
+    s.add_argument('--supersedes',help='Exact predecessor SHA256 for an explicit experience-plan correction')
+    s.add_argument('--reason',help='Reason for the experience-plan correction; no silent reselection')
+    s.add_argument('--policy',type=Path,help='Private workspace publication policy; contains credential references only')
+    s.add_argument('--browser',choices=['chromium','webkit'],action='append',help='Default: both engines; a partial probe does not qualify the missing engine')
+    s.add_argument('--retry',action='store_true',help='Keep the previous inspection and create a new attempt')
     return p
 
 
 def execute(a):
     from .validation import phase
-    stable = a.command in ('validate','next-stage','stage-report','receipt') or (a.command=='strategy' and a.operation=='check')
+    stable = a.command in ('validate','next-stage','stage-report','receipt','discovery') or (a.command=='strategy' and a.operation=='check')
     return phase(_execute)(a) if stable else _execute(a)
 
 
 def _execute(a):
     c = a.command
+    if c=='native':
+        from . import native_session as native
+        caller=os.environ.get('CODEX_THREAD_ID')
+        if a.operation=='setup':
+            from .native_setup import ensure_codex_cli
+            return {'status':'AVAILABLE','executable':ensure_codex_cli(),'scope':'isolated_transport_not_host_qualification'}
+        if a.operation in ('context','prepare'):
+            if not a.workspace:raise ValueError('Native startup requires the installed workspace')
+            if a.operation=='context':return {'status':'WORKER' if native.is_worker(a.workspace,caller) else 'LAUNCHER'}
+            setup=native.workspace_setup(a.workspace);config=setup.get('native_observer',{})
+            if not a.repo_url or not a.site_url:raise ValueError('Native preparation requires exactly the repository and prospect URLs')
+            return native.prepare(a.workspace,a.repo_url+'\n'+a.site_url,
+                model=a.model or config.get('model'),effort=a.effort or config.get('effort'),caller=caller)
+        if not a.session:raise ValueError('Native operation requires its session path')
+        if a.operation=='serve':return native.serve(a.session)
+        if a.operation=='opened':
+            if not a.receipt:raise ValueError('Actual panel-opening receipt is required')
+            return native.register_open(a.session,a.receipt,caller)
+        if a.operation=='status':return native.status(a.session,wait=a.wait)
+        if a.operation=='stop':return native.request_stop(a.session,caller)
+        if a.operation=='reconcile':return native.reconcile(a.session,caller)
+        if a.operation=='close-view':
+            if read_json(a.session/'request.json')['owner_thread_id']!=caller:raise ValueError('View belongs to another lane')
+            if not (a.session/'result.json').exists():raise ValueError('Do not close the view while execution is active')
+            from .publication import write_json
+            write_json(a.session/'close-view.json',{'requested':True});return {'status':'VIEW_CLOSE_REQUESTED'}
+    if c=='publication-setup':
+        from .web_setup import configure_publication
+        result=configure_publication(a.workspace,a.owner,a.org,credential_ref=a.credential_ref)
+        return {key:result[key] for key in ('status','phase','authority','project_name','project_id',
+            'policy_path','per_run_target','prospect_publication') if key in result}
+    if c == 'web':
+        from . import web
+        if a.operation=='preflight':
+            from .web_publication import preflight_run
+            if a.source or a.output or a.plan or a.browser or a.retry or a.supersedes or a.reason:
+                raise ValueError('web preflight checks the installed policy only, without writes')
+            return preflight_run(a.run_dir,a.policy)
+        if a.operation=='plan':
+            if not a.source or not a.plan or a.output or a.policy or a.browser or a.retry:
+                raise ValueError('web plan requires --source and --plan before writing the homepage')
+            return web.plan_run(a.run_dir,a.source,a.plan,supersedes=a.supersedes,reason=a.reason)
+        if a.supersedes or a.reason:raise ValueError('Plan revision arguments belong to web plan only')
+        if a.operation=='budget':
+            from .web_timing import budget
+            if a.source or a.output or a.plan or a.policy or a.browser or a.retry:
+                raise ValueError('web budget is a read-only complete run clock')
+            return budget(state.load_run(a.run_dir))
+        if a.operation=='release':
+            from .web_inputs import prepare_release
+            if a.source or a.output or a.plan or a.policy or a.browser or a.retry:
+                raise ValueError('web release uses the assessed canonical public input allowlist')
+            row=prepare_release(a.run_dir)
+            return {'status':'PREPARED','scope':'creative_inputs_only_not_external_publication',
+                'authority':'verified_public_source_projection','path':row['path'],'sha256':row['sha256']}
+        if a.operation=='media-index':
+            if not a.source or not a.output or a.plan or a.policy or a.browser or a.retry:
+                raise ValueError('web media-index requires only --source and --output within the run')
+            run=state.load_run(a.run_dir);root=Path(run['root'])
+            if state.delivery_format(run)!='web':raise ValueError('web media-index requires a web run')
+            source=state._safe_path(root,a.source);output=state._safe_path(root,a.output,exists=False)
+            return web.index_film(source,output)
+        if a.output:raise ValueError('--output belongs to web media-index only')
+        if a.operation in ('publish','verify'):
+            from . import web_publication
+            if a.source or a.plan or a.browser or a.retry:
+                raise ValueError('Publication consumes the accepted registered build and browser checks')
+            policy=a.policy or state.load_run(a.run_dir)['profile']['parameters'].get('publication_policy')
+            if not policy:
+                raise ValueError('The private workspace publication policy is not configured')
+            result=(web_publication.publish_run if a.operation=='publish' else web_publication.verify_run)(a.run_dir,policy)
+            return {key:result[key] for key in ('status','scope','url','build_id','run_id','authority','authentication_used','timing','delivery_status') if key in result}
+        if a.operation=='build':
+            if not a.source or not a.plan or a.browser or a.retry or a.policy:
+                raise ValueError('web build requires --source and --plan; browser options belong to inspect')
+            result=web.build_run(a.run_dir,a.source,a.plan)
+            return {key:result[key] for key in ('status','scope','creative_quality','build_id','manifest_path','run_id') if key in result}
+        if a.source or a.plan or a.policy:
+            raise ValueError('web inspect consumes the registered exact build, not replacement inputs')
+        result=web.inspect_run(a.run_dir,browsers=tuple(a.browser or ['chromium','webkit']),retry=a.retry)
+        row=state.load_run(a.run_dir)['artifacts']['web-inspection']
+        return {key:result[key] for key in ('status','scope','creative_quality','build_id','run_id')} | {
+            'report_path':str(a.run_dir/row['path']), 'capture_count':len(result['captures']),
+            'issue_count':len(result['issues']),'issues':result['issues'][:3]}
     if c in ('ready-tasks','claim-task','task-event','accept-task-result','execution-status'):
         from . import execution
         from .transactions import read_json as read_execution_json
@@ -191,16 +306,17 @@ def _execute(a):
             from .public_research import prepare
             return prepare(a.run_dir)
         from . import discovery_evidence
-        if a.operation in ('register','reconcile'):
+        if a.operation in ('register','reconcile','scope','supplement'):
             if not a.report: raise ValueError('discovery register/reconcile requires --report')
-            return getattr(discovery_evidence,a.operation)(a.run_dir, a.report)
+            method={'scope':'register_scope','supplement':'register_supplement'}.get(a.operation,a.operation)
+            return getattr(discovery_evidence,method)(a.run_dir, a.report)
         state.invalidate_changed(a.run_dir)
         inspect=discovery_evidence.inspect_channels if a.operation=='channels' else discovery_evidence.inspect_discovery
         return inspect(state.load_run(a.run_dir))
     if c in ('freeze-creatives', 'check-creatives'):
         from .preservation import freeze_creatives, inspect_preservation
         return freeze_creatives(a.run_dir, read_json(a.selection)) if c == 'freeze-creatives' else inspect_preservation(state.load_run(a.run_dir))
-    if c == 'doctor': return doctor(check_presentations=a.presentations)
+    if c == 'doctor': return doctor(check_presentations=a.presentations,delivery_format=a.delivery_format)
     if c == 'history':
         from . import history
         if a.operation == 'collect': return history.collect(a.run_dir,a.urls)
@@ -218,10 +334,12 @@ def _execute(a):
         return assess_placements(data['placements'], data['pages'])
     if c == 'init':
         from .experience import read_mandate_input
+        from .native_session import admission_time
         return state.init_run(a.url, a.runs_root, read_json(a.profile) if a.profile else None,
             creative_mandate=json.loads(read_mandate_input(a.creative_mandate)) if a.creative_mandate else None,
             audience_handoff_contract=a.audience_handoff_contract,
-            execution_config=read_json(a.execution_config) if a.execution_config else None)
+            execution_config=read_json(a.execution_config) if a.execution_config else None,
+            delivery_format=a.delivery_format,admitted_at=admission_time(Path.cwd(),os.environ.get('CODEX_THREAD_ID'),a.url))
     if c == 'validate': return state.validate_run(a.run_dir)
     if c == 'next-stage': return state.next_stage(a.run_dir)
     if c == 'check-experience':
@@ -246,11 +364,22 @@ def _execute(a):
     if c == 'context-packet': return state.build_context_packet(a.run_dir, a.output, a.files)
     if c == 'collect':
         from .discovery import collect, continue_collect
+        from .transactions import execution_metadata
+        config={'concurrency':1,'panel_scan':'legacy','image_wait_policy':'legacy','proof_storage':'expanded'}
+        excluded=None
+        if a.run_dir:
+            run=state.load_run(a.run_dir);config.update({k:v for k,v in execution_metadata(run)['config'].items() if k in config})
+            source=read_json(a.frontier)['input_url'] if a.frontier else a.url
+            if source!=run['url']:raise ValueError('Collection must use the run URL')
+            state._safe_path(Path(run['root']),str(a.output.absolute().relative_to(Path(run['root']))),exists=False)
+            from .discovery_evidence import current_exclusions
+            excluded=list(current_exclusions(run))
+        config={k:getattr(a,k) if getattr(a,k) is not None else v for k,v in config.items()}
         if a.frontier:
             if a.url: raise ValueError('Use the prior report URL when continuing; do not supply a replacement URL')
-            return continue_collect(a.frontier,a.output,allow_local=a.allow_local_fixture,max_pages=a.max_pages,panel_scan=a.panel_scan,image_wait_policy=a.image_wait_policy,proof_storage=a.proof_storage,concurrency=a.concurrency)
+            return continue_collect(a.frontier,a.output,allow_local=a.allow_local_fixture,max_pages=a.max_pages,excluded_urls=excluded,**config)
         if not a.url: raise ValueError('A URL or --frontier prior report is required')
-        return collect(a.url, a.output, allow_local=a.allow_local_fixture, max_pages=a.max_pages,panel_scan=a.panel_scan,image_wait_policy=a.image_wait_policy,proof_storage=a.proof_storage,concurrency=a.concurrency)
+        return collect(a.url, a.output, allow_local=a.allow_local_fixture, max_pages=a.max_pages,excluded_urls=excluded,**config)
     if c in ('export','inspect'):
         from .artifacts import export_pdf, inspect_pdf
         return export_pdf(a.source,a.output,audience=a.audience) if c == 'export' else inspect_pdf(a.pdf,a.output,audience=a.audience,max_pages=a.max_pages)
@@ -272,14 +401,33 @@ def _execute(a):
     raise ValueError('Unsupported command')
 
 
+def _output_receipt(args,result):
+    if getattr(args,'full_output',False) or not isinstance(result,dict):return result
+    if args.command=='collect':
+        path=Path(args.output)/'discovery.json'
+        return {'status':result['status'],'scope':'physical_collection_only','report_path':str(path),
+            'sha256':state._sha(path),'viewports':len(result.get('pages',[])),
+            'pending_states':len(result.get('coverage',{}).get('pending_states',[]))}
+    if args.command!='discovery' or args.operation=='research-plan':return result
+    run=state.load_run(args.run_dir);entries=result.get('entries',[]);issues=result.get('issues',[])
+    identifiers=[*run['metadata'].get('discovery_reports',[]),*run['metadata'].get('discovery_external_reports',[])]
+    reports=[{'path':run['artifacts'][i]['path'],'sha256':run['artifacts'][i]['sha256']} for i in identifiers[-8:]]
+    return {k:result[k] for k in ('status','scope','semantic_analysis','visual_quality') if k in result} | {
+        'entry_count':len(entries),'destination_count':len({x['url'] for x in entries if x.get('url')}),
+        'issue_count':len(issues),'issues':[str(i)[:500] for i in issues[:8]],
+        'reports':reports,'report_count':len(identifiers),'state_path':str(Path(run['root'])/'state.json'),
+        'details':'Canonical reports retained; --full-output explicitly returns the full inspection.'}
+
+
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
         if getattr(args,'run_dir',None) is not None and args.command not in ('metrics','ready-tasks','execution-status'):
             from .telemetry import TraceRecorder
             with TraceRecorder(args.run_dir) as trace:
-                with trace.span('cli.command', command=args.command):
+                with trace.span('cli.command', command=args.command,**({'operation':args.operation} if hasattr(args,'operation') else {})) as observation:
                     result = execute(args)
+                    if isinstance(result,dict) and isinstance(result.get('status'),str):observation['business_status']=result['status'].upper()
         else:
             result = execute(args)
     except (ValueError, OSError, KeyError, TypeError, json.JSONDecodeError) as error:
@@ -291,11 +439,12 @@ def main(argv=None):
     if args.command == 'metrics' and args.format == 'markdown':
         print('# Mesures locales\n\nCouverture : '+result['coverage']+'\n\nTemps hôte et tokens : inconnus.\n\n```json\n'+json.dumps(result,ensure_ascii=False,indent=2)+'\n```')
     else:
-        print(json.dumps(result,ensure_ascii=False,indent=2,default=str))
+        print(json.dumps(_output_receipt(args,result),ensure_ascii=False,indent=2,default=str))
     if args.command=='ready-tasks':return 0
     if args.command in ('claim-task','task-event','accept-task-result'):
         if result.get('status')=='UNKNOWN_OUTCOME':return 5
         if result.get('status')=='REJECTED_STALE':return 3
+    if args.command in ('web','publication-setup') and result.get('status')=='UNKNOWN_OUTCOME':return 5
     return 2 if str(result.get('status', '')).upper() in ('FAIL','BLOCKED','STALE','PARTIAL','UNAVAILABLE') else 0
 
 

@@ -103,8 +103,28 @@ def _external_root(path):
     candidate = _no_symlinks(raw.resolve())
     protected = [RESOURCE_ROOT]
     for ancestor in RESOURCE_ROOT.parents:
-        if (ancestor / "SKILL.md").is_file() or (ancestor / ".git").exists():
+        # The consumer's own Git workspace is not the public distribution.
+        if ((ancestor / "SKILL.md").is_file() or
+                ((ancestor / ".git").exists() and (ancestor/'skills/proposition/SKILL.md').is_file()
+                 and (ancestor/'scripts/install.py').is_file())):
             protected.append(ancestor)
+    skill=RESOURCE_ROOT.parents[1];installation=skill/'installation.json'
+    if installation.exists():
+        if installation.is_symlink() or installation.stat().st_size>65536:
+            raise ValueError('Installation identity must be a bounded regular file')
+        settings=json.loads(installation.read_text())
+        protected.append(skill.parent)
+        source=settings.get('source_checkout')
+        if source:
+            if not Path(source).is_absolute():raise ValueError('Installation source identity must be absolute')
+            protected.append(Path(source).resolve())
+        else:
+            # Compatibility with older managed installations which only stored
+            # their source venv. Never infer an arbitrary Git workspace boundary.
+            python=Path(settings.get('runtime_python',''))
+            if python.is_absolute() and python.parent.parent.name=='.venv':
+                source=python.parent.parent.parent
+                if (source/'skills/proposition/SKILL.md').is_file():protected.append(source.resolve())
     if any(candidate == boundary or boundary in candidate.parents for boundary in protected):
         raise ValueError("Run data must live outside the checkout")
     return candidate
@@ -139,28 +159,43 @@ def _schema(name, value):
         raise ValueError(f"Invalid {name}: {'/'.join(map(str, first.path))}: {first.message}")
 
 
-def _requirements():
+def _requirements(run=None):
     data = json.loads((DATA_ROOT / "requirements.json").read_text(encoding="utf-8"))
     rows = data["requirements"]
     expected = {f"R{i:02}" for i in range(1, 82)}
     if len(rows) != 81 or {row["id"] for row in rows} != expected:
         raise ValueError("The public requirement registry must cover R01 through R81 exactly once")
+    if run is not None and delivery_format(run) == 'web':
+        overrides = json.loads((DATA_ROOT / 'web-format.json').read_text())['requirements']
+        rows = [dict(row, label=overrides.get(row['id'], row['label'])) for row in rows]
     return rows
 
 
-def _stages():
+def _stages(run=None):
     rows = json.loads((DATA_ROOT / "stages.json").read_text(encoding="utf-8"))["stages"]
     if len(rows) != 13 or len({row["id"] for row in rows}) != 13:
         raise ValueError("The stage registry must contain thirteen distinct named stages")
-    return {row["id"]: row for row in rows}
+    result = {row["id"]: row for row in rows}
+    if run is not None and delivery_format(run) == 'web':
+        overrides = json.loads((DATA_ROOT / 'web-format.json').read_text())['stages']
+        for identifier, changes in overrides.items():
+            result[identifier].update(changes)
+    return result
+
+
+def delivery_format(run):
+    """Historical runs and direct legacy CLI calls remain documents."""
+    return run['profile']['parameters'].get('delivery_format', 'documents')
 
 
 def delivery_scope(state):
+    if delivery_format(state) == 'web':
+        return 'client'
     return state["profile"]["parameters"].get("delivery_scope", "full")
 
 
 def _quality_stages(state):
-    return {key: row for key, row in _stages().items()
+    return {key: row for key, row in _stages(state).items()
             if key != PUBLICATION_STAGE
             and not (delivery_scope(state) == "client" and key == "internal.handoffs")}
 
@@ -187,7 +222,7 @@ def _validate_structure(state):
         raise ValueError("Review lies outside the named stage registry")
 
 
-def init_run(url, run_root, profile=None, *, creative_mandate=None, audience_handoff_contract=2, execution_config=None):
+def init_run(url, run_root, profile=None, *, creative_mandate=None, audience_handoff_contract=2, execution_config=None, delivery_format=None,admitted_at=None):
     """Create a new run under run_root, which must be outside the checkout."""
     parsed = urlsplit(url)
     if type(audience_handoff_contract) is not int or audience_handoff_contract not in (1,2):
@@ -204,11 +239,17 @@ def init_run(url, run_root, profile=None, *, creative_mandate=None, audience_han
                 "required_reviewers": ["review-a", "review-b"], "parameters": {}}
     if profile is not None:
         selected.update(deepcopy(profile))
+    if delivery_format is not None:
+        selected['parameters']['delivery_format'] = delivery_format
     _schema('profile',selected)
     selected['parameters'].setdefault('proposal_contract',2)
     _schema("profile", selected)
     run_id = f"run-{uuid4().hex}"
     stamp = _now()
+    if admitted_at is not None:
+        admitted=datetime.fromisoformat(admitted_at)
+        if admitted.tzinfo is None or admitted>datetime.fromisoformat(stamp):raise ValueError('Admission time must be a dated past observation')
+        stamp=admitted_at
     from .experience import initial_exploration_contract
     contract,instruction=initial_exploration_contract(url,creative_mandate,stamp)
     root = base / run_id
@@ -221,6 +262,13 @@ def init_run(url, run_root, profile=None, *, creative_mandate=None, audience_han
              "reviews": {}, "stage_reviews": {}, "checkpoints": {},
              "metadata": {"creative_exploration_contract":contract,"creative_reading_contract":1,
                           "sales_kit_contract":1,"public_research_contract":1,"audience_handoff_contract":audience_handoff_contract}}
+    if selected['parameters'].get('delivery_format') == 'web':
+        state['metadata']['web_contract'] = 1
+        if execution_config is None:
+            execution['config']={'concurrency':2,'panel_scan':'batch','image_wait_policy':'terminal_aware',
+                                 'proof_storage':'content_addressed','max_host_tasks':2}
+            _schema('execution',execution)
+        state['metadata']['execution']=execution
     if execution_config is not None: state['metadata']['execution'] = execution
     save_run(root, state)
     return load_run(root)
@@ -325,6 +373,12 @@ def _save_locked(run_dir, state):
         previous = json.loads(_state_bytes(target))
         if previous.get("id") != state["id"]:
             raise ValueError("Cannot replace a different run")
+        if delivery_format(previous) != delivery_format(state):
+            raise ValueError('Initialized delivery format cannot change; create another run')
+        if delivery_format(previous)=='web' and previous['created_at']!=state['created_at']:
+            raise ValueError('The complete web run clock cannot be reset')
+        if previous.get('metadata', {}).get('web_contract') != state.get('metadata', {}).get('web_contract'):
+            raise ValueError('Initialized web contract cannot change or disappear')
         contract=previous.get('metadata',{}).get('creative_exploration_contract')
         if contract is not None and state.get('metadata',{}).get('creative_exploration_contract')!=contract:
             raise ValueError('Initialized creative exploration contract cannot be changed or removed')
@@ -690,14 +744,15 @@ def _review_receipt_issues(state, root, review, stage_id=None):
 
 
 def _stage_report(state, stage_id):
-    stage = _stages().get(stage_id)
+    stage = _stages(state).get(stage_id)
     if stage is None:
         raise ValueError("Unknown named stage")
     if stage_id == "internal.handoffs" and delivery_scope(state) == "client":
         return {"stage_id": stage_id, "status": "NOT_APPLICABLE", "score": None,
                 "issues": [], "reason": "Internal deliverables excluded by explicit client scope"}
-    requirements = [row for row in _requirements() if row["stage_id"] == stage_id]
+    requirements = [row for row in _requirements(state) if row["stage_id"] == stage_id]
     issues = []
+    web_format=delivery_format(state)=='web'
     if stage_id == 'discovery.site':
         from .discovery_evidence import inspect_discovery
         for message in inspect_discovery(state)['issues']:
@@ -744,14 +799,18 @@ def _stage_report(state, stage_id):
             issue("missing_evidence", requirement["id"], "Stage needs evidence without decisive unknowns")
     if stage_id in {"creative.direction", "client.composition", "export.documents"}:
         from .preservation import inspect_preservation
-        preservation = inspect_preservation(state, selection_only=stage_id == "creative.direction")
+        preservation = inspect_preservation(state, selection_only=web_format or stage_id == "creative.direction")
         for message in preservation["issues"]:
             issue("creative_preservation", stage_id, message)
     if stage_id in {"creative.direction", "client.composition", "export.documents", "verify.final"}:
         from .experience import inspect_experience
-        for message in inspect_experience(state, stage_id)["issues"]:
+        for message in inspect_experience(state, 'creative.direction' if web_format else stage_id)["issues"]:
             issue("creative_experience", stage_id, message)
-    if stage_id in {'internal.handoffs','export.documents','verify.final'}:
+    if web_format and stage_id in {'client.composition','review.client','export.documents','verify.final'}:
+        from .web import inspect_delivery
+        for message in inspect_delivery(state)['issues']:
+            issue('web_delivery',stage_id,message)
+    if not web_format and stage_id in {'internal.handoffs','export.documents','verify.final'}:
         from .composition import handoff_issues
         for message in handoff_issues(state):
             issue('client_handoff_revision',stage_id,message)
@@ -762,9 +821,9 @@ def _stage_report(state, stage_id):
     else:
         score = sum(review["scores"])
         if stage_id in {'client.composition','review.client'}:
-            from .composition import enabled, CLIENT_INPUTS
-            if enabled(state) and not set(CLIENT_INPUTS).issubset(review['evidence']):
-                issue('kit_review_packet',stage_id,'Review must receive the current client source, plan, receipt, catalogue, story and both exports')
+            from .composition import enabled, client_inputs
+            if enabled(state) and not set(client_inputs(state)).issubset(review['evidence']):
+                issue('kit_review_packet',stage_id,'Review must receive the complete current client packet for its delivery format')
         if stage_id=='discovery.site' and 'artifact:site-discovery' not in _dependency_closure(state,review['evidence']):
             issue('discovery_evidence',stage_id,'Stage review must cover the current Discovery receipt')
         if stage_id=='discovery.channels' and 'discovery-channels' in state['artifacts'] and 'artifact:discovery-channels' not in _dependency_closure(state,review['evidence']):
@@ -847,7 +906,7 @@ def _validate_run(run_dir):
     issues = []
     root = Path(state["root"])
     active_stages = _quality_stages(state)
-    active_requirements = [row for row in _requirements()
+    active_requirements = [row for row in _requirements(state)
                            if row["stage_id"] in active_stages or row["stage_id"] == PUBLICATION_STAGE]
     publication_ids = {row["id"] for row in _requirements() if row["stage_id"] == PUBLICATION_STAGE}
     quality_roots = [f"evaluation:{identifier}" for identifier in state["evaluations"]
@@ -919,8 +978,8 @@ def _validate_run(run_dir):
             issue("review_not_passed", reviewer, "Required review has not passed")
         if sum(review["scores"]) < 9:
             issue("review_score", reviewer, "Each required reviewer must independently score at least 9/10")
-        from .composition import enabled, CLIENT_INPUTS
-        if enabled(state) and not set(CLIENT_INPUTS).issubset(review['evidence']):
+        from .composition import enabled, client_inputs
+        if enabled(state) and not set(client_inputs(state)).issubset(review['evidence']):
             issue('kit_review_packet',reviewer,'Both client reviewers must receive the current complete kit packet')
         for message in _review_receipt_issues(state, root, review):
             issue("review_independence", reviewer, message)
@@ -929,12 +988,16 @@ def _validate_run(run_dir):
         report = _stage_report(state, stage_id)
         stage_reports[stage_id] = {"status": report["status"], "score": report["score"]}
         issues.extend(report["issues"])
-    publication = _stage_report(state, PUBLICATION_STAGE)
-    publication["review_status"] = publication["status"]
-    if PUBLICATION_STAGE not in state["stage_reviews"]:
-        publication["status"] = "NOT_RUN"
-    publication["scope"] = "external_persistence_review"
-    publication["execution"] = "NOT_REPORTED_BY_THIS_LOCAL_RUNTIME"
+    if delivery_format(state)=='web':
+        from .web_publication import publication_report
+        publication=publication_report(state)
+    else:
+        publication = _stage_report(state, PUBLICATION_STAGE)
+        publication["review_status"] = publication["status"]
+        if PUBLICATION_STAGE not in state["stage_reviews"]:
+            publication["status"] = "NOT_RUN"
+        publication["scope"] = "external_persistence_review"
+        publication["execution"] = "NOT_REPORTED_BY_THIS_LOCAL_RUNTIME"
     return {"status": ("STALE" if any(i["code"] == "stale_evidence" for i in issues)
                        else "BLOCKED") if issues else "PASS", "issues": issues,
             "scope": delivery_scope(state),
@@ -1001,6 +1064,9 @@ def build_context_packet(run_dir, output_dir, files):
         raise ValueError("The current public brief has not passed its stage gate")
     from .experience import require_packet_methods
     require_packet_methods(load_run(run_dir), files)
+    if delivery_format(load_run(run_dir))=='web':
+        from .web_inputs import prepare_release
+        prepare_release(run_dir,files)
     return _build_packet(run_dir, output_dir, files, "creative_input")
 
 
@@ -1017,11 +1083,15 @@ def _build_packet(run_dir, output_dir, files, scope):
         artifact = state["artifacts"].get(requested)
         if artifact is None:
             artifact = next((row for row in state["artifacts"].values() if row["path"] == str(requested)), None)
-        if not artifact or artifact["audience"] not in ("client", "public") or not artifact["public_allowed"]:
+        if not artifact or artifact["audience"] not in ("client", "public"):
             raise ValueError("Only explicitly allowed client/public artifacts may enter the packet")
-        approval = artifact.get("approval")
-        if not approval or not approval.get("actor") or approval.get("sha256") != artifact["sha256"]:
-            raise ValueError("The public artifact needs approval bound to its exact hash")
+        if delivery_format(state)=='web' and scope=='creative_input':
+            from .web_inputs import allowed
+            if not allowed(state,artifact):raise ValueError('Artifact is outside the verified public source projection')
+        else:
+            approval = artifact.get("approval")
+            if not artifact['public_allowed'] or not approval or not approval.get("actor") or approval.get("sha256") != artifact["sha256"]:
+                raise ValueError("The public artifact needs approval bound to its exact hash")
         source = _safe_path(root, artifact["path"])
         if artifact["status"] != "CURRENT" or _sha(source) != artifact["sha256"]:
             raise ValueError("The public artifact changed after assessment")

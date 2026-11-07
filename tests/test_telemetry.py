@@ -15,6 +15,15 @@ except ImportError:
 
 
 class TelemetryTests(unittest.TestCase):
+    def test_repeated_hash_counters_do_not_evict_the_command_end(self):
+        with telemetry.TraceRecorder(self.root,max_events=16) as trace:
+            with trace.span('cli.command',command='discovery'):
+                for _ in range(10000):trace.counter('validation.hash',bytes=12,file_id='a'*64)
+        result=telemetry.metrics(self.root)
+        self.assertEqual('complete',result['coverage'])
+        self.assertEqual(10000,result['counters']['validation.hash'])
+        self.assertEqual(1,len(result['command_sessions']))
+
     def setUp(self):
         self.assertIsNotNone(telemetry, 'Bounded telemetry is not implemented')
         self.temp = tempfile.TemporaryDirectory()
@@ -44,6 +53,17 @@ class TelemetryTests(unittest.TestCase):
         self.assertEqual(2, result['counters']['reader.json'])
         self.assertIsNone(result['tokens_used'])
         self.assertIsNone(result['account_tokens_remaining'])
+
+    def test_cli_preserves_blocked_business_outcome_beside_technical_success(self):
+        from proposition_runtime import state
+        run=state.init_run('https://fixture.example/',self.root/'runs')
+        launcher=Path(__file__).resolve().parents[1]/'skills/proposition/scripts/proposition.py'
+        result=subprocess.run([sys.executable,str(launcher),'discovery','check',run['root']],capture_output=True,text=True,timeout=10)
+        self.assertEqual(2,result.returncode)
+        events=[json.loads(line) for p in (Path(run['root'])/'telemetry').glob('*.jsonl') for line in p.read_text().splitlines()]
+        end=next(e for e in events if e['event']=='end' and e['name']=='cli.command')
+        self.assertEqual('SUCCEEDED',end['status'])
+        self.assertEqual('BLOCKED',end['attributes'].get('business_status'))
 
     def test_forbidden_attributes_are_not_recorded(self):
         with telemetry.TraceRecorder(self.root) as trace:

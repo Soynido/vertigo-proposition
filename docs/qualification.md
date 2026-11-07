@@ -43,3 +43,14 @@ La recette après intégration suit [la validation production](../skills/proposi
 Un reçu nommant les méthodes et leurs empreintes pouvait rester cohérent alors que la lecture était tronquée ou complétée après le rendu. Le contrat de lecture version 1 lie désormais couverture déclarée, inputs courants et ordre avant les scènes centrales. Le précontrôle `check-experience --inputs-only` s'exécute avant les rendus ; le gate complet et le gel vérifient ensuite les dates centrales obligatoires, y compris pour les candidats écartés. Les reprises historiques sans ce contrat gardent leur portée.
 
 Les tests de cohérence et la revue du delta ciblent ce défaut ; ils ne certifient ni lecture sémantique, ni vérité d'une date déclarée, ni gain créatif de nouveaux audits. Une consommation fictive des consignes reste un essai documentaire assisté. La qualification autonome de cette correction demeure en attente du test neuf à deux URL sur sa révision distribuée.
+
+
+## Parcours web candidat
+
+La version web utilise le parcours public et créatif existant, puis un plan d’expérience préalable, un build statique, deux revues indépendantes et une prévisualisation Vercel vérifiée. Le défaut installé est web ; les anciens dossiers et la demande explicite `documents` gardent leur contrat. Les [critères de préintégration](../skills/proposition-quality/references/production-validation.md) s’appliquent aux deux formats.
+
+Les tests de fichiers, de navigateurs, de reprise et de publication isolent des composants. Les fixtures fictives ne jugent ni la créativité ni le transfert prospect. Un test de lecture des instructions ne prouve pas leur application. Un lien technique ou un fournisseur simulé ne remplace pas un vrai lien client contrôlé.
+
+Avant promotion : revue adversariale indépendante et suite complète, puis version candidate identifiable. Qualification Codex : un premier prospect avec exactement URL repo + URL site, puis deux URL nouvelles (photos et vidéo, avec au moins un cas non hôtelier à désigner). Reprendre les deux cas nouveaux dans Claude Code sans transmettre les résultats Codex. Un seul essai à la fois, examen avant le suivant, échecs conservés. Le témoin de qualité reste hors contexte de l’exécutant.
+
+Évaluer séparément autonomie/contrats reçus, exploration et identité, immersion réelle mobile et aller/retour, récit/mission/décision, sources/droits/lien exact et délai complet. Objectif 600 secondes, plafond 1 200 avec checkpoint. Les temps avant init et jusqu’au message de remise restent mesurés par l’hôte ; sinon cette portion est inconnue. Aucun gain ×10 ni coût du run déduit d’un quota partagé. La validation créative humaine de cette cohorte précède un vrai projet client. Cette qualification n’est pas encore acquise par la présence du code.

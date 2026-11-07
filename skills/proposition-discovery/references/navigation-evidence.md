@@ -5,12 +5,22 @@ Le collecteur est borné ; `captured` ne qualifie que les pages/états explicite
 ## Exécution canonique
 
 1. Le run existe déjà. `doctor`, collecte et export résolvent le même navigateur. Sans canal explicite, Chrome puis Chromium ; un canal explicitement indisponible bloque au lieu de se substituer silencieusement.
-2. `collect URL --output RUN_DIR/research/LOT --max-pages N`. Le rapport et ses preuves restent dans le run, hors checkout. Aucun écrasement. Le code CLI non nul d'un lot partiel signale une limite ; lire le JSON, conserver les preuves, puis traiter les manques.
+2. `collect URL --run-dir RUN_DIR --output RUN_DIR/research/LOT --max-pages N`. Les réglages figés du run sont repris, sauf option explicite ; hors run les défauts historiques restent conservés. Le rapport et ses preuves restent dans le run, hors checkout. Aucun écrasement. Le code CLI non nul d'un lot partiel signale une limite ; lire le JSON, conserver les preuves, puis traiter les manques.
 3. `discovery register RUN_DIR --report RUN_DIR/research/LOT/discovery.json`. L'enregistrement lie sources, captures, interactions, couverture et hashes au gate existant. Ce reçu n'attribue aucune note de qualité.
-4. `collect --frontier RAPPORT --output RUN_DIR/research/LOT-SUIVANT --max-pages N` puis enregistrer ce lot. La filiation doit continuer une preuve enregistrée ; ne pas relancer un ancien rapport altéré. Une URL vue n'efface pas un état mobile manquant. Une reprise au plus de l'état échoué ; ensuite complément hôte ou checkpoint.
+4. `collect --frontier RAPPORT --run-dir RUN_DIR --output RUN_DIR/research/LOT-SUIVANT --max-pages N` puis enregistrer ce lot. La filiation doit continuer une preuve enregistrée ; ne pas relancer un ancien rapport altéré. Une URL vue n'efface pas un état mobile manquant. Une reprise au plus de l'état échoué ; ensuite complément hôte ou checkpoint. Un état épuisé reste dans `pending_states` et ne bloque pas les autres visites ; une répétition sans travail éligible n'est pas une progression.
 5. `discovery check RUN_DIR`, puis évaluation R08/R09/R10 et revue isolée des captures exactes. Leurs preuves incluent `artifact:site-discovery`. `stage-report`, `next-stage` et `validate` consomment ce contrôle ; une note de 9/10 ne le contourne pas.
 
+## Types et périmètre sourcé
+
+L'inventaire conserve toutes les destinations. Les suffixes de fichiers orientent les médias/documents vers `resource_pending`, sans prétendre vérifier leur MIME, leur contenu ou leurs droits. Ils attendent une issue sourcée dans `discovery reconcile`, puis `discovery channels`, comme les destinations externes. Si la récupération révèle du HTML, observer ses deux viewports et adopter ce complément ; un suffixe d'image ne dispense pas une page HTML effectivement observée de navigation. Les autres URL restent des pages candidates requises par défaut.
+
+Ne pas exclure automatiquement un autre hôtel depuis un préfixe de chemin. Après lecture du premier lot, `discovery scope RUN_DIR --report SCOPE.json` enregistre au besoin `{version:1,client_entity,destinations:[{url,kind:"other_entity",entity_name,source_id,quote,reason}]}`. `client_entity` doit apparaître dans une source de la page prospect ; chaque autre entité demande une entrée liée à cette URL et à sa source, une citation exacte contenant son nom, et une justification de périmètre. Ce contrôle vérifie provenance et cohérence, pas la justesse sémantique du choix : la revue Discovery confronte la citation au site. Relier la revue à `artifact:discovery-scope`. Conserver toutes les autres pages pertinentes, dont services/événements et parcours partagés.
+
+La continuation rattachée au run consomme ce périmètre. Un nouveau lot périme les jugements dépendants ; reconfirmer le périmètre sur les sources courantes. Ne pas supprimer les URL du registre pour obtenir PASS.
+
 ## États effectivement observés
+
+Avant l'exploration, le collecteur attend le contenu rendu et la disparition d'un loader couvrant la vue, avec un délai borné. `render_not_ready` conserve une capture de l'obstacle, laisse le viewport dû et n'étend pas la collecte depuis son DOM masqué. La disponibilité technique n'est pas un jugement visuel. Les dépendances publiques de rendu (scripts, styles, polices, images) peuvent être récupérées séparément, sans cookie/identifiant, avec validation d'adresse et limites de taille ; cela n'autorise ni navigation externe, ni formulaire, ni iframe, ni XHR externe. Un refus ou une limite restent dans le rapport.
 
 Bandeaux HTML : attendre de manière bornée, fermer/refuser les options facultatives par un contrôle visible et vérifier l'état après action. Ne pas cacher l'obstacle par CSS, le retirer du DOM depuis un script, ou forcer le clic. Conserver la capture avant et après ; impossible à fermer = manque explicite.
 
@@ -27,6 +37,8 @@ Les commandes du collecteur produisent le format canonique. Un complément du na
 - `link_entries`, candidats sociaux/médias et restrictions conservés. Le gate ne déduit ni analyse sémantique ni qualité visuelle de ces champs.
 
 Consulter l'exemple de rapport réellement produit par la commande avant de préparer un complément. Les ressources hors origine ou documents embarqués bloqués par le collecteur ne démontrent pas un défaut du site. Employer le navigateur hôte autorisé pour observer réellement les états manquants ; conserver ses captures et textes, sa provenance, la limite et la révision. Sans complément possible, checkpoint : aucune déclaration de complétude inventée.
+
+Adopter ce rapport avec `discovery supplement RUN_DIR --report RAPPORT_HOTE` : il exige `backend:"host-browser"`, des fichiers physiques valides et `continuation.previous_report_sha256` lié à un lot déjà enregistré. Reprendre l'inventaire et les obligations encore dues dans sa couverture ; ne pas remplacer silencieusement la frontière par une liste vide. Une navigation dans l'hôte sans adoption n'a pas fermé le gate.
 
 Le collecteur strict ne suit pas implicitement une redirection vers un autre hôte, y compris `www`. Pour un complément hôte qui a réellement observé la redirection HTTPS vers la variante `www` du domaine initial, déclarer `backend: "host-browser"` et la chaîne `pages[].redirects` (`from`, `to`, `http_status`). Le rapport conserve l'URL initiale et les URL finales/captures. Ce rapprochement de preuves ne change pas la politique réseau du collecteur ; un domaine tiers n'est pas accepté comme le prospect. Un autre domaine régional ou une identité ambiguë demande une qualification distincte.
 

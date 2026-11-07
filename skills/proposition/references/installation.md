@@ -1,13 +1,16 @@
 # Installer le kit dans son propre espace
 
-Le dépôt public fournit des skills et un runtime. Son utilisateur n'a besoin d'aucun droit d'écriture, d'aucune invitation de collaborateur, d'aucun fork et d'aucune clé GitHub pour le télécharger. Les comptes et permissions nécessaires à la création d'un environnement Codex Cloud sont une configuration de l'hôte. Aucun modèle ou effort particulier n'est imposé par ce kit.
+Le dépôt public est une distribution, pas le workspace prospect. Aucun droit d'écriture, invitation, fork ou clé GitHub n'est nécessaire pour le télécharger. Aucun modèle ou effort particulier n'est imposé. Le format standard installé est `web` ; le parcours `documents` reste disponible explicitement.
 
-## Codex Cloud : configuration initiale
+## Préparer une fois Codex ou Claude Code
 
-1. Sur son propre compte GitHub, créer un dépôt **privé**, par exemple `vertigo-presentations`, avec un README. Ce dépôt est l'espace de travail du collaborateur. Ne pas coller l'URL du kit dans le champ « Repository name ».
-2. Dans Codex Cloud, créer un environnement et connecter GitHub si nécessaire. Autoriser l'application utilisée par Codex sur ce seul dépôt privé, le sélectionner, puis commencer la préparation. Si la liste est vide, vérifier cette autorisation et actualiser. Aucun accès en écriture à `Soynido/vertigo-proposition` n'est nécessaire.
-3. Activer l'accès Internet de l'environnement. Le parcours collecte des domaines prospect, médias et sources externes : le preset limité aux gestionnaires de paquets ne suffit pas. Pour ce premier essai, choisir **All (unrestricted)** si la politique du workspace l'autorise ; sinon autoriser les destinations requises et déclarer les manques. Aucun secret fournisseur n'est nécessaire au parcours natif.
-4. Dans le terminal de préparation, depuis la racine du dépôt privé, télécharger le kit dans un checkout séparé des skills et des livrables :
+Pour le suivi natif **Codex Desktop** dans la lane, ajouter explicitement à l'installation `--with-native-observer --native-model MODELE_CHOISI --native-effort EFFORT_CHOISI`. Ce réglage se fait une fois ; le futur prompt reste les deux URL. Il installe le transport Codex verrouillé dans un cache isolé et conserve l'abonnement connecté, sans remplacer le CLI global ni modifier son authentification. La lane doit disposer de `open_in_codex` pour son onglet ; cela n'en fait pas un MCP obligatoire pour le parcours Cloud ou Claude sans cet observateur. Un modèle indisponible bloque au lieu d'être remplacé. Lire [le démarrage natif](native-startup.md) pour la portée réelle de la trace et la distinction entre lanceur Desktop et arbre de production.
+
+Créer ou sélectionner son propre workspace privé. Dans Codex Cloud, préparer un environnement personnel. Si l'interface demande un dépôt, sélectionner son propre dépôt privé (un README suffit), autoriser la connexion GitHub sur ce dépôt et actualiser la liste. Ne pas créer une copie sous le compte de Vertigo ni coller une URL dans « Repository name ». L'accès au kit public se fait par téléchargement, sans invitation de collaborateur.
+
+Activer le réseau nécessaire aux sites prospect, médias/CDN, recherche publique, méthodes et à `api.vercel.com`/Vercel. Le preset de gestionnaires de paquets ne couvre pas toute la recherche. Dans l'interface Cloud actuelle, vérifier l'accès Internet public et les destinations autorisées, puis publier l'environnement. Une permission réseau ne fournit pas des identifiants.
+
+Depuis la racine du workspace privé :
 
 ```bash
 WORKSPACE="$PWD"
@@ -18,63 +21,56 @@ git -C "$KIT" remote set-url --push origin DISABLED
 git -C "$KIT" rev-parse HEAD
 ```
 
-Ce téléchargement ne pousse rien sur GitHub. La désactivation du push est une garde locale supplémentaire ; elle ne constitue pas un contrôle d'accès. Les droits du compte restent ceux de GitHub. Si `KIT` existe déjà, l'inspecter avant une mise à jour ; ne pas écraser un dossier ni supprimer un environnement utilisateur. Lire le README, `AGENTS.md`, `scripts/setup.py` et `scripts/install.py` du checkout avant exécution.
+Si `KIT` existe, inspecter sa révision avant une mise à jour, sans écraser de fichiers. Lire son README, `AGENTS.md`, `scripts/setup.py` et `scripts/install.py` avant exécution. La garde locale de push n'est pas un contrôle de permissions GitHub. Aucun push n'est requis.
 
-5. Installer le kit avec l'interpréteur **Python 3.11+** disponible :
-
-```bash
-python3 "$KIT/scripts/setup.py" --workspace "$WORKSPACE" --browser --with-upstream --with-presentations
-```
-
-Cette commande crée le venv du checkout, installe les paquets et hashes du profil présentations, installe Chromium, copie les **neuf skills et toutes leurs ressources** dans `$WORKSPACE/.agents/skills`, récupère les cinq distributions verrouillées et lance les contrôles. Marketingskills est une sélection explicite des deux méthodes de recherche, avec leurs références et licence ; les quatre autres familles restent complètes. Elle ne change pas les skills globaux ni la configuration MCP. Le reçu privé est `$WORKSPACE/.vertigo/setup.json`.
-
-Sur **Linux avec autorisation explicite d'installation système et processus root**, ajouter `--with-system-deps` à cette même commande. Ce choix installe les bibliothèques système de Chromium ainsi que `libreoffice-impress` et `fonts-dejavu-core` via apt. L'installateur ne lance jamais `sudo`, ne crée pas de compte et n'élève pas ses droits. Sans cette capacité, faire préparer les dépendances par l'administrateur de l'environnement ou garder le blocage explicite. Sous macOS/Windows, fournir un renderer LibreOffice/soffice disponible et exécutable ou qualifier une capacité de présentation de l'hôte ; aucun gestionnaire système n'est lancé automatiquement.
-
-6. Vérifier le reçu et compléter les capacités de l'hôte ci-dessous, puis publier l'environnement. Conserver le checkout : les skills installés référencent son Python. Dans une **nouvelle tâche** issue de cet environnement, relire le reçu et exécuter le diagnostic installé avant le travail client :
+Préparer Python 3.11+, Git et Node/npm. Configurer une connexion Vercel personnelle autorisée à créer le support isolé : soit le login CLI local, soit une variable personnelle accessible à la tâche. Ne pas écrire un token dans une commande, un document ou le dépôt. Choisir son organisation une fois dans la CLI ou passer son identifiant par `--vercel-org` à l'installation.
 
 ```bash
-python3 "$WORKSPACE/.agents/skills/proposition/scripts/proposition.py" doctor --presentations
+python3 "$KIT/scripts/setup.py" --workspace "$WORKSPACE" --host codex \
+  --browser --with-upstream --owner "NOM DU RESPONSABLE" --with-publication
 ```
 
-Les variables shell d'une phase de préparation ne sont pas un contrat de persistance. Dans une nouvelle tâche, résoudre `WORKSPACE` depuis le projet courant et le chemin du skill réellement installé. Ne pas supposer qu'un outil personnel du poste local est présent dans Cloud. L'état effectivement retrouvé et le doctor tranchent ; la préparation locale et la CI ne prouvent pas la persistance dans le compte du collaborateur.
+Pour Claude Code dans son propre projet, remplacer seulement `--host codex` par `--host claude`. L'installateur crée le venv, installe les dépendances verrouillées, Chromium et WebKit, les neuf skills et leurs ressources, les méthodes épinglées et les instructions d'entrée propres à l'hôte. Codex reçoit `.agents/skills` et un bloc géré dans `AGENTS.md` ; Claude Code reçoit `.claude/skills` et `CLAUDE.md`. Le texte préexistant hors bloc est conservé. Les réglages privés sont dans `.vertigo/profile.json`, les reçus dans `.vertigo/setup.json` et `setup-HOST.json`. Conserver le kit : le lanceur installé référence son Python.
 
-Les configurations et livrables restent dans cet espace privé. Le cache des distributions publiques utilise `PROPOSITION_UPSTREAM_CACHE`, sinon `XDG_CACHE_HOME/vertigo-proposition/upstreams`, sinon `~/.cache/vertigo-proposition/upstreams` ; il ne contient pas les données prospect. Les sources vérifiées sont réutilisées entre propositions sans téléchargement supplémentaire lorsque leurs empreintes restent valides. Exclure `.vertigo/`, `.agents/skills/` et les sorties générées des commits automatiques de son dépôt de travail ; aucun commit ni push n'est nécessaire pour installer ou publier l'environnement Cloud. Les runs sont créés **hors du checkout du kit**, par exemple dans `$WORKSPACE/outputs` avec `init --runs-root`. Ne pas écrire de présentation ou de preuve prospect dans le dépôt public.
+Sur Linux, `--with-system-deps` est une option explicite pour un processus root autorisé : elle installe les bibliothèques système des navigateurs. Aucun `sudo` ni élévation automatique. Pour le mode documentaire, ajouter `--delivery-format documents --with-presentations`, omettre `--with-publication` et fournir LibreOffice/soffice ; avec l'option système autorisée, le renderer est installé. Ce profil conserve python-pptx et ses contrôles d'édition/rendu. Il n'est pas nécessaire au web.
 
-7. Dans la nouvelle tâche, le message utilisateur est seulement :
+## Vercel : un lien normal, support géré une fois
+
+Un lien Vercel appartient à un projet. L'option explicite `--with-publication` crée et vérifie automatiquement **un nouveau support isolé**, sans demander un projet au collaborateur et sans modifier un site existant. La CLI Vercel est verrouillée dans un cache séparé, sans remplacer une CLI globale. Comme Vercel réserve le premier déploiement d'un projet à sa production, l'installation publie uniquement une page technique fixe sans prospect. Ensuite chaque run utilise exclusivement une prévisualisation unique ; aucun domaine, alias ou déploiement de production client n'est changé.
+
+La politique privée contient responsable, organisation, projet autorisé et référence d'accès ; aucun token en clair. Une installation interrompue conserve son reçu et réconcilie l'effet inconnu avant une nouvelle tentative. Ne pas créer un autre projet pour masquer un état incertain.
+
+Pour une variable personnelle déjà configurée dans l'hôte, ajouter `--vercel-credential-ref env:VERTIGO_VERCEL_TOKEN` et l'organisation. Le kit garde seulement le nom de la variable. Dans l'interface Cloud actuelle, demander cette variable à l'environnement et la fournir depuis le coffre personnel comme **Environment variable**, car CLI et client HTTP doivent pouvoir la lire. Un simple `export` dans une préparation ne prouve pas sa présence dans une autre tâche. Dans les anciens environnements Cloud, les « secrets » réservés au setup sont retirés avant l'agent : ils ne suffisent pas pour cette référence runtime. Ne pas contourner cette limite en enregistrant un token dans les skills ou les sorties.
+
+Sources officielles : [environnements Cloud actuels](https://learn.chatgpt.com/docs/environments/cloud-environments), [anciens environnements et portée des secrets](https://learn.chatgpt.com/docs/environments/cloud-environment). Relever l'interface réellement utilisée ; ces deux configurations ne sont pas interchangeables. Un test local ne prouve pas la persistance des accès dans le compte du collaborateur.
+
+## Vérifier dans une nouvelle tâche
+
+Résoudre le workspace et le lanceur depuis l'installation effectivement présente. Ne pas supposer que les variables du terminal de préparation ont persisté.
+
+```bash
+python3 "$WORKSPACE/.agents/skills/proposition/scripts/proposition.py" doctor --delivery-format web
+```
+
+Pour Claude, utiliser `.claude/skills` au lieu de `.agents/skills`. Vérifier que les neuf skills, méthodes, caches et ressources sont retrouvés et que les vrais navigateurs fonctionnent. L'hôte doit également exposer recherche, lecture des pixels et nouveaux contextes indépendants. Une installation de paquet n'atteste pas ces capacités. Après `init`, `web preflight RUN` relit les accès actuels et le projet autorisé **sans écriture fournisseur**, avant le travail prospect.
+
+Les fichiers privés, `.vertigo/`, les skills installés et les livrables ne sont pas destinés aux commits de l'espace de travail. Les runs vivent hors du checkout du kit, par exemple dans `$WORKSPACE/outputs`. Les caches publics peuvent être réutilisés après vérification ; ils ne fournissent aucun résultat client.
+
+Dans une nouvelle tâche du même environnement préparé, envoyer uniquement :
 
 ```text
 https://github.com/Soynido/vertigo-proposition
 <URL réelle du prospect>
 ```
 
-L'agent lit le README de cette révision et le `proposition/SKILL.md` effectivement installé. Si plusieurs versions ou anciens plugins exposent le même nom, résoudre et consigner les fichiers de cette installation ; ne pas substituer leurs règles. Aucun brief, ancien contexte client ou rappel créatif n'est ajouté. La configuration technique initiale ne certifie pas le résultat du test autonome.
+L'agent retrouve l'entrée installée et initialise `web` explicitement. Aucun brief, rappel créatif ou ancien rendu à ajouter. Si une autre version du plugin existe, relever les fichiers réellement utilisés et suivre cette installation, sans mélanger les contrats.
 
-Sources officielles de la procédure Cloud : [environnements](https://learn.chatgpt.com/docs/environments/cloud-environments), [démarrage](https://learn.chatgpt.com/docs/cloud). Leurs interfaces et capacités peuvent évoluer ; relever la surface réellement utilisée.
+## Portée des contrôles et mise à jour
 
-## Paquets, outils et limites
+Le doctor web teste Chromium/WebKit ; le doctor documentaire conserve le test PDF et, avec `--presentations`, la création/édition/rendu d'une fixture PPTX. Ni l'un ni l'autre ne juge le client, la créativité, la fidélité des livrables ou l'indépendance de l'hôte. Les quatre méthodes créatives et les deux méthodes marketing/recherche sont distribuées à leurs révisions verrouillées, avec références et licences. Réception, lecture, application adaptée et indisponibilité restent distinctes.
 
-| Besoin | Ce que fournit le kit | Vérification restante |
-|---|---|---|
-| Runtime | Python 3.11+, Git ; paquets Python et dépendances transitives verrouillés | Python et Git doivent être disponibles dans l'environnement |
-| Navigation et PDF | Playwright, Chromium, extraction PDF, rendu PDFium et Pillow | Le doctor lance le navigateur ; les parcours réels, modales et scroll restent vérifiés sur le prospect |
-| PPTX local | Profil optionnel `--with-presentations` : python-pptx 1.0.2 et dépendances verrouillées | Le profil nécessite LibreOffice/soffice pour son test de rendu local |
-| Édition/rendu PPTX | `doctor --presentations` crée, rouvre, modifie, rend et rasterise une diapositive fictive avec texte et image séparés | Ce test mécanique ne prouve pas la fidélité du deck client, sa lisibilité ou sa qualité |
-| Méthodes | Quatre sources à commits verrouillés : SEO/GEO, Impeccable, Apple Design et Scroll Craft | Chargées et appliquées avec reçus `native`, `adapted` ou `unavailable` ; un téléchargement n'est pas une exécution |
-| Recherche et inspection visuelle | Capacités de l'agent hôte à inventorier | Accès aux sources et lecture des pixels réellement exposés ; jamais un PASS déduit du pip install |
-| Création/revues indépendantes | Contrat public et paquets minimaux | Nouveaux contextes sans historique privé réellement disponibles ; sinon gate indépendant `BLOCKED` |
-| Génération d'image et Sites | Facultatifs, s'ils sont autorisés et disponibles | Sans génération, utiliser les médias authentiques ; l'absence de Sites ne remplace pas la source HTML/CSS |
-| Cloudflare et fournisseurs SEO | Facultatifs, uniquement si déjà autorisés et configurés | Aucun compte, crédit ou accès prospect exigé pour installer le parcours natif ; aucune activation automatique |
-| MCP | **Aucun serveur MCP obligatoire pour le runtime local** | Un outil MCP utile doit être exposé, autorisé et essayé ; installer une dépendance Python n'installe pas un MCP |
-| Connecteurs privés / publication | Hors du starter public | Autorisation et configuration distinctes ; aucune publication, aucun email ou déploiement implicites |
+Aucun MCP, Cloudflare ou fournisseur IA payant supplémentaire n'est obligatoire. La génération d'image est facultative ; la matière authentique reste prioritaire. Sans une capacité essentielle, conserver un blocage précis au lieu d'inventer son usage. Aucun repli payant Anthropic.
 
-Le profil local PPTX fournit une bibliothèque et un contrôle d'outils. Il n'ajoute aucun exporteur de proposition, gabarit universel ou nouvelle procédure créative au moteur. Les sources HTML/CSS, la structure modifiable et les contrôles de fidélité restent ceux du contrat de livraison.
+Le mode historique `--dest` est conservé ; sans workspace/destination, il utilise `~/.codex/skills`. Une mise à jour explicite `--update` refuse d'écraser des skills ou un bloc géré modifiés. Ne pas changer une installation pendant un essai pour sauver son résultat.
 
-Le Cloud peut ne pas exposer les outils natifs de navigation/ordinateur du desktop. Le navigateur **piloté par code** doit réellement fonctionner dans cet environnement ; la présence d'un package ne suffit pas. Les capacités d'isolation et d'inspection visuelle doivent être vérifiées indépendamment. Garder chaque blocage localisé, sans déclarer le workflow complet prêt à partir du seul statut de l'installation.
-
-## Local, mise à jour et contrôle
-
-Le même `--workspace` fonctionne dans un dossier local existant distinct du kit. Un consommateur prépare ce dossier et utilise les mêmes commandes, sans configurer Codex Cloud. Le mode historique `--dest` reste disponible ; sans `--workspace` ni `--dest`, la destination historique est `~/.codex/skills`.
-
-Une mise à jour gérée utilise `--update`, après vérification de la nouvelle révision et des scripts. Elle refuse d'écraser des skills modifiés ou non gérés. Les caches de méthodes verrouillées peuvent être réutilisés ; aucune donnée client n'est préchargée. Ne pas changer une installation en cours de qualification pour sauver un test.
-
-`PASS` dans le reçu couvre **l'installation et les outils locaux essayés**. Les capacités d'hôte restent `NOT_VERIFIED_BY_INSTALLER`, et l'E2E prospect `NOT_RUN`, jusqu'à leurs preuves réelles. La qualification finale demeure un test neuf aux deux URL seules avec examen des PDF/PPTX exacts.
+`PASS` d'installation couvre les outils essayés, pas l'autonomie. La qualification exige les deux URL seules, les HTML/ressources/lien public exacts en web, ou les PDF/PPTX exacts en documents, avec qualité et durée évaluées séparément. La qualification Codex puis Claude Code et la répétabilité restent attachées aux cas réellement testés.

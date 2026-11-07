@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Client-specific web experience intent, not a universal scene template",
+  "type": "object",
+  "required": [
+    "version",
+    "entrypoint",
+    "sources_page",
+    "public_files",
+    "inputs_sha256",
+    "selection_sha256",
+    "coverage",
+    "scenes",
+    "engine",
+    "actions",
+    "media"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "entrypoint": {
+      "const": "index.html"
+    },
+    "sources_page": {
+      "type": "string",
+      "minLength": 1
+    },
+    "public_files": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2048,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "inputs_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "selection_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "coverage": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "selector",
+          "meaning",
+          "proofs",
+          "claim_status"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "K01",
+              "K02",
+              "K03",
+              "K04",
+              "K05",
+              "K06",
+              "K07",
+              "K08"
+            ]
+          },
+          "selector": {
+            "type": "string",
+            "minLength": 1
+          },
+          "meaning": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proofs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "claim_status": {
+            "enum": [
+              "observed",
+              "declared",
+              "proposed",
+              "estimate",
+              "unknown"
+            ]
+          },
+          "page": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "selector",
+          "meaning",
+          "states",
+          "mobile",
+          "reduced_motion",
+          "interaction",
+          "intent_ids",
+          "media_paths"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "selector": {
+            "type": "string",
+            "minLength": 1
+          },
+          "meaning": {
+            "type": "string",
+            "minLength": 1
+          },
+          "interaction": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mobile": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reduced_motion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "states": {
+            "type": "array",
+            "minItems": 3,
+            "uniqueItems": true,
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "intent_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "media_paths": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "page": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "engine": {
+      "type": "object",
+      "required": [
+        "kind",
+        "files",
+        "rationale"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "portable",
+            "custom"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_modules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "resource",
+              "sha256"
+            ],
+            "properties": {
+              "resource": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "selector",
+          "target",
+          "purpose"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "selector": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "purpose": {
+            "enum": [
+              "prospect",
+              "vertigo"
+            ]
+          },
+          "page": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "kind",
+          "source_ref",
+          "rights",
+          "changes"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "authentic",
+              "transformed",
+              "generated",
+              "illustration",
+              "studio"
+            ]
+          },
+          "source_ref": {
+            "type": "string"
+          },
+          "rights": {
+            "enum": [
+              "allowed",
+              "unknown",
+              "restricted"
+            ]
+          },
+          "changes": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "web-source": {
+          "type": "string"
+        },
+        "web-material": {
+          "type": "string"
+        }
+      }
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "selector",
+          "expect_selector"
+        ],
+        "properties": {
+          "page": {
+            "type": "string",
+            "minLength": 1
+          },
+          "selector": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expect_selector": {
+            "type": "string",
+            "minLength": 1
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

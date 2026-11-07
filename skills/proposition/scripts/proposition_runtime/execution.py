@@ -36,12 +36,47 @@ def _parameters(run,spec):
         result.update(url=run['url'],max_pages=10,concurrency=config['concurrency'],panel_scan=config['panel_scan'],image_wait_policy=config['image_wait_policy'],proof_storage=config['proof_storage'],allow_local_fixture=False,frontier_descriptor=None)
     if spec.get('topic'):result['topic']=spec['topic']
     if spec.get('mission_id'):result['mission_id']=spec['mission_id']
+    result['delivery_format']=state.delivery_format(run)
+    if state.delivery_format(run)=='web':
+        from .web_timing import deadlines
+        result.update(deadlines(run))
+    return result
+
+
+def _format_specs(run):
+    specs=_specs()
+    if state.delivery_format(run)!='web':return specs
+    from .composition import client_inputs
+    result=[]
+    for original in specs:
+        spec=deepcopy(original);key=spec['task_key']
+        if spec['stage_id']=='internal.handoffs':continue
+        if key=='client.composition.plan':
+            spec.update(completed_by=['web-plan'],packet='creative_public',isolation='continue_public',
+                capabilities=['host.continue_context'],audiences=['public','client'],
+                outputs={'web-plan':{'name':'web-plan.json','kind':'file','audience':'internal'}})
+        elif key=='client.composition.build':
+            spec.update(inputs=['web-plan','creative-inputs','creative-experience','creative-exploration','creative-reading'],
+                completed_by=['web-source'],packet='creative_public',isolation='continue_public',
+                capabilities=['host.continue_context'],audiences=['public','client'],
+                outputs={'web-source':{'name':'index.html','kind':'file','audience':'client'},
+                         'web-material':{'name':'assets','kind':'tree','audience':'client'}})
+        elif key.startswith('review.client.') or key in ('export.documents.consolidate','verify.final.inspect'):
+            spec['inputs']=[ref.split(':',1)[1] for ref in client_inputs(run)]
+        if spec['packet']=='creative_public':
+            from .web_inputs import public_ids
+            projected=public_ids(run) if run['artifacts'].get('creative-inputs',{}).get('status')=='CURRENT' else []
+            spec['inputs']=list(dict.fromkeys(spec['inputs']+projected+['public-input-release']))
+            # The continuing creator may receive its own typed planning records,
+            # never arbitrary internal artifacts or the author's audit history.
+            if spec['isolation']=='continue_public':spec['audiences']+=['internal']
+        result.append(spec)
     return result
 
 def _variants(run):
     result=[]
     from .public_research import TOPICS
-    for original in _specs():
+    for original in _format_specs(run):
         if original['task_key']=='research.topic':
             for topic in TOPICS:
                 spec=deepcopy(original);spec.update(task_key='research.topic.'+topic,topic=topic,completed_by=['research-topic-'+topic]);spec['outputs']['report']['name']=topic+'.json';result.append(spec)
@@ -58,9 +93,9 @@ def _variants(run):
             else:
                 spec=deepcopy(original);spec['inputs']+=['strategy-mission-'+m['id'] for m in draft['proposed_missions']];result.append(spec)
         elif original['task_key'] in ('export.documents.consolidate','verify.final.inspect'):
-            from .composition import CLIENT_INPUTS,DERIVATIVES
+            from .composition import client_inputs,DERIVATIVES
             spec=deepcopy(original)
-            required={ref.split(':',1)[1] for ref in CLIENT_INPUTS}
+            required={ref.split(':',1)[1] for ref in client_inputs(run)}
             if state.delivery_scope(run)!='client': required |= DERIVATIVES-{'client-context'}
             if original['task_key']=='verify.final.inspect':required |= {'client-context','export-consolidation'}
             spec['inputs']=list(dict.fromkeys(spec['inputs']+sorted(required)));result.append(spec)
@@ -74,8 +109,8 @@ def _variants(run):
         completed=list(dict.fromkeys(i for s in producers for i in s['completed_by']))
         required=list(dict.fromkeys(completed+[i for s in producers for i in s['inputs']]))
         if stage_id in ('client.composition','review.client'):
-            from .composition import CLIENT_INPUTS
-            required=list(dict.fromkeys(required+[ref.split(':',1)[1] for ref in CLIENT_INPUTS]))
+            from .composition import client_inputs
+            required=list(dict.fromkeys(required+[ref.split(':',1)[1] for ref in client_inputs(run)]))
         if not completed or not all(run['artifacts'].get(i,{}).get('status')=='CURRENT' for i in completed):continue
         result.append({'task_key':'stage-review.'+stage_id,'stage_id':stage_id,'inputs':required,'completed_by':['stage-review-receipt-'+stage_id,'stage-review-report-'+stage_id],'methods':[],'capabilities':['host.fresh_context'],'packet':'review_inputs','isolation':'independent_review','audiences':['public','client','sales','technical','internal'],'outputs':{'receipt':{'name':'independence.json','kind':'file','audience':'internal'},'report':{'name':'review.json','kind':'file','audience':'internal'}},'skill':'proposition-quality'})
     return result
@@ -94,6 +129,20 @@ def _destinations(run,spec,seed):
     result={role:'outputs/tasks/'+seed+'/'+details['name'] for role,details in spec['outputs'].items()}
     if spec['task_key']=='discovery.site.collect':return {'discovery-report':'research/capture-'+seed+'/discovery.json','discovery-material':'research/capture-'+seed+'/sources'}
     if spec['task_key'].startswith('client.composition.'):
+        if state.delivery_format(run)=='web':
+            if spec['task_key']=='client.composition.plan':
+                result.update({'web-source':'outputs/client/'+seed+'/site/index.html',
+                               'web-material':'outputs/client/'+seed+'/site/assets'})
+            else:
+                row=run['artifacts'].get('web-plan')
+                if not row or row['status']!='CURRENT':raise ValueError('Web build requires its current plan and reserved destinations')
+                path=state._safe_path(Path(run['root']),row['path']);plan=transactions.read_json(path)
+                if set(plan['outputs'])!={'web-source','web-material'}:raise ValueError('Web plan must retain source and asset destinations')
+                for key,value in plan['outputs'].items():
+                    _relative(value)
+                    if key=='web-source' and Path(value).suffix!='.html':raise ValueError('The web entry source must remain HTML')
+                result.update(plan['outputs'])
+            return result
         from .composition import OUTPUTS
         if spec['task_key']=='client.composition.plan':
             result.update({key:'outputs/client/'+seed+'/'+key+suffix for key,suffix in OUTPUTS.items()})
@@ -192,10 +241,75 @@ def _task_schemas(run,spec):
     if key=='strategy.understand':names.add('strategy-draft')
     elif key.startswith('strategy.mission.'):names.add('strategy-mission')
     elif key=='strategy.reconcile' and state._contract_version(run,'audience_handoff_contract')==2:names.add('strategy-report-v2')
+    if state.delivery_format(run)=='web' and key.startswith('client.composition.'):names.add('web-plan')
     if spec['isolation']=='independent_review':names.update(('review-receipt','quality-review','evaluation'))
     return {name:state.CONTRACT_ROOT/(name+'.schema.json') for name in sorted(names)}
 
+
+def _artifact_refs(value):
+    if isinstance(value,dict):
+        for child in value.values():yield from _artifact_refs(child)
+    elif isinstance(value,list):
+        for child in value:yield from _artifact_refs(child)
+    elif isinstance(value,str) and value.startswith('artifact:'):yield value
+
+
+def _creative_allowed(run,spec,record):
+    if state.delivery_format(run)!='web':
+        approval=record.get('approval') or {}
+        return bool(record.get('public_allowed') and record['audience'] in ('client','public')
+            and approval.get('actor') and approval.get('sha256')==record['sha256'])
+    from .web_inputs import allowed
+    if allowed(run,record):return True
+    if spec['isolation']!='continue_public':return False
+    # Only explicitly requested, input-bound outputs from this same creative
+    # context may cross the continuation boundary. An internal filename or an
+    # approval-shaped metadata object is not an authorization.
+    if record['id'] not in {'creative-reading','creative-exploration','creative-experience','web-plan'} & set(spec['inputs']):
+        return False
+    closure=state._dependency_closure(run,['artifact:'+record['id']])
+    if any(state._resolve(run,r).get('kind')=='private' for r in closure if r.startswith(('source:','fact:'))):
+        return False
+    path=state._safe_path(Path(run['root']),record['path']);data=transactions.read_json(path)
+    return data.get('inputs_sha256')==run['artifacts']['creative-inputs']['sha256']
+
+
+def _web_evidence_files(run,spec):
+    """Exact files behind evidence records; no mutable cache or whole run copy."""
+    root=Path(run['root']);files=[]
+    review=spec['packet']=='review_inputs'
+    if review and 'web-build' in spec['inputs']:
+        from . import web
+        directory,manifest,_=web.current_build(run)
+        for row in manifest['files']:
+            files.append(_descriptor(root,state._safe_path(root,directory/row['path']),'input','client'))
+        files.append(_descriptor(root,directory/'.vercel/output/static/vertigo-build.json','input','client'))
+        report=web.current_inspection(run)
+        folder=state._safe_path(root,run['artifacts']['web-inspection']['path']).parent
+        for row in report['captures']:
+            files.append(_descriptor(root,state._safe_path(root,folder/row['path']),'input','internal'))
+    if review or spec['isolation']=='continue_public':
+        from .composition import _current
+        for identifier in ('creative-exploration','creative-experience'):
+            if identifier not in spec['inputs']:continue
+            _,path=_current(run,'artifact:'+identifier);data=transactions.read_json(path)
+            if data.get('inputs_sha256')!=run['artifacts']['creative-inputs']['sha256']:
+                raise ValueError('Creative evidence refers to different public inputs')
+            for reference in _artifact_refs(data):
+                row,path=_current(run,reference)
+                if row['audience'] not in ('public','client'):continue
+                if path.suffix.lower() not in ('.png','.jpg','.jpeg','.webp'):continue
+                closure=state._dependency_closure(run,[reference])
+                if any(state._resolve(run,r).get('kind')=='private' for r in closure if r.startswith(('source:','fact:'))):
+                    raise ValueError('Private material cannot enter a creative evidence packet')
+                files.append(_descriptor(root,path,'input',row['audience']))
+    return files
+
 def _plan(run,spec,parameters):
+    if state.delivery_format(run)=='web' and spec['task_key']=='client.composition.build':
+        prepared=run['metadata'].get('web_plan')
+        if not prepared or prepared['sha256']!=run['artifacts'].get('web-plan',{}).get('sha256'):
+            raise ValueError('Register the frozen pre-development web plan before dispatching implementation')
     required=['artifact:'+key for key in spec['inputs']]
     hashes=_inputs(run,required)
     contracts=transactions.contract_hashes();methods,_=_method_files(spec['methods'])
@@ -205,9 +319,10 @@ def _plan(run,spec,parameters):
         record=state._resolve(run,ref)
         if not record.get('path'):continue
         if spec['packet']=='creative_public':
-            if not ref.startswith('artifact:') or record['audience'] not in ('client','public') or not record.get('public_allowed'):continue
+            if not ref.startswith('artifact:') or not _creative_allowed(run,spec,record):continue
         elif spec['packet']=='review_inputs' and ref not in required:continue
         path=state._safe_path(Path(run['root']),record['path']);selected.append(_descriptor(Path(run['root']),path,'input',record.get('audience','internal')))
+    if state.delivery_format(run)=='web':selected+=_web_evidence_files(run,spec)
     selected=list({f['path']:f for f in selected}.values())
     seed=state._digest({'run_id':run['id'],'key':spec['task_key'],'inputs':hashes,'parameters':parameters})[:16]
     destinations=_destinations(run,spec,seed)
@@ -219,6 +334,11 @@ def _plan(run,spec,parameters):
 @phase
 def ready_tasks(run_dir,host):
     state._schema('host-capabilities',host);_time(host['observed_at']);run=state.load_run(run_dir);view=deepcopy(run);state._invalidate_view(view)
+    if state.delivery_format(run)=='web':
+        from .web_timing import budget
+        if not budget(run)['may_continue']:
+            return {'status':'BLOCKED','ready':[],'blocked':[{'reason':'1200 second ceiling exceeded; keep the checkpoint'}],
+                'stage_id':None,'scope':'qualification_deadline_not_a_business_verdict'}
     available={c['id'] for c in host['capabilities'] if c['status']=='AVAILABLE'}
     stages=state._quality_stages(view);stage=next((sid for sid in stages if state._stage_report(view,sid)['status']!='PASS'),None)
     config=transactions.execution_metadata(run)['config'];ready=[];blocked=[]
@@ -245,6 +365,9 @@ def _plan_header(request):
 
 def _check_plan(run,request):
     _plan_header(request)
+    if state.delivery_format(run)=='web':
+        from .web_timing import require_time
+        require_time(run)
     spec=next((s for s in _variants(run) if s['task_key']==request['task_key']),None)
     if spec is None:raise ValueError('Unknown task key')
     view=deepcopy(run);state._invalidate_view(view)
@@ -298,13 +421,15 @@ def _freeze_packet(root,directory,run,plan,spec):
         if state._stage_report(run,'brief.public')['status']!='PASS':raise ValueError('Creative packet requires the current public brief gate')
         require_packet_methods(run,[d['path'] for d in selected])
     files=[];sources={};snapshots=[]
+    supplemental=_web_evidence_files(run,spec) if state.delivery_format(run)=='web' else []
     for descriptor in selected:
         if descriptor['audience'] not in plan['packet_plan']['allowed_audiences']:raise ValueError('Input audience outside the task allowlist')
-        if kind=='creative_public':
+        if kind=='creative_public' and descriptor['path'] in {r['path'] for r in run['artifacts'].values()}:
             row=next((r for r in run['artifacts'].values() if r['path']==descriptor['path']),None)
-            if not row or row['status']!='CURRENT' or not row['public_allowed'] or not row.get('approval',{}):raise ValueError('Creative input is not explicitly approved')
-            if not row['approval'].get('actor') or row['approval'].get('sha256')!=descriptor['sha256']:raise ValueError('Creative approval is not bound to exact bytes')
-            if not any(r.startswith(('source:','fact:')) for r in state._dependency_closure(run,['artifact:'+row['id']])):raise ValueError('Creative input lacks source provenance')
+            if not row or row['status']!='CURRENT' or (descriptor not in supplemental and not _creative_allowed(run,spec,row)):
+                raise ValueError('Creative input is outside the verified public input or continuation allowlist')
+            if state.delivery_format(run)!='web' and not any(r.startswith(('source:','fact:')) for r in state._dependency_closure(run,['artifact:'+row['id']])):
+                raise ValueError('Creative input lacks source provenance')
         sources['files/'+descriptor['path']]=(_file(root,descriptor),descriptor['role'],descriptor['audience'])
     methods,roots=_method_files(spec['methods'])
     for name,path in methods.items():sources[name]=(path,'method','public')
@@ -312,6 +437,11 @@ def _freeze_packet(root,directory,run,plan,spec):
     # prepare JSON and upstream cache paths are never handed to the worker.
     for path in sorted(_instruction_files(spec['skill'])):
         sources['canonical/'+path.relative_to(state.RESOURCE_ROOT.parents[2]).as_posix()]=(path,'instruction','public')
+    if state.delivery_format(run)=='web' and spec['packet'] in ('creative_public','review_inputs'):
+        resources=state.RESOURCE_ROOT.parents[2]/'proposition/resources/web'
+        for path in sorted(resources.rglob('*')):
+            state._no_symlinks(path)
+            if path.is_file():sources['canonical/'+path.relative_to(state.RESOURCE_ROOT.parents[2]).as_posix()]=(path,'resource','public')
     schemas=_task_schemas(run,spec)
     for name,path in schemas.items():
         sources['canonical/'+path.relative_to(state.RESOURCE_ROOT.parents[2]).as_posix()]=(path,'schema','public')
@@ -322,6 +452,50 @@ def _freeze_packet(root,directory,run,plan,spec):
         for ref in plan['input_hashes']:
             snapshots.append({'ref':ref,'digest':plan['input_hashes'][ref],'value':deepcopy(state._resolve(run,ref))})
     native={'task_key':plan['task_key'],'input_parameters':plan['input_parameters'],'inputs':[d for d in files if d['role']=='input'],'instructions':[d for d in files if d['role']=='instruction'],'methods':[{'family':s['id'],'commit':s['commit'],'reference_root':str(directory/'upstreams'/s['id']/s['commit']/'source'),'entrypoints':[str(directory/'upstreams'/s['id']/s['commit']/'source'/e) for e in s['entrypoints']]} for s,_ in roots],'output_destinations':plan['output_destinations'],'isolation':plan['isolation'],'execution':'HOST_REQUIRED_NOT_ATTESTED'}
+    if kind=='creative_public':
+        contract=directory/'canonical/proposition-creative/references/creative-contract.md'
+        descriptor=next((d for d in files if d['path']==contract.relative_to(root).as_posix() and d['role']=='instruction'),None)
+        if descriptor is None or not contract.is_file():
+            raise ValueError('Creative packet requires its frozen creative contract')
+        content=contract.read_text(encoding='utf-8')
+        marker='## Capsule de dispatch réutilisable'
+        if content.count(marker)!=1:raise ValueError('Frozen creative contract has no unique dispatch capsule')
+        section=content.split(marker,1)[1].split('\n## ',1)[0]
+        capsule=' '.join(line.lstrip('> ').strip() for line in section.splitlines() if line.strip())
+        if not capsule:raise ValueError('Frozen creative contract has an empty dispatch capsule')
+        phase={'creative.direction.prepare':('prepare','Lire le brief public, le contrat créatif figé et les méthodes ; produire uniquement creative-reading. Ne pas rendre de scènes à cette phase.'),
+               'creative.direction.explore':('explore','Explorer les mondes du même besoin, rendre et inspecter une scène centrale par monde, comparer les scènes exactes puis motiver la sélection ; produire creative-exploration et ses matériaux.'),
+               'creative.direction.develop':('develop','Développer les seules directions retenues : ouverture, révélation, action, mobile autonome et intention d’expérience ; produire creative-experience et ses matériaux.'),
+               'client.composition.plan':('web_plan','Dans le même contexte créatif, établir le plan web avant tout HTML à partir des directions et scènes retenues ; produire web-plan.'),
+               'client.composition.build':('web_build','Transposer le plan et les scènes retenues en HTML/CSS/JS scrollable, inspecter interactions et mobile ; produire web-source et web-material sans refaire une sélection.')}.get(plan['task_key'])
+        if phase is None:raise ValueError('Creative packet has no creator phase task')
+        input_row=run['artifacts'].get('creative-inputs')
+        frozen_input=directory/'files'/input_row['path'] if input_row else None
+        if frozen_input is None or not frozen_input.is_file():raise ValueError('Creative packet requires frozen creative-inputs')
+        opportunity=transactions.read_json(frozen_input).get('opportunity')
+        if not isinstance(opportunity,dict):raise ValueError('Frozen creative inputs lack the business opportunity')
+        native['task']={'role':'Créateur de la proposition pour cette entreprise','phase':phase[0],
+                        'instruction':phase[1],'business_objective':opportunity,
+                        'creative_contract':{'path':descriptor['path'],'sha256':descriptor['sha256']},
+                        'dispatch_capsule':capsule,
+                        'skill_context':'Le SKILL.md décrit la coordination ; la présente tâche assigne uniquement la phase du créateur.'}
+    if state.delivery_format(run)=='web' and kind in ('creative_public','review_inputs'):
+        from .web_inputs import public_records
+        native['public_evidence']=public_records(run)
+        native['resources']=[d for d in files if d['role']=='resource']
+        references=set(plan['packet_plan']['record_refs'])
+        for identifier in ('creative-experience','creative-exploration'):
+            if identifier in spec['inputs']:
+                row=run['artifacts'].get(identifier)
+                if row:references.update(_artifact_refs(transactions.read_json(state._safe_path(root,row['path']))))
+        native['input_artifacts']={}
+        for reference in sorted(references):
+            if not reference.startswith('artifact:'):continue
+            record=state._resolve(run,reference)
+            if not record or not record.get('path'):continue
+            copied=directory/'files'/record['path']
+            match=next((d for d in files if d['path']==copied.relative_to(root).as_posix() and d['sha256']==record['sha256']),None)
+            if match:native['input_artifacts'][reference]=match
     native['schemas']={name:str(directory/'canonical'/path.relative_to(state.RESOURCE_ROOT.parents[2])) for name,path in schemas.items()}
     if plan['task_key'].startswith('strategy.') and roots:
         from . import strategy
@@ -341,11 +515,12 @@ def _freeze_packet(root,directory,run,plan,spec):
     native['operation_boundary']='Write candidates only under .work/attempt_id/ using the exact work paths declared below. Propose closed operations in TaskResult; do not call state registration, review, freeze, adoption or publication writers from the worker. The coordinator retains those authorities and all canonical gates.'
     native['adoption_contract']={'output_artifact_ids':spec['completed_by'],'reviewer_id':spec.get('reviewer_id'),'stage_id':spec['stage_id'],'outputs':spec['outputs'],'result_schema':native['schemas']['task-result'],'work_prefix':'.work/'+directory.name+'/','quality':'No business PASS follows from a technical receipt; record actual evidence and limits.'}
     if spec['isolation']=='independent_review':
-        native['adoption_contract']['rubric']=state._stages()[spec['stage_id']]
-        native['adoption_contract']['requirements']=[r for r in state._requirements() if r['stage_id']==spec['stage_id']]
+        native['adoption_contract']['rubric']=state._stages(run)[spec['stage_id']]
+        native['adoption_contract']['requirements']=[r for r in state._requirements(run) if r['stage_id']==spec['stage_id']]
     native_path=directory/'native-task.json';_write_frozen(native_path,native);files.append(_descriptor(root,native_path,'native-task','internal' if private else 'public'))
     role_entry=(directory/'canonical'/spec['skill']/'SKILL.md').relative_to(root).as_posix()
     required_reads=[d['path'] for d in files if d['role'] in ('input','native-task','schema') or d['path']==role_entry]
+    if kind=='creative_public':required_reads.append(native['task']['creative_contract']['path'])
     for method in native['methods']:
         required_reads.extend(Path(p).relative_to(root).as_posix() for p in method['entrypoints'])
     manifest={'schema_version':'1.0','scope':'internal_execution' if private else kind,'task_id':plan['task_id'],'files':files,'required_reads':sorted(set(required_reads)),'record_snapshots':snapshots,'source_record_hashes':plan['input_hashes']}
@@ -527,7 +702,8 @@ def _reject_stale(root,attempt):
 
 def _check_future_outputs(request,plan):
     from .composition import OUTPUTS
-    expected={key:request['output_destinations'][key] for key in OUTPUTS}
+    keys=('web-source','web-material') if request.get('input_parameters',{}).get('delivery_format')=='web' else OUTPUTS
+    expected={key:request['output_destinations'][key] for key in keys}
     if plan.get('outputs')!=expected:raise ValueError('Candidate composition plan changed destinations reserved before planning')
 
 @phase
@@ -547,7 +723,8 @@ def accept_task_result(run_dir,result):
     spec=next(s for s in _variants(run) if s['task_key']==request['task_key']);_read_receipt(root,result,request,attempt)
     mapping=_output_mapping(root,attempt,request,spec,result['outputs']);_check_operations(run,request,spec,result['operations'],mapping)
     if spec['task_key']=='client.composition.plan':
-        operation=next((o for o in result['operations'] if o['op']=='artifact.register' and o['args']['artifact_id']=='client-story-map'),None)
+        identifier='web-plan' if state.delivery_format(run)=='web' else 'client-story-map'
+        operation=next((o for o in result['operations'] if o['op']=='artifact.register' and o['args']['artifact_id']==identifier),None)
         if operation is None:raise ValueError('Composition planning must register its current plan')
         _check_future_outputs(request,transactions.read_json(mapping[operation['args']['path']][0]))
     if spec['task_key']=='strategy.understand':
@@ -615,6 +792,9 @@ def task_event(run_dir,event):
             if before!='CLAIMED':
                 if row['dispatch_key']==payload['dispatch_key']:return {'status':before,'attempt':row,'dispatch_granted':False}
                 raise transactions.Conflict('CONFLICT: dispatch was already attempted')
+            if state.delivery_format(current)=='web':
+                from .web_timing import require_time
+                require_time(current)
             if _now()>_time(row['claim_expires_at']):raise ValueError('Reservation expired before dispatch')
             row['state']='DISPATCHING';row['dispatch_key']=payload['dispatch_key'];granted=True
         elif kind=='dispatched':

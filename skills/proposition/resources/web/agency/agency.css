@@ -1,0 +1,15 @@
+@font-face{font-family:"Vertigo Poppins";src:url("poppins-latin-400-normal.woff2") format("woff2");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"Vertigo Poppins";src:url("poppins-latin-500-normal.woff2") format("woff2");font-style:normal;font-weight:500;font-display:swap}
+@font-face{font-family:"Vertigo Poppins";src:url("poppins-latin-700-normal.woff2") format("woff2");font-style:normal;font-weight:700;font-display:swap}
+[data-vertigo-agency]{--vg-ink:#171717;--vg-paper:#fff;--vg-rule:#ddd8d0;color:var(--vg-ink);background:var(--vg-paper);font-family:"Vertigo Poppins",sans-serif;font-size:clamp(.94rem,.9rem + .2vw,1.08rem);line-height:1.55}
+[data-vertigo-agency] .vg-wordmark{display:block;width:clamp(132px,15vw,190px);height:auto}
+[data-vertigo-agency] .vg-frame{width:min(100% - 2*clamp(20px,4vw,72px),1440px);margin-inline:auto}
+[data-vertigo-agency] .vg-header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:24px;border-bottom:1px solid var(--vg-rule)}
+[data-vertigo-agency] .vg-eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+[data-vertigo-agency] [data-vg-progress]{overflow-x:auto;max-width:100%}
+[data-vertigo-agency] [data-vg-progress] ol{display:flex;gap:clamp(12px,2vw,28px);list-style:none;padding:0;margin:0}
+[data-vertigo-agency] [data-vg-progress] a{display:inline-flex;align-items:center;min-height:44px;color:inherit;text-decoration:none;white-space:nowrap;border-bottom:1px solid transparent}
+[data-vertigo-agency] [data-vg-progress] a[aria-current]{border-bottom-color:currentColor}
+[data-vertigo-agency] :focus-visible{outline:2px solid currentColor;outline-offset:5px}
+@media(max-width:640px){[data-vertigo-agency] .vg-header{align-items:flex-start;flex-wrap:wrap;gap:16px}}
+@media(prefers-reduced-motion:reduce){[data-vertigo-agency]{scroll-behavior:auto}}

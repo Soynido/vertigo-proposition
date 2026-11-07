@@ -22,6 +22,7 @@ MAX_RUN_BYTES = 64 * 1024 * 1024
 MAX_METRIC_EVENTS = 20000
 ATTRIBUTES = {'count', 'bytes', 'files', 'captures', 'cache_hits', 'channel',
               'wait_kind', 'role', 'version', 'operation', 'command', 'file_id'}
+ATTRIBUTES.add('business_status')
 NAMES = {'cli.command', 'validation.hash', 'reader.json', 'upstream.inspect',
          'research.prepare', 'research.validate', 'research.host', 'strategy.prepare',
          'strategy.validate', 'strategy.read', 'strategy.mission', 'channels.inspect',
@@ -57,6 +58,7 @@ class TraceRecorder:
         self.events = 0
         self.bytes = 0
         self.diagnostics = []
+        self.counters = {}
 
     def __enter__(self):
         from . import state
@@ -86,7 +88,10 @@ class TraceRecorder:
         return self
 
     def __exit__(self, *_):
-        _current.reset(self._token)
+        try:
+            for (name,span,encoded),values in self.counters.items():
+                self._event('counter',name,span,span,{**json.loads(encoded),**values})
+        finally:_current.reset(self._token)
 
     def _partial(self):
         from . import state
@@ -142,13 +147,17 @@ class TraceRecorder:
         self._event('start', name, identifier, parent, attributes)
         token = _parent.set(identifier)
         status = 'SUCCEEDED'; error = None
+        outcome={}
         try:
-            yield
+            yield outcome
         except BaseException as failure:
             status = 'CANCELLED' if type(failure).__name__ in ('CancelledError','KeyboardInterrupt','SystemExit') else 'FAILED'
             error = type(failure).__name__[:64]
             raise
         finally:
+            business=outcome.get('business_status')
+            if business in {'PASS','FAIL','BLOCKED','STALE','PARTIAL','UNAVAILABLE','UNKNOWN_OUTCOME','ERROR','CURRENT','READY','COLLECTED','FRONTIER_EXHAUSTED'}:
+                attributes={**attributes,'business_status':business}
             self._event('end', name, identifier, parent, attributes, status, error)
             _parent.reset(token)
 
@@ -156,7 +165,12 @@ class TraceRecorder:
         if name not in NAMES or type(count) is not int or count < 0:
             raise ValueError('Invalid technical counter')
         attributes = _attributes({**attributes, 'count':count})
-        self._event('counter', name, _parent.get(), _parent.get(), attributes)
+        key=(name,_parent.get(),json.dumps({k:v for k,v in attributes.items() if k not in ('count','bytes')},sort_keys=True))
+        if key not in self.counters and len(self.counters)>=4096:
+            self._partial();self.diagnostics.append('TELEMETRY_COUNTER_BUDGET');return
+        row=self.counters.setdefault(key,{'count':0})
+        row['count']+=count
+        if 'bytes' in attributes:row['bytes']=row.get('bytes',0)+attributes['bytes']
 
 
 def counter(name, count=1, **attributes):

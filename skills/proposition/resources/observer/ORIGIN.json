@@ -1,0 +1,99 @@
+{
+  "source": "Owner-supplied workflow UI, qualified local technical observer V2. Public native activity adapter is a distinct implementation.",
+  "no_qualification_claim": "These hashes attest origin, not native host functionality.",
+  "base_source_files": [
+    {
+      "path": "index.html",
+      "sha256": "c94d63bc5fdcb1757e27a214225c0565b9ceba7bf5dcaf9bf56fed97be42ba84"
+    },
+    {
+      "path": "assets/preview.css",
+      "sha256": "351a72170941bffaa295b60dba90971fb3dbc2824525ddbddf8a883aedc84ca9"
+    },
+    {
+      "path": "assets/initialize.js",
+      "sha256": "93549e5136abc74e66316913d946fbf70a059d3fe05d769a42f7757135f3b90f"
+    },
+    {
+      "path": "assets/state-bridge.js",
+      "sha256": "e86186b7fd119cd76ea3beded23b2de62406bcd12a71527122fb235cae268b49"
+    },
+    {
+      "path": "assets/preview-tooltip.js",
+      "sha256": "d84bf5985bfd275a8e67deaa5307ee6260cfa95aaeaa24ed478846ed5d5746c8"
+    },
+    {
+      "path": "assets/runtime-core.js",
+      "sha256": "32d0a1dd01916f0ebe03681d1b32a400f7fb9ee6ae1828ad3a95dfd85703c754"
+    },
+    {
+      "path": "assets/runtime-adapter.js",
+      "sha256": "079c39d1c594f03a29a8c1599807b85d6500311bee4ee48da4f370bc4c2b888a"
+    },
+    {
+      "path": "assets/reference/gemini.svg",
+      "sha256": "8ab0a9bafec11f7e69bcb9fc4ffd8f1bc927d1ddcbbb6ff36dee5ae8b5a9d602"
+    },
+    {
+      "path": "assets/reference/claude.svg",
+      "sha256": "a3101f3047a119aa11825ad9369510f0c472428c8c52d420e31bc62db44a8364"
+    },
+    {
+      "path": "assets/reference/meta.svg",
+      "sha256": "adf9f2c1a646ccd3a37ca8c2e7e5985d64630cd633f4b95fba393d1d44e0578c"
+    },
+    {
+      "path": "assets/reference/openai.svg",
+      "sha256": "a595df6b423920c67a7f8f73c063e4bfb72d415948097b6cac063a2366bb5186"
+    },
+    {
+      "path": "assets/reference/inter.woff2",
+      "sha256": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62"
+    },
+    {
+      "path": "assets/reference/Inter-LICENSE.txt",
+      "sha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a"
+    },
+    {
+      "path": "assets/reference/font.css",
+      "sha256": "140d59061134f391d0c81488d89b31027a15ec42b0a8a6d47df38f32bc92ccf6"
+    },
+    {
+      "path": "assets/vendor/PROVENANCE.json",
+      "sha256": "07da21908ddec0dee690e2dfe0dac92fdee76ce4c86c29bbffbed1c8e0755639"
+    },
+    {
+      "path": "assets/vendor/floating-ui-dom.js",
+      "sha256": "b8199f76adccb9b17b3ab57124c42585dc19197127d1a5d19307d1983f80bd89"
+    },
+    {
+      "path": "assets/vendor/lucide-LICENSE.txt",
+      "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+    },
+    {
+      "path": "assets/vendor/lucide.js",
+      "sha256": "fde878a4f7aebe548b071eaaf343d898f66d275e93970abe95d8ca5fda290b51"
+    },
+    {
+      "path": "assets/vendor/floating-ui-core.js",
+      "sha256": "6985ce661153c01d97f6be9babb6a9566f923c716c2b7fbead48fbb09f419ba8"
+    },
+    {
+      "path": "assets/vendor/floating-ui-LICENSE.txt",
+      "sha256": "0e4c9a9b6c71019cbbea3bdc20b01223110a9035700f9c960c8fcbf78c2325ce"
+    },
+    {
+      "path": "src/agent-setup/markup.html",
+      "sha256": "14192129ebe5ea55c244263fdea7f18e6136348ac7d43e8719399edbe47e3933"
+    },
+    {
+      "path": "src/agent-setup/style.css",
+      "sha256": "5289f888124b1ec0b2fb18ea310f408a6c09a3f555fd9b77c07c24340be6f8de"
+    },
+    {
+      "path": "src/agent-setup/app.js",
+      "sha256": "55dd9eb88763425030cb194d3ea0eb67ce373b9e3c499d0053d5dc7b5aa1c82c"
+    }
+  ],
+  "hash_scope": "Historical base UI hashes. Current modified files are covered by the installation manifest, not these base hashes."
+}

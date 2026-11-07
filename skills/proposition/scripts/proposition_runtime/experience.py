@@ -506,7 +506,12 @@ def inspect_experience(run, stage='creative.direction', *, proposed_selection=No
             if len(locked)!=len(all_ids) or {r['id'] for r in locked}!=all_ids or any(r['sha256']!=render_hashes[r['id']] for r in locked):
                 raise ValueError('Frozen selection does not preserve all rendered narrative moments')
         if stage in ('client.composition','export.documents','verify.final'):
-            _check_story(run,inputs)
+            if state.delivery_format(run)=='web':
+                from .web import inspect_delivery
+                report=inspect_delivery(run)
+                if report['status']!='PASS':raise ValueError('; '.join(report['issues']))
+            else:
+                _check_story(run,inputs)
         return {'status':'PASS','scope':'experience_evidence_consistency_only','checks':checks,
                 'aesthetic_quality':'REQUIRES_ISOLATED_REVIEW','declared_measurements':'REQUIRE_RENDER_REVIEW','issues':[]}
     except (ValueError,OSError,KeyError,TypeError,IndexError,AttributeError) as error:
