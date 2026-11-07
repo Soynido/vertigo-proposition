@@ -58,6 +58,7 @@ class TraceRecorder:
         self.events = 0
         self.bytes = 0
         self.diagnostics = []
+        self.counters = {}
 
     def __enter__(self):
         from . import state
@@ -87,7 +88,10 @@ class TraceRecorder:
         return self
 
     def __exit__(self, *_):
-        _current.reset(self._token)
+        try:
+            for (name,span,encoded),values in self.counters.items():
+                self._event('counter',name,span,span,{**json.loads(encoded),**values})
+        finally:_current.reset(self._token)
 
     def _partial(self):
         from . import state
@@ -161,7 +165,12 @@ class TraceRecorder:
         if name not in NAMES or type(count) is not int or count < 0:
             raise ValueError('Invalid technical counter')
         attributes = _attributes({**attributes, 'count':count})
-        self._event('counter', name, _parent.get(), _parent.get(), attributes)
+        key=(name,_parent.get(),json.dumps({k:v for k,v in attributes.items() if k not in ('count','bytes')},sort_keys=True))
+        if key not in self.counters and len(self.counters)>=4096:
+            self._partial();self.diagnostics.append('TELEMETRY_COUNTER_BUDGET');return
+        row=self.counters.setdefault(key,{'count':0})
+        row['count']+=count
+        if 'bytes' in attributes:row['bytes']=row.get('bytes',0)+attributes['bytes']
 
 
 def counter(name, count=1, **attributes):

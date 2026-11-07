@@ -11,6 +11,7 @@ import subprocess
 import sys
 import threading
 import time
+from datetime import datetime,timezone
 from uuid import uuid4
 from . import state
 from .transactions import run_lock,read_json
@@ -54,6 +55,16 @@ def is_worker(workspace,thread_id):
     return launch.exists() and read_json(launch).get('thread_id')==thread_id
 
 
+def admission_time(workspace,thread_id,site_url):
+    for root in (Path(workspace).absolute(),*Path(workspace).absolute().parents):
+        pointer=root/'.vertigo/native/current.json'
+        if pointer.exists() and is_worker(root,thread_id):
+            folder=Path(read_json(pointer)['session']);request=read_json(folder/'request.json')
+            if request['prompt'].splitlines()[1]!=site_url:raise ValueError('Native admission belongs to another site')
+            return datetime.fromtimestamp(request['created_at'],timezone.utc).isoformat()
+    return None
+
+
 def register_open(session,path,caller):
     folder=state._external_root(session)
     with run_lock(folder):
@@ -90,8 +101,7 @@ def prepare(workspace,prompt,*,model,effort,caller):
         pointer=folder/'current.json'
         if pointer.exists():
             old=Path(read_json(pointer)['session']);last=old/'result.json'
-            if not last.exists():raise ValueError('A native session is already reserved; reconcile it before a new launch')
-            previous=read_json(last)
+            previous=_effective_result(old)
             if previous.get('status')=='UNKNOWN_OUTCOME' or (previous.get('status')=='BLOCKED' and (old/'launch.json').exists()):
                 raise ValueError('Previous native outcome is unknown; reconcile without a duplicate dispatch')
             prior=read_json(old/'request.json') if (old/'request.json').exists() else {}
@@ -119,18 +129,84 @@ def status(session,*,wait=0):
     folder=state._external_root(session);deadline=time.monotonic()+min(30,max(0,wait))
     while True:
         result=folder/'result.json'
-        if result.exists():return read_json(result)
+        if result.exists() or (folder/'reconciliation.json').exists():return _effective_result(folder)
         if time.monotonic()>=deadline:
             progress=folder/'progress.json'
             return read_json(progress) if progress.exists() else {'status':'WAITING_FOR_PANEL_OPEN','session':str(folder)}
         time.sleep(.2)
 
 
+def _effective_result(folder):
+    original=(read_json(folder/'result.json') if (folder/'result.json').exists() else
+              {'status':'UNKNOWN_OUTCOME','scope':'native_execution_not_business_quality','reason':'No final service receipt'})
+    path=folder/'reconciliation.json'
+    if not path.exists():return original
+    recovered=read_json(path)
+    try:
+        if _reconciliation_inputs_match(folder,recovered.get('input_hashes',{})):
+            return recovered['result']
+    except (OSError,ValueError):pass
+    return original
+
+
+def _reconciliation_inputs_match(folder,hashes):
+    return bool(hashes) and all((not (folder/name).exists()) if sha is None else
+        state._sha(state._safe_path(folder,name))==sha for name,sha in hashes.items())
+
+
+def reconcile(session,caller):
+    """Read stored owned turns on a fresh transport; no resume or new turn."""
+    from .native_host import AppServerClient
+    from .native_launch import read_owned_turn
+    from .native_activity import public_text
+    folder=state._external_root(session)
+    with run_lock(folder):
+        request=read_json(folder/'request.json')
+        if caller!=request['owner_thread_id']:raise ValueError('Reconciliation belongs to the owner lane')
+        original=_effective_result(folder)
+        if original['status']!='UNKNOWN_OUTCOME':return original
+        result=dict(original,scope='native_execution_not_business_quality',business_quality='NOT_ASSESSED')
+        names=('request.json','result.json','launch.json','lifecycle.json')
+        if any(not (folder/name).exists() for name in ('launch.json','lifecycle.json')):
+            return dict(result,reconciliation_error='Durable owned lifecycle evidence is missing')
+        hashes={name:state._sha(folder/name) if (folder/name).exists() else None for name in names}
+        launch=read_json(folder/'launch.json');ledger=read_json(folder/'lifecycle.json');owned=launch.get('receipt',{})
+        agents=ledger.get('agents',[]);known={ledger.get('root_id')}
+        if not owned.get('thread_id') or ledger.get('root_id')!=owned['thread_id'] or not agents or len(agents)>128 or agents[0].get('id')!=owned['thread_id']:
+            return dict(result,reconciliation_error='Owned lifecycle root is missing or inconsistent')
+        for agent in agents:
+            if not agent.get('turn_id') or (agent['id']!=owned['thread_id'] and agent.get('parent_id') not in known):
+                return dict(result,reconciliation_error='Descendant ownership or turn identity is incomplete')
+            known.add(agent['id'])
+        root=next((a for a in agents if a['id']==owned['thread_id']),{})
+        if root.get('turn_id')!=owned.get('turn_id'):
+            return dict(result,reconciliation_error='Owned root turn changed')
+        observed=[];until=time.monotonic()+15
+        try:
+            with AppServerClient(argv=request['argv'],cwd=request['workspace']) as host:
+                for agent in agents:
+                    remaining=until-time.monotonic()
+                    if remaining<=0:raise TimeoutError('Bounded reconciliation deadline exceeded')
+                    observed.append(read_owned_turn(host,agent['id'],agent['turn_id'],timeout=remaining))
+        except (ValueError,RuntimeError,OSError,TimeoutError) as error:
+            return dict(result,reconciliation_error=public_text(str(error)))
+        if any(a['status']=='UNKNOWN_OUTCOME' for a in observed):
+            return dict(result,readback=observed)
+        if not _reconciliation_inputs_match(folder,hashes):
+            raise ValueError('Lifecycle changed during reconciliation; read the current session')
+        outcome=dict(status=observed[0]['status'],scope='native_execution_not_business_quality',
+            business_quality='NOT_ASSESSED',readback=observed,finished_at=time.time(),reconciled=True)
+        write_json(folder/'reconciliation.json',{'input_hashes':hashes,'result':outcome})
+        return outcome
+
+
 def request_stop(session,caller):
     folder=state._external_root(session)
     if read_json(folder/'request.json')['owner_thread_id']!=caller:raise ValueError('STOP belongs to another calling lane')
     done=folder/'result.json'
-    if done.exists():return {'status':'ALREADY_IDLE','result':read_json(done)}
+    if done.exists():
+        result=_effective_result(folder)
+        return {'status':'RECONCILIATION_REQUIRED' if result['status']=='UNKNOWN_OUTCOME' else 'ALREADY_IDLE','result':result}
     target=state._no_symlinks(folder/'stop.json')
     # Cancellation must remain writable while dispatch holds its reservation.
     # O_EXCL creates one durable signal without replacing an existing request.
@@ -151,7 +227,7 @@ def serve(session):
     from .native_launch import NativeLaunch
     from .native_observer import make_server
     folder=state._external_root(session);request=read_json(folder/'request.json')
-    feed=NativeActivity();server=make_server(feed)
+    feed=NativeActivity(journal_dir=folder);server=make_server(feed)
     threading.Thread(target=server.serve_forever,daemon=True).start()
     write_json(folder/'session.json',{'status':'WAITING_FOR_PANEL_OPEN','session':str(folder),
         'owner_thread_id':request['owner_thread_id'],'url':f'http://127.0.0.1:{server.server_port}/#'+server.token,
@@ -174,7 +250,7 @@ def serve(session):
                 model=request['model'],effort=request['effort'],inputs=request['inputs'],
                 lane_id=request['owner_thread_id'],panel_open=read_json(folder/'panel-open.json'))
             started=launch.start();write_json(folder/'progress.json',started)
-            until=time.monotonic()+1200;last_progress=0;stopping=False
+            until=time.monotonic()+max(0,request.get('created_at',time.time())+1200-time.time());last_progress=0;stopping=False
             while True:
                 with feed._lock:
                     root=dict(feed.agents.get(started['thread_id'],{}))
@@ -185,6 +261,9 @@ def serve(session):
                     break
                 if not feed.connected:raise ValueError('Native source disconnected; execution outcome unknown')
                 if time.monotonic()-last_progress>=2:
+                    snapshot=feed.snapshot()
+                    write_json(folder/'lifecycle.json',{'root_id':started['thread_id'],
+                        'agents':[{k:a.get(k) for k in ('id','parent_id','turn_id','status','started_at','ended_at')} for a in snapshot['agents']]})
                     write_json(folder/'progress.json',{**started,'last_public_message':root.get('last_output',''),
                         'observed_agents':1+len(children),'observed_at':time.time()});last_progress=time.monotonic()
                 time.sleep(.2)
@@ -199,6 +278,11 @@ def serve(session):
         unknown=bool(host and host.outcome_unknown) or launch_record.get('state')=='TURN_INTENT' or unfinished
         result.update(status='UNKNOWN_OUTCOME' if unknown else 'INTERRUPTED' if (folder/'stop.json').exists() else 'BLOCKED',error=public_text(str(error)))
     finally:
+        snapshot=feed.snapshot()
+        result.update(activity=snapshot, business_quality='NOT_ASSESSED')
+        write_json(folder/'lifecycle.json',{'root_id':feed.root_id,
+            'agents':[{k:a.get(k) for k in ('id','parent_id','turn_id','status','started_at','ended_at')} for a in snapshot['agents']]})
+        if (folder/'launch.json').exists():result['launch']=read_json(folder/'launch.json').get('receipt')
         result['finished_at']=time.time();write_json(folder/'result.json',result)
         # The model process is closed. Keep only the read-only observer briefly.
         until=time.monotonic()+600

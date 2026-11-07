@@ -8,6 +8,10 @@ Un journal par processus ; aucune soustraction entre domaines d’horloge distin
 
 Les traces n’acceptent que des attributs techniques : compteurs, octets, versions, rôles, canal et identifiants opaques de fichiers. Aucun texte prospect, prompt, cookie, URL ou paramètre signé. Budgets : 4 Kio par événement, 4 096 événements et 4 Mio par processus, 128 entrées et 64 Mio par run ; lecture métrique plafonnée à 20 000 événements. Atteindre un plafond rend la mesure partielle ; cela ne transforme pas un résultat métier valide en échec. Une panne de télémétrie n’autorise ni suppression automatique ni relance de production.
 
+Les compteurs identiques d'une commande sont agrégés par type et identité de fichier, avec leurs nombres et octets cumulés. Ils sont écrits après les fins de spans pour ne pas les évincer. Cette agrégation ne mesure pas une durée par fichier. Discovery partage maintenant sa phase stable de lectures ; toute écriture pertinente invalide cette phase, et un nouveau contrôle relit les fichiers courants.
+
+`collect` et les inspections/adoptions `discovery` rendent par défaut un reçu compact : statut, nombres, premiers manques et chemins/empreintes des rapports canoniques. Les fichiers et API Python complets restent conservés ; `--full-output` restitue explicitement l'ancien inventaire CLI. Lire les seuls détails nécessaires dans ces rapports au lieu de réimprimer toutes les entrées à chaque passage.
+
 Comparer à périmètre constant : mêmes sources, contrats, missions, formats et gates. Séparer cache froid, cache complet, validation/rejeu et E2E. Conserver cinq paires et leurs échecs. Aucune réduction globale de durée n’est admise depuis une fixture locale ou depuis des compteurs seuls.
 
 ## Contrôles partagés dans une phase stable
@@ -31,6 +35,8 @@ En web, les nouveaux runs sans réglage explicite figent concurrence `2`, `max_h
 ## Coordinateur et tâches natives
 
 L'observateur natif Desktop, lorsqu'il est explicitement installé, démarre via [l'entrée canonique](native-startup.md) avant init. Il observe le contexte de production qu'il possède et ses descendants ; il ne prétend pas s'attacher à un autre tour Desktop. Seuls les agents réels ont des lignes ouvrables. Les commandes déterministes restent dans leur activité, sans rôle supplémentaire. L'ouverture acceptée dans la lane et le rendu réel sont distincts ; aucune lecture humaine n'est requise pour lancer.
+
+Le service conserve dans sa session les événements publics de cycle de vie et les sorties publiques finalisées, dans deux journaux bornés à 8 Mio chacun. Les deltas continuent d'animer la vue sans être tous recopiés ; le checkpoint conserve aussi le dernier état observé. Aucun raisonnement privé n'entre dans ces journaux. Une limite ou erreur de journal reste explicite ; ni le flux ni son historique ne valident la proposition.
 
 Cette voie orchestre les mêmes étapes et gates. Le runtime prépare, réserve et adopte ; l'hôte exécute réellement. Il ne lance aucun modèle externe ni fournisseur payant à la place de l'hôte. Si l'hôte n'expose pas les capacités nécessaires, déclarer la limite ; ne pas inventer un sous-agent, une indépendance ou un résultat. Les commandes de domaine historiques restent utilisables par le coordinateur, avec les mêmes exigences de fraîcheur et d'isolement ; ne pas combiner leurs écritures avec celles d'un worker pour une même tâche.
 

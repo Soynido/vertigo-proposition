@@ -24,6 +24,14 @@ class WebTimingTests(unittest.TestCase):
         self.assertTrue(result['may_continue']);self.assertEqual(result['ceiling_remaining_seconds'],499)
         self.assertEqual(result['tokens_used'],None)
 
+    def test_native_admission_time_is_included_in_the_immutable_run_clock(self):
+        admitted=(self.start-timedelta(seconds=80)).isoformat()
+        run=state.init_run('https://fixture.example/',Path(self.tmp.name)/'runs',delivery_format='web',admitted_at=admitted)
+        self.assertEqual(admitted,run['created_at'])
+        self.assertEqual(80,self.timing.budget(run,now=self.start)['wall_seconds'])
+        changed=dict(run,created_at=self.start.isoformat())
+        with self.assertRaises(ValueError):state.save_run(run['root'],changed)
+
     def test_ceiling_prevents_new_work_without_mutating_the_run(self):
         host={'schema_version':'1.0','observed_at':self.run['created_at'],'host_kind':'synthetic_fixture',
               'capabilities':[{'id':'browser','status':'AVAILABLE'}]}

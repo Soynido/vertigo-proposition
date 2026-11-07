@@ -20,7 +20,10 @@ except ImportError:
 SERVER=r'''
 import json,sys
 from pathlib import Path
-base=Path(sys.argv[1]);active=False;started=0
+base=Path(sys.argv[1]);active=False;started=0;ephemeral=False;turn_status='completed'
+saved=base/'host-state.json'
+if saved.exists():
+ previous=json.loads(saved.read_text());active=previous['active'];started=previous['started'];ephemeral=previous['ephemeral'];turn_status=previous['turn_status']
 for line in sys.stdin:
  r=json.loads(line);m=r['method'];p=r.get('params',{})
  with (base/'calls.jsonl').open('a') as out:out.write(json.dumps(r)+'\n')
@@ -29,6 +32,7 @@ for line in sys.stdin:
  elif m=='account/read':result={'account':{'type':'chatgpt'}}
  elif m=='model/list':result={'data':[{'id':'gpt-6-sol','model':'gpt-6-sol','supportedReasoningEfforts':[{'reasoningEffort':'xhigh'}]}],'nextCursor':None}
  elif m=='thread/start':
+  ephemeral=p.get('ephemeral',False)
   mode=p.get('sandbox','danger-full-access')
   result={'thread':{'id':'owned','status':{'type':'idle'}},'model':p['model'],'reasoningEffort':p['config']['model_reasoning_effort'],'instructionSources':[str(base/'AGENTS.md')],
           'approvalPolicy':p.get('approvalPolicy','on-request'),
@@ -36,13 +40,24 @@ for line in sys.stdin:
   if (base/'extra-instructions').exists():result['instructionSources'].append(str(base/'unexpected.md'))
   if (base/'change-input').exists():(base/'AGENTS.md').write_text('Changed during host setup')
  elif m=='turn/start':
-  started+=1;active=True;result={'turn':{'id':'t'+str(started),'status':'inProgress'}}
+  started+=1;active=True;turn_status='inProgress';result={'turn':{'id':'t'+str(started),'status':'inProgress'}}
+  print(json.dumps({'method':'turn/started','params':{'threadId':'owned','turn':result['turn']}}),flush=True)
   if (base/'lose-response').exists():continue
- elif m=='thread/read':result={'thread':{'id':'owned','status':{'type':'active' if active else 'idle'}}}
- elif m=='thread/turns/list':result={'data':[{'id':'foreign' if (base/'foreign-turn').exists() else 't'+str(started),'status':'inProgress' if active else 'completed'}],'nextCursor':None}
- elif m=='turn/interrupt':active=False;result={}
- elif m=='fixture/finish':active=False;result={}
+ elif m=='thread/read':
+  result={'thread':{'id':'owned','status':{'type':'active' if active else 'idle'}}}
+  if p.get('includeTurns'):result['thread']['turns']=[{'id':'t'+str(started),'status':turn_status,'items':[{'type':'reasoning','text':'PRIVATE_FIXTURE'}]}]
+ elif m=='thread/turns/list':
+  if (base/'legacy-pagination').exists():
+   print(json.dumps({'id':r['id'],'error':{'code':-32601,'message':'list_turns is not supported yet'}}),flush=True);continue
+  if ephemeral or (base/'reject-stop').exists():
+   print(json.dumps({'id':r['id'],'error':{'code':-32600,'message':'ephemeral threads do not support thread/turns/list'}}),flush=True);continue
+  result={'data':[{'id':'foreign' if (base/'foreign-turn').exists() else 't'+str(started),'status':turn_status}],'nextCursor':None}
+ elif m=='turn/interrupt':
+  active=False;turn_status='interrupted';result={}
+  print(json.dumps({'method':'turn/completed','params':{'threadId':'owned','turn':{'id':'t'+str(started),'status':'interrupted'}}}),flush=True)
+ elif m=='fixture/finish':active=False;turn_status='completed';result={}
  else:result={}
+ saved.write_text(json.dumps(dict(active=active,started=started,ephemeral=ephemeral,turn_status=turn_status)))
  print(json.dumps({'id':r['id'],'result':result}),flush=True)
 '''
 
@@ -133,6 +148,29 @@ class NativeLaunchTests(unittest.TestCase):
         self.assertEqual(result,self.launch.stop())
         interrupts=[c['params'] for c in self.calls() if c['method']=='turn/interrupt']
         self.assertEqual([{'threadId':'owned','turnId':'t1'}],interrupts)
+
+    def test_a_finished_owned_turn_can_be_reconciled_without_new_dispatch(self):
+        self.launch.start();self.host.request('fixture/finish',{})
+        result=self.launch.reconcile()
+        self.assertEqual('COMPLETED',result['status'])
+        self.assertEqual('t1',result['turn_id'])
+        self.assertEqual(1,len([c for c in self.calls() if c['method']=='turn/start']))
+
+    def test_legacy_persistent_history_supports_stop_and_metadata_reconciliation(self):
+        (self.base/'legacy-pagination').touch();self.launch.start()
+        self.assertEqual('STOP_CONFIRMED',self.launch.stop()['status'])
+        observed=self.launch.reconcile()
+        self.assertEqual('INTERRUPTED',observed['status'])
+        self.assertNotIn('PRIVATE_FIXTURE',json.dumps(observed))
+
+    def test_an_active_turn_remains_unknown_on_read_only_reconciliation(self):
+        self.launch.start()
+        self.assertEqual('UNKNOWN_OUTCOME',self.launch.reconcile()['status'])
+        self.assertNotIn('turn/interrupt',[c['method'] for c in self.calls()])
+
+    def test_reconciliation_does_not_adopt_a_foreign_turn(self):
+        self.launch.start();self.host.request('fixture/finish',{});(self.base/'foreign-turn').touch()
+        self.assertEqual('UNKNOWN_OUTCOME',self.launch.reconcile()['status'])
 
     def test_a_different_active_turn_is_not_interrupted(self):
         self.launch.start();(self.base/'foreign-turn').touch()

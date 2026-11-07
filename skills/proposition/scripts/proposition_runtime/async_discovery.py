@@ -61,7 +61,7 @@ async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
         "limitations": [
             "Bounded same-origin public HTML sample; no claim of exhaustive coverage.",
             "Desktop and mobile Chromium observations are not a full device/browser matrix.",
-            "No forms, login, unsafe HTTP methods, cross-origin requests, private services or downloads.",
+            "No forms, login, unsafe HTTP methods, cross-origin navigation or private services. Public render dependencies use bounded credential-free GET at validated literal addresses.",
             "Embedded frame documents are excluded; evidence describes the main document only.",
             "Menu and scroll exploration is bounded; hidden or inaccessible content may remain.",
             "Social accounts and assets are sourced candidates, not verified ownership or reuse rights.",
@@ -83,6 +83,8 @@ async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
     queued = set(known_urls or []) | seen | set(seed_urls)
     socials: dict[str, dict] = {}
     assets: dict[str, dict] = {}
+    from .render_resources import RenderResources
+    render_resources=RenderResources(allow_local)
     blocked_seen = set()
 
     def blocked(request_url: str, method: str, reason: str) -> None:
@@ -187,8 +189,11 @@ async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
                             if request.method not in {'GET','HEAD'}: raise ValueError('unsafe_http_method')
                             if request.resource_type=='document' and request.frame!=page.main_frame:
                                 raise ValueError('embedded_document_excluded')
+                            if d._origin(request.url)!=d._origin(initial) and request.resource_type!='document':
+                                body,headers=await render_resources.get(request.url,request.resource_type)
+                                await route.fulfill(status=200,headers=headers,body=body);return
                             await safe_destination(request.url)
-                        except ValueError as exc:
+                        except (ValueError,OSError,TimeoutError) as exc:
                             visit_blocked(request.url,request.method,str(exc));await route.abort();return
                         await route.continue_()
                     except Error:
@@ -226,6 +231,7 @@ async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
                 if image_wait_policy=='terminal_aware':
                     tracker=async_navigation.ImageTracker(page);await tracker.install()
 
+                render_ready=False
                 @traced('navigation.capture')
                 async def capture(kind,control=None):
                     snapshot=await page.evaluate(d.SNAPSHOT_JS)
@@ -249,7 +255,7 @@ async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
                     result['sources'].append({'id':source_id,'url':page.url,'requested_url':record['requested_url'],
                         'title':snapshot['title'],'viewport':record['viewport'],'retrieved_at':d._now(),
                         'kind':kind,'artifacts':artifacts})
-                    result['observations'].append(({key:snapshot[key] for key in ('links','assets','jsonld')},source_id,page.url))
+                    if render_ready:result['observations'].append(({key:snapshot[key] for key in ('links','assets','jsonld')},source_id,page.url))
 
                 response=await page.goto(record['requested_url'],wait_until='domcontentloaded',timeout=d.NAVIGATION_TIMEOUT_MS)
                 record['final_url']=page.url
@@ -257,7 +263,10 @@ async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
                 if not response or response.status>=400: record['status']='inaccessible'
                 elif 'html' not in response.headers.get('content-type',''): record['status']='unsupported_content'
                 else:
-                    await page.wait_for_timeout(100)
+                    render_ready=await async_navigation.render_ready(page)
+                    if not render_ready:
+                        record['exploration']={'status':'partial','unresolved':['render_not_ready'],'scroll':{'reached_end':False},'bounded':True}
+                        await capture('render_unavailable');record['status']='partial';return
                     await async_navigation.explore(page,record,capture,max_menu_actions=d.MAX_MENU_ACTIONS,
                         max_scroll_steps=d.MAX_SCROLL_STEPS,panel_scan=panel_scan,image_wait_policy=image_wait_policy,
                         image_tracker=tracker)
@@ -322,6 +331,7 @@ async def collect(url, output_dir, *, allow_local, max_pages, concurrency=1,
             report['status']='unavailable';report['runtime_error']=type(exc).__name__
             report['limitations'].append('Browser runtime unavailable or interrupted; no successful coverage is implied.')
     report["social_candidates"] = list(socials.values())
+    report['render_resources']=[render_resources.records[k] for k in sorted(render_resources.records)]
     report["asset_candidates"] = list(assets.values())
     report["coverage"]["discovered_urls"] = sorted(queued)
     report["coverage"]["omitted_urls"] = list(queue)

@@ -119,7 +119,7 @@ def workbench(run_dir):
 def parser():
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest='command', required=True)
-    s=sub.add_parser('native');s.add_argument('operation',choices=['setup','context','prepare','serve','opened','status','stop','close-view'])
+    s=sub.add_parser('native');s.add_argument('operation',choices=['setup','context','prepare','serve','opened','status','stop','close-view','reconcile'])
     s.add_argument('--workspace',type=Path);s.add_argument('--session',type=Path);s.add_argument('--receipt',type=Path)
     s.add_argument('--repo-url');s.add_argument('--site-url');s.add_argument('--model');s.add_argument('--effort');s.add_argument('--wait',type=float,default=0)
     doctor_parser = sub.add_parser('doctor')
@@ -135,11 +135,13 @@ def parser():
     s.add_argument('--concurrency',type=int,choices=[1,2,4])
     s.add_argument('--proof-storage',choices=['expanded','content_addressed'])
     s.add_argument('--panel-scan',choices=['legacy','batch']);s.add_argument('--image-wait-policy',choices=['legacy','terminal_aware'])
+    s.add_argument('--full-output',action='store_true',help='Print the full report instead of its bounded file receipt')
     s = sub.add_parser('prepare-inputs'); s.add_argument('run_dir', type=Path); s.add_argument('manifest', type=Path); s.add_argument('--output', required=True, type=Path); s.add_argument('--timeout-seconds', type=float, default=5)
     s = sub.add_parser('preprocess'); s.add_argument('run_dir', type=Path); s.add_argument('--mode', choices=['auto','codex','cloudflare'])
     s = sub.add_parser('strategy'); s.add_argument('operation', choices=['prepare','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path); s.add_argument('--cache', type=Path); s.add_argument('--stage', choices=['analysis.specialists','company.v2','brief.public'],default='brief.public')
     s = sub.add_parser('history'); s.add_argument('operation', choices=['collect','register','check']); s.add_argument('run_dir', type=Path); s.add_argument('--urls', nargs='*', default=[]); s.add_argument('--report', type=Path)
     s = sub.add_parser('discovery'); s.add_argument('operation', choices=['register','supplement','scope','check','reconcile','channels','research-plan']); s.add_argument('run_dir', type=Path); s.add_argument('--report', type=Path)
+    s.add_argument('--full-output',action='store_true',help='Print the complete inventory explicitly; default output is bounded')
     for command in ('validate', 'receipt', 'workbench', 'next-stage', 'check-experience'):
         s = sub.add_parser(command); s.add_argument('run_dir', type=Path)
         if command == 'check-experience':
@@ -184,14 +186,13 @@ def parser():
 
 def execute(a):
     from .validation import phase
-    stable = a.command in ('validate','next-stage','stage-report','receipt') or (a.command=='strategy' and a.operation=='check')
+    stable = a.command in ('validate','next-stage','stage-report','receipt','discovery') or (a.command=='strategy' and a.operation=='check')
     return phase(_execute)(a) if stable else _execute(a)
 
 
 def _execute(a):
     c = a.command
     if c=='native':
-        import os
         from . import native_session as native
         caller=os.environ.get('CODEX_THREAD_ID')
         if a.operation=='setup':
@@ -211,6 +212,7 @@ def _execute(a):
             return native.register_open(a.session,a.receipt,caller)
         if a.operation=='status':return native.status(a.session,wait=a.wait)
         if a.operation=='stop':return native.request_stop(a.session,caller)
+        if a.operation=='reconcile':return native.reconcile(a.session,caller)
         if a.operation=='close-view':
             if read_json(a.session/'request.json')['owner_thread_id']!=caller:raise ValueError('View belongs to another lane')
             if not (a.session/'result.json').exists():raise ValueError('Do not close the view while execution is active')
@@ -332,11 +334,12 @@ def _execute(a):
         return assess_placements(data['placements'], data['pages'])
     if c == 'init':
         from .experience import read_mandate_input
+        from .native_session import admission_time
         return state.init_run(a.url, a.runs_root, read_json(a.profile) if a.profile else None,
             creative_mandate=json.loads(read_mandate_input(a.creative_mandate)) if a.creative_mandate else None,
             audience_handoff_contract=a.audience_handoff_contract,
             execution_config=read_json(a.execution_config) if a.execution_config else None,
-            delivery_format=a.delivery_format)
+            delivery_format=a.delivery_format,admitted_at=admission_time(Path.cwd(),os.environ.get('CODEX_THREAD_ID'),a.url))
     if c == 'validate': return state.validate_run(a.run_dir)
     if c == 'next-stage': return state.next_stage(a.run_dir)
     if c == 'check-experience':
@@ -398,6 +401,24 @@ def _execute(a):
     raise ValueError('Unsupported command')
 
 
+def _output_receipt(args,result):
+    if getattr(args,'full_output',False) or not isinstance(result,dict):return result
+    if args.command=='collect':
+        path=Path(args.output)/'discovery.json'
+        return {'status':result['status'],'scope':'physical_collection_only','report_path':str(path),
+            'sha256':state._sha(path),'viewports':len(result.get('pages',[])),
+            'pending_states':len(result.get('coverage',{}).get('pending_states',[]))}
+    if args.command!='discovery' or args.operation=='research-plan':return result
+    run=state.load_run(args.run_dir);entries=result.get('entries',[]);issues=result.get('issues',[])
+    identifiers=[*run['metadata'].get('discovery_reports',[]),*run['metadata'].get('discovery_external_reports',[])]
+    reports=[{'path':run['artifacts'][i]['path'],'sha256':run['artifacts'][i]['sha256']} for i in identifiers[-8:]]
+    return {k:result[k] for k in ('status','scope','semantic_analysis','visual_quality') if k in result} | {
+        'entry_count':len(entries),'destination_count':len({x['url'] for x in entries if x.get('url')}),
+        'issue_count':len(issues),'issues':[str(i)[:500] for i in issues[:8]],
+        'reports':reports,'report_count':len(identifiers),'state_path':str(Path(run['root'])/'state.json'),
+        'details':'Canonical reports retained; --full-output explicitly returns the full inspection.'}
+
+
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
@@ -418,7 +439,7 @@ def main(argv=None):
     if args.command == 'metrics' and args.format == 'markdown':
         print('# Mesures locales\n\nCouverture : '+result['coverage']+'\n\nTemps hôte et tokens : inconnus.\n\n```json\n'+json.dumps(result,ensure_ascii=False,indent=2)+'\n```')
     else:
-        print(json.dumps(result,ensure_ascii=False,indent=2,default=str))
+        print(json.dumps(_output_receipt(args,result),ensure_ascii=False,indent=2,default=str))
     if args.command=='ready-tasks':return 0
     if args.command in ('claim-task','task-event','accept-task-result'):
         if result.get('status')=='UNKNOWN_OUTCOME':return 5

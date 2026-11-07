@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import sys
 import unittest
+import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'skills/proposition/scripts'))
 try:
@@ -12,6 +13,20 @@ except ImportError:
 
 
 class NativeActivityTests(unittest.TestCase):
+    def test_terminal_and_final_public_events_survive_live_window_rollover(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            feed=NativeActivity(journal_dir=Path(tmp).resolve())
+            feed.bind_root({'id':'root','status':{'type':'idle'}})
+            feed.observe({'method':'turn/started','params':{'threadId':'root','turn':{'id':'turn','status':'inProgress'}}})
+            for _ in range(2100):feed.observe({'method':'item/agentMessage/delta','params':{'threadId':'root','itemId':'message','delta':'x'}})
+            feed.observe({'method':'item/completed','params':{'threadId':'root','item':{'id':'message','type':'agentMessage','text':'Final public message'}}})
+            feed.observe({'method':'turn/completed','params':{'threadId':'root','turn':{'id':'turn','status':'completed'}}})
+            events=[json.loads(l) for p in Path(tmp).glob('*.jsonl') for l in p.read_text().splitlines()]
+            self.assertTrue(any(e['kind']=='turn.started' for e in events))
+            self.assertTrue(any(e['kind']=='turn.completed' for e in events))
+            self.assertTrue(any(e.get('text')=='Final public message' for e in events))
+            self.assertLess(len(events),20)
+
     def setUp(self):
         self.assertIsNotNone(NativeActivity, 'Native per-agent activity is not implemented')
         self.feed = NativeActivity(clock=lambda: 1000.0)

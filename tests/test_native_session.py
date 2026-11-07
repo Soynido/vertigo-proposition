@@ -128,4 +128,97 @@ class NativeSessionTests(unittest.TestCase):
         with patch('proposition_runtime.native_host.AppServerClient',ProtocolHost):result=ns.serve(folder)
         self.assertEqual('UNKNOWN_OUTCOME',result['status'])
 
+    def _finished_durable_session(self):
+        from test_native_launch import SERVER
+        from proposition_runtime.native_launch import NativeLaunch
+        from proposition_runtime.native_host import AppServerClient
+        from proposition_runtime.native_activity import NativeActivity
+        from types import SimpleNamespace
+        folder=self.workspace/'.vertigo/native/durable';folder.mkdir(parents=True)
+        script=self.workspace/'host.py';script.write_text(SERVER)
+        argv=[sys.executable,'-u',str(script),str(self.workspace)]
+        feed=NativeActivity();observer=SimpleNamespace(feed=feed,ui_ready_at=1)
+        inputs={str(self.workspace/'AGENTS.md'):hashlib.sha256(b'Entry').hexdigest()}
+        request={'workspace':str(self.workspace),'prompt':'https://github.com/fixture/kit\nhttps://fixture.example/',
+                 'model':'gpt-6-sol','effort':'xhigh','owner_thread_id':'owner','argv':argv,'inputs':inputs}
+        (folder/'request.json').write_text(json.dumps(request))
+        with AppServerClient(argv=argv,on_notification=feed.observe,on_connection=feed.connection) as host:
+            launch=NativeLaunch(host,observer,folder,workspace=self.workspace,prompt=request['prompt'],
+                model='gpt-6-sol',effort='xhigh',inputs=inputs,lane_id='owner',panel_open={'threadId':'owner','status':'queued'})
+            started=launch.start();host.request('fixture/finish',{})
+        (folder/'result.json').write_text(json.dumps({'status':'UNKNOWN_OUTCOME','error':'Lost source'}))
+        (folder/'lifecycle.json').write_text(json.dumps({'root_id':started['thread_id'],'agents':[
+            {'id':started['thread_id'],'turn_id':started['turn_id'],'parent_id':None}]}))
+        return folder
+
+    def test_reconcile_reads_durable_result_without_rewriting_failure_or_redispatching(self):
+        folder=self._finished_durable_session();before=(folder/'result.json').read_bytes()
+        result=ns.reconcile(folder,'owner')
+        self.assertEqual('COMPLETED',result['status'])
+        self.assertEqual(before,(folder/'result.json').read_bytes())
+        self.assertEqual('COMPLETED',ns.status(folder)['status'])
+        calls=[json.loads(x) for x in (self.workspace/'calls.jsonl').read_text().splitlines()]
+        self.assertEqual(1,sum(c['method']=='turn/start' for c in calls))
+
+    def test_service_crash_before_result_write_can_still_reconcile_the_owned_turn(self):
+        folder=self._finished_durable_session();(folder/'result.json').unlink()
+        self.assertEqual('COMPLETED',ns.reconcile(folder,'owner')['status'])
+        self.assertFalse((folder/'result.json').exists())
+        self.assertEqual('COMPLETED',ns.status(folder)['status'])
+
+    def test_reconcile_refuses_another_lane_before_contacting_host(self):
+        folder=self._finished_durable_session();calls=(self.workspace/'calls.jsonl').read_bytes()
+        with self.assertRaisesRegex(ValueError,'owner|lane'):ns.reconcile(folder,'foreign')
+        self.assertEqual(calls,(self.workspace/'calls.jsonl').read_bytes())
+
+    def test_installed_init_inherits_only_the_matching_worker_admission_clock(self):
+        import contextlib,os,time
+        from datetime import datetime,timezone
+        from proposition_runtime import cli
+        folder=self._finished_durable_session();request=json.loads((folder/'request.json').read_text())
+        request['created_at']=time.time()-75;(folder/'request.json').write_text(json.dumps(request))
+        (folder.parent/'current.json').write_text(json.dumps({'session':str(folder)}))
+        args=cli.parser().parse_args(['init','https://fixture.example/','--runs-root',str(self.workspace/'runs'),'--delivery-format','web'])
+        with contextlib.chdir(self.workspace),patch.dict(os.environ,{'CODEX_THREAD_ID':'owned'}):run=cli.execute(args)
+        self.assertEqual(datetime.fromtimestamp(request['created_at'],timezone.utc).isoformat(),run['created_at'])
+        self.assertIsNone(ns.admission_time(self.workspace,'foreign','https://fixture.example/'))
+
+    def test_reconcile_cannot_clear_unknown_when_a_descendant_identity_is_incomplete(self):
+        folder=self._finished_durable_session();ledger=json.loads((folder/'lifecycle.json').read_text())
+        ledger['agents'].append({'id':'child','parent_id':'owned','turn_id':None})
+        (folder/'lifecycle.json').write_text(json.dumps(ledger))
+        self.assertEqual('UNKNOWN_OUTCOME',ns.reconcile(folder,'owner')['status'])
+
+    def _serve_timeout(self,*,reject_stop=False):
+        from test_native_launch import SERVER
+        from types import SimpleNamespace
+        import time
+        folder=self.workspace/'.vertigo/native/timeout';folder.mkdir(parents=True)
+        script=self.workspace/'host.py';script.write_text(SERVER)
+        if reject_stop:(self.workspace/'reject-stop').touch()
+        (folder/'request.json').write_text(json.dumps({'workspace':str(self.workspace),
+            'prompt':'https://github.com/fixture/kit\nhttps://fixture.example/','model':'gpt-6-sol','effort':'xhigh',
+            'owner_thread_id':'owner','argv':[sys.executable,'-u',str(script),str(self.workspace)],
+            'created_at':time.time(),'inputs':{str(self.workspace/'AGENTS.md'):hashlib.sha256(b'Entry').hexdigest()}}))
+        (folder/'panel-open.json').write_text(json.dumps({'status':'queued','threadId':'owner'}))
+        (folder/'close-view.json').write_text('{}')
+        ticks=iter([0,1,1202,1203,1204])
+        clock=SimpleNamespace(monotonic=lambda:next(ticks),time=time.time,sleep=time.sleep)
+        with patch.object(ns,'time',clock):result=ns.serve(folder)
+        return folder,result
+
+    def test_service_ceiling_interrupts_owned_turn_and_preserves_its_lifecycle(self):
+        folder,result=self._serve_timeout()
+        self.assertEqual('INTERRUPTED',result['status'])
+        self.assertEqual('t1',result['launch']['turn_id'])
+        self.assertEqual('INTERRUPTED',result['activity']['agents'][0]['status'])
+        self.assertTrue((folder/'lifecycle.json').exists())
+
+    def test_error_in_stop_still_preserves_owned_identities_and_observation(self):
+        folder,result=self._serve_timeout(reject_stop=True)
+        self.assertEqual('UNKNOWN_OUTCOME',result['status'])
+        self.assertEqual('t1',result['launch']['turn_id'])
+        self.assertEqual('owned',result['activity']['root_id'])
+        self.assertEqual('t1',json.loads((folder/'lifecycle.json').read_text())['agents'][0]['turn_id'])
+
 if __name__=='__main__':unittest.main()

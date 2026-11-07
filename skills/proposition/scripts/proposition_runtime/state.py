@@ -222,7 +222,7 @@ def _validate_structure(state):
         raise ValueError("Review lies outside the named stage registry")
 
 
-def init_run(url, run_root, profile=None, *, creative_mandate=None, audience_handoff_contract=2, execution_config=None, delivery_format=None):
+def init_run(url, run_root, profile=None, *, creative_mandate=None, audience_handoff_contract=2, execution_config=None, delivery_format=None,admitted_at=None):
     """Create a new run under run_root, which must be outside the checkout."""
     parsed = urlsplit(url)
     if type(audience_handoff_contract) is not int or audience_handoff_contract not in (1,2):
@@ -246,6 +246,10 @@ def init_run(url, run_root, profile=None, *, creative_mandate=None, audience_han
     _schema("profile", selected)
     run_id = f"run-{uuid4().hex}"
     stamp = _now()
+    if admitted_at is not None:
+        admitted=datetime.fromisoformat(admitted_at)
+        if admitted.tzinfo is None or admitted>datetime.fromisoformat(stamp):raise ValueError('Admission time must be a dated past observation')
+        stamp=admitted_at
     from .experience import initial_exploration_contract
     contract,instruction=initial_exploration_contract(url,creative_mandate,stamp)
     root = base / run_id

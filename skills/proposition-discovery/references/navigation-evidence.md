@@ -20,6 +20,8 @@ La continuation rattachée au run consomme ce périmètre. Un nouveau lot périm
 
 ## États effectivement observés
 
+Avant l'exploration, le collecteur attend le contenu rendu et la disparition d'un loader couvrant la vue, avec un délai borné. `render_not_ready` conserve une capture de l'obstacle, laisse le viewport dû et n'étend pas la collecte depuis son DOM masqué. La disponibilité technique n'est pas un jugement visuel. Les dépendances publiques de rendu (scripts, styles, polices, images) peuvent être récupérées séparément, sans cookie/identifiant, avec validation d'adresse et limites de taille ; cela n'autorise ni navigation externe, ni formulaire, ni iframe, ni XHR externe. Un refus ou une limite restent dans le rapport.
+
 Bandeaux HTML : attendre de manière bornée, fermer/refuser les options facultatives par un contrôle visible et vérifier l'état après action. Ne pas cacher l'obstacle par CSS, le retirer du DOM depuis un script, ou forcer le clic. Conserver la capture avant et après ; impossible à fermer = manque explicite.
 
 Menus : ouvertures, sous-menus, puis fermetures enregistrés. Défilement : captures avec recouvrement, positions, hauteur/viewport, stabilisation et images visibles réellement chargées ; panneaux internes pertinents aussi. Arrêt au plafond, contenu instable ou capture manquante = `partial` avec obligations restantes. Une fin de document ne prouve pas à elle seule la compréhension des contenus.

@@ -11,6 +11,9 @@ import math
 import re
 import threading
 import time
+import os
+import stat
+from pathlib import Path
 
 MAX_TEXT = 4096
 MAX_AGENTS = 128
@@ -40,7 +43,7 @@ def _status(value):
 
 
 class NativeActivity:
-    def __init__(self, *, clock=time.time):
+    def __init__(self, *, clock=time.time,journal_dir=None):
         self.clock = clock
         self.root_id = None
         self.agents = {}
@@ -53,8 +56,13 @@ class NativeActivity:
         self._messages = {}
         self._completed = {}
         self._lock = threading.RLock()
+        if journal_dir is not None:
+            from .state import _no_symlinks
+            journal_dir=_no_symlinks(Path(journal_dir).absolute())
+            if not journal_dir.is_dir():raise ValueError('Existing private journal directory required')
+        self.journal_dir=journal_dir
 
-    def _event(self, kind, agent, now, *, item_id=None, text=None):
+    def _event(self, kind, agent, now, *, item_id=None, text=None,persist=True):
         self.cursor += 1
         event = {'seq':self.cursor, 'kind':kind, 'agent_id':agent['id'],
                  'parent_id':agent['parent_id'], 'turn_id':agent['turn_id'],
@@ -64,6 +72,19 @@ class NativeActivity:
         if len(self.events) == self.events.maxlen:
             self.diagnostics.add('EVENT_WINDOW_TRUNCATED')
         self.events.append(event)
+        if self.journal_dir is not None and persist:
+            try:
+                from .state import _no_symlinks
+                path=_no_symlinks(self.journal_dir/('public-output.jsonl' if text is not None else 'lifecycle-events.jsonl'))
+                encoded=(json.dumps(event,ensure_ascii=False)+'\n').encode()
+                flags=os.O_WRONLY|os.O_CREAT|os.O_APPEND|getattr(os,'O_NOFOLLOW',0)|getattr(os,'O_NONBLOCK',0)
+                fd=os.open(path,flags,0o600)
+                with os.fdopen(fd,'ab') as out:
+                    info=os.fstat(out.fileno())
+                    if not stat.S_ISREG(info.st_mode) or info.st_size+len(encoded)>8*1024*1024:raise ValueError('Public journal budget reached')
+                    out.write(encoded);out.flush()
+                    if kind in ('turn.started','turn.completed'):os.fsync(out.fileno())
+            except (OSError,ValueError):self.diagnostics.add('PUBLIC_JOURNAL_UNAVAILABLE_OR_FULL')
         agent['last_activity_at'] = now
 
     def _register(self, thread_id, parent_id, now, *, role=None):
@@ -113,7 +134,7 @@ class NativeActivity:
             self.diagnostics.add('OUTPUT_PREVIEW_TRUNCATED')
         self._messages[key] = value[:MAX_TEXT*2]
         agent['last_output'] = public_text(self._messages[key])
-        self._event('public.output', agent, now, item_id=item_id, text=agent['last_output'])
+        self._event('public.output', agent, now, item_id=item_id, text=agent['last_output'],persist=not append)
 
     def _tool(self, agent, item, now, *, complete):
         identifier = item.get('id')

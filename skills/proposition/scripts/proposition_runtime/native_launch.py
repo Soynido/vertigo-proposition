@@ -93,7 +93,7 @@ class NativeLaunch:
                 # Preserve the user's effective host policy, including managed
                 # restrictions. The observer grants no execution permissions.
                 'config':{'model_reasoning_effort':self.effort},
-                'ephemeral':True},timeout=timeout)
+                'ephemeral':False},timeout=timeout)
             result_policy={'approval_policy':result.get('approvalPolicy'),'sandbox':result.get('sandbox')}
             thread=result['thread'];record['thread_id']=thread['id'];self._write(record)
             if result.get('model')!=self.model or result.get('reasoningEffort')!=self.effort:
@@ -118,6 +118,13 @@ class NativeLaunch:
             record.update(state='RUNNING',receipt=receipt);self._write(record)
             return receipt
 
+    def reconcile(self,*,timeout=15):
+        """Read the owned durable turn; never resume, dispatch or interrupt it."""
+        record=self._read();receipt=(record or {}).get('receipt')
+        if not receipt:
+            return {'status':'UNKNOWN_OUTCOME','reason':'Owned turn identity is missing'}
+        return read_owned_turn(self.host,receipt['thread_id'],receipt['turn_id'],timeout=timeout)
+
     def stop(self,*,timeout=15):
         with run_lock(self.session):
             record=self._read()
@@ -128,20 +135,53 @@ class NativeLaunch:
             current=self.host.request('thread/read',{'threadId':thread_id,'includeTurns':False},timeout=timeout)
             status=current['thread']['status']['type']
             if status=='idle':
+                observed=self.reconcile(timeout=timeout)
+                if observed['status']=='UNKNOWN_OUTCOME':
+                    raise ValueError('Host idle without a terminal owned turn; outcome remains unknown')
                 result={'status':'ALREADY_IDLE','thread_id':thread_id,'turn_id':receipt['turn_id']}
             elif status=='active':
-                turns=self.host.request('thread/turns/list',{'threadId':thread_id,'limit':1,
-                    'itemsView':'notLoaded','sortDirection':'desc'},timeout=timeout).get('data',[])
-                if not turns or turns[0].get('id')!=receipt['turn_id'] or turns[0].get('status')!='inProgress':
+                turn=_latest_turn(self.host,thread_id,timeout=timeout)
+                if turn.get('id')!=receipt['turn_id'] or turn.get('status')!='inProgress':
                     raise ValueError('Active turn is not the owned turn; refusing interruption')
                 if record.get('stop_intent'):
                     raise ValueError('Stop outcome unknown; readback has not confirmed completion')
                 record['stop_intent']=time.time();self._write(record)
                 self.host.request('turn/interrupt',{'threadId':thread_id,'turnId':receipt['turn_id']},timeout=timeout)
-                current=self.host.request('thread/read',{'threadId':thread_id,'includeTurns':False},timeout=timeout)
-                if current['thread']['status']['type']!='idle':
-                    raise ValueError('Stop requested; completion remains unconfirmed')
+                until=time.monotonic()+timeout
+                while True:
+                    observed=self.reconcile(timeout=max(.1,until-time.monotonic()))
+                    if observed['status'] in ('COMPLETED','INTERRUPTED','FAILED'):break
+                    if time.monotonic()>=until:
+                        raise ValueError('Stop requested; completion remains unconfirmed')
+                    time.sleep(.05)
                 result={'status':'STOP_CONFIRMED','thread_id':thread_id,'turn_id':receipt['turn_id']}
             else:
                 raise ValueError('Native thread state unknown; refusing an inferred STOP')
             record['stop_receipt']=result;self._write(record);return result
+
+
+def _latest_turn(host,thread_id,*,timeout=15):
+    try:
+        turns=host.request('thread/turns/list',{'threadId':thread_id,'limit':1,
+            'itemsView':'notLoaded','sortDirection':'desc'},timeout=timeout).get('data',[])
+    except RuntimeError as error:
+        if 'Host request rejected: -32601 list_turns is not supported yet' not in str(error):raise
+        # Pinned 0.167 legacy threads expose metadata only through this RPC.
+        # Never retain, inspect or forward item contents (including reasoning).
+        raw=host.request('thread/read',{'threadId':thread_id,'includeTurns':True},timeout=timeout)['thread']
+        if raw.get('id')!=thread_id:return {}
+        turns=raw.get('turns',[])[-1:]
+    return {k:turns[0].get(k) for k in ('id','status')} if turns else {}
+
+
+def read_owned_turn(host,thread_id,turn_id,*,timeout=15):
+    """A bounded metadata read, including from a new transport after a crash."""
+    current=host.request('thread/read',{'threadId':thread_id,'includeTurns':False},timeout=timeout)['thread']
+    turn=_latest_turn(host,thread_id,timeout=timeout)
+    result={'status':'UNKNOWN_OUTCOME','thread_id':thread_id,'turn_id':turn_id}
+    if current.get('id')!=thread_id or turn.get('id')!=turn_id:
+        return dict(result,reason='Latest turn does not match the owned turn')
+    status={'completed':'COMPLETED','interrupted':'INTERRUPTED','failed':'FAILED'}.get(turn.get('status'))
+    if status and current.get('status',{}).get('type') in ('idle','notLoaded','systemError'):
+        result['status']=status
+    return result
