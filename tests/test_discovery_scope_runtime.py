@@ -1,7 +1,7 @@
 """Real bounded browser/CLI fixture: entities, media and PDF share one origin."""
 from functools import partial
 from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
-import json,os
+import hashlib,json,os
 from pathlib import Path
 import subprocess,sys,tempfile,threading,unittest
 from PIL import Image
@@ -31,8 +31,14 @@ class DiscoveryScopeRuntimeTests(unittest.TestCase):
                 def cli(*args):
                     p=subprocess.run([sys.executable,launcher,*map(str,args)],capture_output=True,text=True,timeout=45)
                     self.assertIn(p.returncode,(0,2),p.stdout[-1000:]+p.stderr[-500:]);return json.loads(p.stdout)
+                def read_report(receipt,expected):
+                    self.assertLess(len(json.dumps(receipt)),8192)
+                    self.assertEqual(str(expected),receipt['report_path'])
+                    data=expected.read_bytes()
+                    self.assertEqual(hashlib.sha256(data).hexdigest(),receipt['sha256'])
+                    return json.loads(data)
                 first=runroot/'research/first'
-                report=cli('collect',url,'--run-dir',runroot,'--output',first,'--allow-local-fixture','--max-pages',1)
+                report=read_report(cli('collect',url,'--run-dir',runroot,'--output',first,'--allow-local-fixture','--max-pages',1),first/'discovery.json')
                 self.assertEqual(2,report['execution']['concurrency'])
                 self.assertEqual('batch',report['navigation_policy']['panel_scan'])
                 de.register(runroot,first/'discovery.json')
@@ -43,7 +49,7 @@ class DiscoveryScopeRuntimeTests(unittest.TestCase):
                         'reason':'A separately named establishment in another city.'}]}))
                 cli('discovery','scope',runroot,'--report',scope)
                 second=runroot/'research/second'
-                resumed=cli('collect','--frontier',first/'discovery.json','--run-dir',runroot,'--output',second,'--allow-local-fixture','--max-pages',4)
+                resumed=read_report(cli('collect','--frontier',first/'discovery.json','--run-dir',runroot,'--output',second,'--allow-local-fixture','--max-pages',4),second/'discovery.json')
                 self.assertEqual([url+'service.html'],resumed['coverage']['attempted_urls'])
                 self.assertIn(url+'photo.png',resumed['coverage']['discovered_urls'])
                 self.assertIn(url+'brochure.pdf',resumed['coverage']['discovered_urls'])
